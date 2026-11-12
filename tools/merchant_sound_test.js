@@ -1,4 +1,4 @@
-// How well the Merchant recognises sounds: paste into the console of abi-hub.html (Edge/Chrome, online), or load it with
+// How well the Merchant recognises sounds: paste into the console of index.html (Edge/Chrome, online), or load it with
 //   await (await fetch("tools/merchant_sound_test.js")).text().then(eval)
 // Each of the 76 reference sounds is played through the same path as the game's sound, with white noise under it
 // (12 dB and 6 dB quieter than the sound, and almost none), and the first match is checked against the sound played.

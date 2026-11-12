@@ -1,6 +1,6 @@
 # ABI Hub — documentação
 
-Uma página só (`abi-hub.html`) para Arena Breakout: Infinite: builds de armas, loadouts, preços do mercado, equipamento, keybinds e mapas com rotas.
+Uma página só (`index.html`) para Arena Breakout: Infinite: builds de armas, loadouts, preços do mercado, equipamento, keybinds e mapas com rotas.
 
 Funciona offline. Abre-se diretamente no browser (`file://`) e não precisa de servidor nem de instalar nada.
 
@@ -10,7 +10,7 @@ Funciona offline. Abre-se diretamente no browser (`file://`) e não precisa de s
 
 | Ficheiro / pasta | O que é |
 |---|---|
-| `abi-hub.html` | A página inteira: CSS, HTML e todo o código. Tem de continuar a ser um ficheiro só, que abre por `file://`. |
+| `index.html` | A página inteira: CSS, HTML e todo o código. Tem de continuar a ser um ficheiro só, que abre por `file://`. Chama-se `index.html` para o site do GitHub Pages abrir sem nada no fim do endereço. |
 | `builds.js` | Os teus dados. Define `window.ABI_BUILDS` com: <br>• builds por arma <br>• `loadouts` <br>• `keybinds` <br>• `routes` (rotas) <br>• `nav` (paredes e aberturas que editaste) |
 | `merchant.js` | Dados do Field Merchant (`window.ABI_MERCHANT`), tirados do ABI Builder por `tools/merchant_extract.py`: itens, os 38 sons, e as caixas de cada mapa/modo com o peso de cada item. |
 | `merchant-sounds.js` | Os 76 sons do Merchant (`window.ABI_MERCHANT_SOUNDS`), em data URLs, gerados por `tools/merchant_sounds.py`. São um `.js` e não `.ogg` soltos porque uma página aberta com duplo clique não consegue usar `fetch` em ficheiros locais. Se o ficheiro faltar, os sons vêm do ABI Builder. |
@@ -366,10 +366,9 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 3. `nav_fix.py … wall/cut` para corrigir.
 4. `nav_check.py <slug>` para confirmar que nada ficou fechado.
 
-**GitHub Pages**: o repositório é público para o Pages funcionar.
-- O `index.html` só reencaminha para o `abi-hub.html`.
+**GitHub Pages**: o repositório é público para o Pages funcionar. O site é https://joaoccarvalhop.github.io/AbiNotes/
 - O `.nojekyll` faz o GitHub servir os ficheiros tal como estão.
-- As duas páginas têm `noindex`, para não aparecerem no Google.
+- O `index.html` tem `noindex`, para não aparecer no Google.
 - O `.gitignore` deixa de fora o zip, o `tools/out/` (dados de trabalho grandes) e o `__pycache__`.
 - No Pages o Save grava no PC de quem o usa, não no site: as alterações fazem-se nesta pasta e depois faz-se push.
 
@@ -377,7 +376,7 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 
 ## 6. Testar
 
-Para testar alterações, abre `abi-hub.html` no Firefox. Depois de mudar o ficheiro, faz **Ctrl+F5**.
+Para testar alterações, abre `index.html` no Firefox. Depois de mudar o ficheiro, faz **Ctrl+F5**.
 
 Para testes automáticos com servidor local:
 
@@ -387,4 +386,4 @@ python -m http.server 8765 --bind 127.0.0.1
 
 Corre-o dentro da pasta do projeto.
 
-Abre http://127.0.0.1:8765/abi-hub.html. O browser guarda dados separados para cada endereço, por isso os rascunhos daqui não se misturam com os do `file://`.
+Abre http://127.0.0.1:8765/. O browser guarda dados separados para cada endereço, por isso os rascunhos daqui não se misturam com os do `file://`.

@@ -1,4 +1,4 @@
-// ABI Hub builds. abi-hub.html reads this file. Edit the JSON by hand, or use Add build + Save in the page.
+// ABI Hub builds. index.html reads this file. Edit the JSON by hand, or use Add build + Save in the page.
 window.ABI_BUILDS = {
   "version": 2,
   "updated": "2026-10-26",

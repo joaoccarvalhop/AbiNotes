@@ -1,5 +1,5 @@
 // The price reader on a real Merchant screen (tools/merchant_ocr_sample.webp: the price card of a Flammables cargo on
-// sale, "16,000 20,000"). Paste into the console of abi-hub.html served over http, or load it with
+// sale, "16,000 20,000"). Paste into the console of index.html served over http, or load it with
 //   await (await fetch("tools/merchant_ocr_card_test.js")).text().then(eval)
 // Teaches the box from the coin to the end of the price once, then looks for the card: where it was, moved elsewhere
 // over other things, and in a smaller window (a video). What you taught in the page is put back afterwards.

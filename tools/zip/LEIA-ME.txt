@@ -3,8 +3,8 @@ ABI Hub - builds, loadouts, mercado, equipamento, tier list, mapas, smelter e ke
 
 COMO ABRIR
 1. Extrai o zip para uma pasta (não abras os ficheiros de dentro do zip).
-2. Abre "abi-hub.html" no Chrome, Edge ou Firefox (duplo clique).
-3. Mantém tudo junto na mesma pasta: abi-hub.html, builds.js, prices.js, merchant.js,
+2. Abre "index.html" no Chrome, Edge ou Firefox (duplo clique).
+3. Mantém tudo junto na mesma pasta: index.html, builds.js, prices.js, merchant.js,
    merchant-sounds.js, e as pastas "maps" e "images".
 
 O QUE PRECISA DE INTERNET

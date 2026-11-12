@@ -1,4 +1,4 @@
-// ABI market prices. abi-hub.html reads this file. Each snapshot is one look at the in-game market; prices are in Koen.
+// ABI market prices. index.html reads this file. Each snapshot is one look at the in-game market; prices are in Koen.
 window.ABI_PRICES = {
   "version": 1,
   "items": [

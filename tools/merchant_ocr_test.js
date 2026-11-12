@@ -1,4 +1,4 @@
-// How well the Merchant's price reader reads: paste into the console of abi-hub.html, or load it with
+// How well the Merchant's price reader reads: paste into the console of index.html, or load it with
 //   await (await fetch("tools/merchant_ocr_test.js")).text().then(eval)
 // Draws prices the way a game might (light text on a dark box, a stray line under it), teaches three of them,
 // then reads others, also bigger. What you taught in the page is put back afterwards.
