@@ -272,7 +272,12 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
   - Leitura: separa tinta de fundo (Otsu), corta linhas e letras, reduz cada letra a 10 × 14 e compara com as letras ensinadas.
   - A altura das letras é a mediana das letras da linha, por isso o que está à volta do cartão não a muda. Colunas pintadas de cima a baixo são a borda do cartão e ficam de fora.
   - Um espaço largo separa números. Em saldo o cartão mostra "16,000 20,000", e o preço dos dados é o completo (o segundo).
-  - Ensina-se na mesma resolução em que se vai ler: a 1280 de largura os dígitos tocam-se e falha.
+  - Ensina-se na mesma resolução em que se vai ler: a 1280 de largura os dígitos tocam-se e falha. Um vídeo do jogo numa janela do browser (YouTube) é ainda mais pequeno e não serve para ensinar.
+  - A caixa pode ser desenhada à volta do cartão todo (`merFitBox`). Ao ensinar, procura a linha do preço pelo que escreveste:
+    - a contagem é aproximada, porque a moeda pode partir-se em pedaços e a vírgula colar-se a um dígito;
+    - ganha a linha com tantas marcas pequenas e baixas como vírgulas;
+    - depois a caixa encolhe para essa linha, da moeda até um pouco depois do fim.
+    - O preço pode ser escrito sem vírgulas (`merCommas` põe-nas como o jogo).
   - O formato guardado mudou (`merOcr.v = 2`). O que foi ensinado antes apaga-se uma vez e ensina-se de novo.
 - **Testes**: correm na consola da página.
   - `tools/merchant_sound_test.js`: os 76 sons com ruído por baixo.
