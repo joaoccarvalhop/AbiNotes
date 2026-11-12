@@ -1,9 +1,10 @@
 """Pick the market frames worth reading out of a recording (python tools/price_frames.py <frames dir> <out dir>).
 
-The frames come from ffmpeg, cropped to the market grid, a few per second. Between two frames the page either scrolled
-(found by sliding one frame's row profile over the other's) or changed (another category, another tab). A frame is kept
-when the page changed, or when it has scrolled about half a screen since the last one kept: so every row of items is
-seen whole at least once, without hundreds of near copies. What's kept is copied to <out dir>, numbered in order.
+The frames come from ffmpeg: 4 a second, cropped to the market grid (crop=1460:880:370:110). The video is cut into
+categories where the title at the top left changes (some last only a second: masks, keys, each ammo). In each category
+it keeps the first frame once it has loaded (the grid comes in dimmed), then one each time the page has scrolled a third
+of the screen further, and the last one: so every row is seen whole at least once. Kept frames are copied to <out dir>,
+named by order and by category number, for reading.
 """
 import os, shutil, sys
 import numpy as np
@@ -12,21 +13,22 @@ from PIL import Image
 src, dst = sys.argv[1], sys.argv[2]
 os.makedirs(dst, exist_ok=True)
 names = sorted(f for f in os.listdir(src) if f.endswith(".jpg"))
-STEP = 0.45  # keep after this share of the screen has scrolled by
+STEP = 0.33
 
 
-def profile(path):  # the picture in grey, a little smaller: rows x columns
+def load(path):
     im = Image.open(path).convert("L")
     w, h = im.size
-    return np.asarray(im.resize((w // 4, h // 4)), dtype=np.float32)
+    grid = np.asarray(im.resize((w // 4, h // 4)), dtype=np.float32)
+    title = np.asarray(im.crop((0, 8, 560, 62)), dtype=np.float32)
+    return grid, title
 
 
-def shift(a, b):
-    """How far b is scrolled from a (in rows of the small picture), and how well it matches (lower is better)."""
+def shift(a, b):  # how far b scrolled from a, in rows of the small picture
     h = a.shape[0]
     best = (0, float(np.mean(np.abs(a - b))))
     for d in range(1, int(h * .8)):
-        for s in (d, -d):  # s > 0: the page moved up (scrolled down)
+        for s in (d, -d):
             x, y = (a[s:], b[:h - s]) if s > 0 else (a[:h + s], b[-s:])
             e = float(np.mean(np.abs(x - y)))
             if e < best[1]:
@@ -34,25 +36,30 @@ def shift(a, b):
     return best
 
 
-prev, moved, kept, head = None, 0, 0, None
-for n in names:
-    cur = profile(os.path.join(src, n))
-    keep = prev is None
-    # the strip with the category's title and the New / Like New / Worn tabs: a change there is a new page even when
-    # the pictures stay the same (only the prices change between tabs)
-    top = cur[:18]
-    if head is not None and float(np.mean(np.abs(top - head))) > 5:
-        keep, moved = True, 0
-    if prev is not None and not keep:
-        s, e = shift(prev, cur)
-        if e > 12:          # nothing lines up: another category or tab
-            keep, moved = True, 0
-        else:
-            moved += abs(s)
-            if moved >= STEP * cur.shape[0]:
-                keep = True
-    if keep:
-        kept += 1; moved = 0; head = top
-        shutil.copy2(os.path.join(src, n), os.path.join(dst, f"k_{kept:03d}_{n}"))
-    prev = cur
-print(kept, "frames kept of", len(names))
+frames = [load(os.path.join(src, n)) for n in names]
+# categories: a run of frames whose title stays the same
+segs, start = [], 0
+for i in range(1, len(frames) + 1):
+    # the same title differs by under 1 (grey level, on average), another by 1.5 and up
+    if i == len(frames) or float(np.mean(np.abs(frames[i][1] - frames[i - 1][1]))) > 1.2:
+        segs.append((start, i - 1)); start = i
+
+keep = []
+for c, (a, b) in enumerate(segs):
+    if b - a < 1:
+        continue  # a lone frame in a change: a fade, not a page
+    first = min(a + 2, b)  # half a second in: loaded, no longer dimmed
+    picked, moved, prev = [first], 0, frames[first][0]
+    for i in range(first + 1, b + 1):
+        s, e = shift(prev, frames[i][0])
+        moved += abs(s) if e <= 12 else 10 ** 6
+        if moved >= STEP * prev.shape[0]:
+            picked.append(i); moved = 0
+        prev = frames[i][0]
+    if picked[-1] != b:
+        picked.append(b)
+    keep += [(c, i) for i in picked]
+
+for k, (c, i) in enumerate(keep, 1):
+    shutil.copy2(os.path.join(src, names[i]), os.path.join(dst, f"k_{k:03d}_c{c:02d}_{names[i]}"))
+print(len(keep), "frames kept of", len(names), "in", len(segs), "runs")

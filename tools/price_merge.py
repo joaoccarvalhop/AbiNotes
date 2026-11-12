@@ -40,6 +40,8 @@ cats = Counter()
 for f in sorted(glob.glob(os.path.join(read_dir, "batch_*.json"))):
     for fr in json.load(open(f, encoding="utf-8")):
         cat, tab = (fr.get("category") or "").strip(), (fr.get("tab") or "").strip().lower()
+        if not cat or cat.lower() in ("favorites", "recently purchased"):
+            continue  # lists of items from other categories, not a category of their own
         kind = {"like new": "likeNew", "worn": "worn"}.get(tab, "new")
         for it in fr.get("items", []):
             if not it.get("name") or not isinstance(it.get("price"), int) or it["price"] <= 0:
@@ -57,17 +59,22 @@ def candidates(cat, name):
     stem = norm(name).rstrip("…").strip()
     if not norm(name).endswith("…") and not any(re.search(r"\(\d+\)$", i["name"]) for i in data["items"] if i["cat"] == cat and norm(base(i["name"])) == norm(name)):
         return []
-    out = []
+    ext, pre = [], []
     for i in data["items"]:
-        if norm(i["cat"]) != norm(cat):
+        if norm(i["cat"]) != norm(cat) or len(stem) < 6:
             continue
         b = norm(base(i["name"])).rstrip("…").strip()
         if b == stem and not norm(base(i["name"])).endswith("…") and norm(name).endswith("…") and not re.search(r"\(\d+\)$", i["name"]):
             continue  # the whole name fits on the card, so it isn't the cut one
-        if len(stem) >= 6 and (b.startswith(stem) or stem.startswith(b)):
-            out.append(i)
-    return out
-last = max(data["snapshots"], key=lambda s: s["date"])["prices"]
+        if b.startswith(stem):
+            ext.append(i)   # its name goes on past what the card shows
+        elif stem.startswith(b):
+            pre.append(i)   # a shorter name in the list ("5.56x45mm M855A1" for "5.56x45mm M855A1 A…")
+    # what the card shows beats a shorter name; among shorter ones, the longest ("M855A1", not "M855")
+    if ext:
+        return ext
+    return [max(pre, key=lambda i: len(base(i["name"])))] if pre else []
+last = max([s for s in data["snapshots"] if s["date"] < date] or data["snapshots"], key=lambda s: s["date"])["prices"]  # the one before this
 def old_price(item, kind):
     v = last.get(item["id"])
     if v is None:
@@ -85,15 +92,24 @@ for (cat, name), kinds in seen.items():
         continue
     handled.add((cat, name))
     for kind, c in kinds.items():
-        # the distinct readings, most seen first, at most one per item (a reading seen once among many is a misread)
-        reads = [k for k, n in c.most_common() if n >= 2 or len(c) <= len(cands)][:len(cands)]
+        # the distinct readings (a reading seen once among many is a misread); each known item takes the one nearest its last
+        # price, and readings left over are items the list didn't have yet: "… (3)" and on
+        reads = [k for k, n in c.most_common() if n >= 2 or len(c) <= len(cands)]
+        k = min(len(cands), len(reads))
         best = None
-        for perm in permutations(cands, len(reads)):
-            cost = sum(abs((old_price(it, kind) or r[0]) - r[0]) / max(r[0], 1) for it, r in zip(perm, reads))
+        for perm in permutations(reads, k):
+            cost = sum(abs((old_price(it, kind) or r[0]) - r[0]) / max(r[0], 1) for it, r in zip(cands, perm))
             if best is None or cost < best[0]:
                 best = (cost, perm)
-        for it, r in zip(best[1], reads):
+        for it, r in zip(cands, best[1]):
             assigned[it["id"]][kind] = r
+        if kind == "new":
+            for r in [r for r in reads if r not in best[1]]:
+                stem = base(cands[0]["name"])
+                n = 1 + max([int(m.group(1)) for i in data["items"] + new_items if i["cat"] == cat and base(i["name"]) == stem and (m := re.search(r"\((\d+)\)$", i["name"]))] or [len(cands)])
+                item = {"id": f'{slug(cat)}-{slug(stem.rstrip("…"))}-{n}', "name": f"{stem} ({n})", "group": cands[0].get("group") or "Other", "cat": cat}
+                new_items.append(item)
+                assigned[item["id"]]["new"] = r
 for iid, kinds in assigned.items():
     out = {}
     for kind, (p, dur) in kinds.items():

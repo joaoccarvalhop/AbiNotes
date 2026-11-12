@@ -62,8 +62,8 @@ def scene(template, item_template, name, src):
     sc.update({"name": name, "uuid": str(uuid.uuid4()), "hotkeys": {"OBSBasic.SelectScene": []}})
     it = copy.deepcopy(item_template)
     it.update({"name": src["name"], "source_uuid": src["uuid"], "id": 1})
-    # fit the capture to the canvas whatever its size
-    it.update({"bounds_type": 2, "bounds_align": 0, "bounds": {"x": float(W), "y": float(H)}, "pos": {"x": 0.0, "y": 0.0}})
+    # kept as your own scene had it (top left, full size): OBS 32 also reads pos_rel/scale_rel/bounds_rel, so bounds set
+    # here alone would be read as zero and the capture would vanish
     sc["settings"] = {"id_counter": 1, "custom_size": False, "items": [it]}
     return sc
 
@@ -137,13 +137,11 @@ disp = next(s for s in base["sources"] if s["id"] == "monitor_capture")
 sc_t = next(s for s in base["sources"] if s["id"] == "scene")
 item_t = sc_t["settings"]["items"][0]
 
-# method 2 = "Windows 10 (1903 and up)": on a laptop with two GPUs OBS runs on the NVIDIA one while the screen hangs off
-# the AMD one, and the default (DXGI duplication) then captures black
-screen_nc = source(disp, "monitor_capture", "Screen (no pointer)", {**disp["settings"], "capture_cursor": False, "method": 2})
+screen_nc = source(disp, "monitor_capture", "Screen (no pointer)", {**disp["settings"], "capture_cursor": False})
 collection("ABI_Prices", "ABI Prices", [screen_nc, scene(sc_t, item_t, "Market", screen_nc)], base)
 
 game = source(disp, "game_capture", "Game Capture", {"capture_mode": "any_fullscreen", "capture_cursor": False, "allow_transparency": False, "limit_framerate": False, "anti_cheat_hook": True})
-screen = source(disp, "monitor_capture", "Display Capture", {**disp["settings"], "capture_cursor": True, "method": 2})
+screen = source(disp, "monitor_capture", "Display Capture", {**disp["settings"], "capture_cursor": True})
 collection("Gameplay", "Gameplay", [game, screen, scene(sc_t, item_t, "Game", game), scene(sc_t, item_t, "Screen", screen)], base)
 
 pick = (sys.argv[1] if len(sys.argv) > 1 else "record").lower()
