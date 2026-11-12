@@ -34,7 +34,8 @@
   /* one compact bar: logo, category tabs, tools */
   .toolbar { flex: none; position: relative; z-index: 10; background: rgb(22, 23, 24); border-bottom: 1px solid var(--line-2); box-shadow: 0 10px 14px -12px #000; }
   /* two rows: sections on top, the active section's own menu and tools below */
-  .bar { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px 18px; padding-inline: max(16px, 2.5vw); }
+  /* the page below keeps room for its scrollbar (--sbw, measured in JS): the bars keep the same, so their right edge meets the content's */
+  .bar { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px 18px; padding-inline: max(16px, 2.5vw) calc(max(16px, 2.5vw) + var(--sbw, 0px)); }
   .bar.main { gap: 6px 26px; border-bottom: 1px solid var(--line); background: rgb(17, 18, 19); }
   .bar.sub { min-height: 44px; animation: enter .2s ease-out; }
   #sub-keybinds { align-items: center; }
@@ -2035,6 +2036,9 @@
 <script>
 // the part under the bar that scrolls (the window itself doesn't)
 const pageEl = document.querySelector(".page");
+// the width of its scrollbar (0 where scrollbars float over the page): the bars above add it on the right, to line up (.bar)
+const measureSbw = () => document.documentElement.style.setProperty("--sbw", (pageEl.offsetWidth - pageEl.clientWidth) + "px");
+measureSbw(); addEventListener("resize", measureSbw);
 const TIERS = [
   { key: "budget", n: 1, label: "Budget" },
   { key: "balanced", n: 2, label: "Balanced" },
