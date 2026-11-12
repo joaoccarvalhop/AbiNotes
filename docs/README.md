@@ -268,7 +268,8 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
     - "All alike": cada som com a mesma probabilidade.
     - "A real cargo": as odds da carga escolhida, ou de todas as do mapa/modo (`prPool`). Usa o mapa, o modo e a carga do `merUI`, os mesmos do Live.
   - **Weak sounds first:** o peso de cada som é multiplicado por 1 + 4 × a taxa de erro (`prMiss`, que começa em 50% para sons nunca ouvidos).
-  - Pick-up ou drop é sorteado e aparece no botão. Espaço volta a tocar o som.
+  - Como no jogo: toca o pick-up e depois o drop (`prSound`), e mostra o tamanho do item (`pr.q.size`, o desenho do filtro de tamanho). Espaço volta a tocar.
+  - Com o tamanho à vista, só aparecem os cartões com itens desse tamanho, rodado ou não (`prFits`, como o filtro do Live com Rotate). No nível Item, as 3 alternativas são do mesmo tamanho sempre que possível.
   - Depois de responder: verde no que era, vermelho no que escolheste, e o item que era, com o som.
   - "Your ear": acerto total, os 5 sons mais falhados (clica para ouvir), as melhores rondas e "Start over".
   - Antes de começar e no fim de uma ronda aparece a caixa `.sh-drop` ao centro.

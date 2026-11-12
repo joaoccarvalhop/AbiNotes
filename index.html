@@ -1460,6 +1460,8 @@
   .pr-stage.idle { display: flex; align-items: center; justify-content: center; }
   .pr-head { display: flex; align-items: center; gap: 16px; }
   .pr-head .pr-replay { flex: none; height: 40px; padding: 0 18px; font-size: 13.5px; }
+  .pr-size { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; font-size: 13.5px; color: var(--fg-strong); border: 1px solid var(--line-2); cursor: help; }
+  .pr-size .mc-glyph b { background: var(--accent); }
   .pr-info { display: flex; align-items: center; gap: 16px; margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .pr-info b { font-size: 15px; color: var(--fg-strong); }
   .pr-verdict { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 14px; font-size: 13.5px; color: var(--muted); border: 1px solid var(--line); background: rgba(255,255,255,.015); }
@@ -9989,20 +9991,31 @@ function prNext() {
   pool.forEach((p, id) => { const sid = MER.items[id][6]; w.set(id, p * (prs.weak ? 1 + 4 * prMiss(sid) : 1)); });
   let id = prPick(w);
   if (pr.q && pool.size > 1) for (let i = 0; i < 4 && MER.items[id][6] === pr.q.sid; i++) id = prPick(w); // rarely the same sound twice in a row
-  const sid = MER.items[id][6], act = Math.random() < .5 ? "u" : "d";
-  // the item level: the item and three others from the pool, each with a different sound (items that sound the same can't be told apart)
+  const it = MER.items[id], sid = it[6], size = [it[4], it[5]];
+  // the item level: the item and three others from the pool, each with a different sound (items that sound the same can't be
+  // told apart), of the same size first: the game shows the size, so a guess by size alone would be too easy
   let opts = null;
   if (prs.level === "item") {
     const others = [...pool.keys()].filter(x => MER.items[x][6] !== sid).sort(() => Math.random() - .5), used = new Set([sid]);
+    const same = x => prFits(MER.items[x], size);
     opts = [id];
-    for (const x of others) { if (opts.length === 4) break; if (!used.has(MER.items[x][6])) { used.add(MER.items[x][6]); opts.push(x); } }
+    for (const x of [...others.filter(same), ...others.filter(x => !same(x))]) { if (opts.length === 4) break; if (!used.has(MER.items[x][6])) { used.add(MER.items[x][6]); opts.push(x); } }
     opts.sort(() => Math.random() - .5);
   }
-  pr.q = { id, sid, act, opts }; pr.a = null;
+  pr.q = { id, sid, size, opts }; pr.a = null;
   if (!pr.t0) pr.t0 = Date.now();
   prDraw(); setTimeout(prHear, 150);
 }
-const prHear = () => { if (pr.q) merPlay(pr.q.sid, pr.q.act, document.querySelector("#merchant .pr-replay")); };
+// an item of this size, turned either way (as Live's size filter with Rotate on)
+const prFits = (it, [w, h]) => (it[4] === w && it[5] === h) || (it[4] === h && it[5] === w);
+// as in the game: the pick-up, then the drop
+let prPlayT = 0;
+function prSound(sid, btn) {
+  clearTimeout(prPlayT);
+  merPlay(sid, "u", btn);
+  prPlayT = setTimeout(() => merPlay(sid, "d", btn && btn.isConnected ? btn : null), 750);
+}
+const prHear = () => { if (pr.q) prSound(pr.q.sid, document.querySelector("#merchant .pr-replay")); };
 function prAnswer(x) { // x: a sound id (card level) or an item id (item level)
   if (!pr.q || pr.a != null) return;
   pr.a = x;
@@ -10074,7 +10087,7 @@ function prDraw(sec = $("merchant")) {
     if (worst.length) {
       const ul = el("div", "pr-weak");
       worst.forEach(([sid, r]) => { const row = el("button", "pr-wrow"); row.type = "button"; row.dataset.tip = merSoundName(sid) + "\nClick to hear it"; row.append(el("b", null, "ID " + sid), el("span", null, Math.round(r * 100) + "%"));
-        row.addEventListener("click", () => merPlay(sid, "u", row)); ul.append(row); });
+        row.addEventListener("click", () => prSound(sid, row)); ul.append(row); });
       rec.append(ul);
     }
   }
@@ -10112,12 +10125,15 @@ function prDraw(sec = $("merchant")) {
     stage.append(zone); stage.classList.add("idle");
   } else {
     const q = pr.q, ok = pr.a != null && (prs.level === "item" ? MER.items[pr.a][6] === q.sid : pr.a === q.sid);
-    const replay = button(q.act === "u" ? "Picked up" : "Dropped", { cls: "mc-play pr-replay", icon: q.act === "u" ? "pickup" : "drop", tip: "Hear it again (Space)", onClick: prHear });
+    const replay = button("Hear it again", { cls: "mc-play pr-replay", icon: "pickup", tip: "The pick-up, then the drop (Space)", onClick: prHear });
+    // the size the game shows you, as Live's size filter draws it
+    const sz = `${q.size[0]}x${q.size[1]}`, size = el("span", "pr-size"); size.append(merSizeGlyph(sz), `${q.size[0]}×${q.size[1]}`);
+    size.dataset.tip = "The room it takes in the cargo, as the game shows it";
     const info = el("div", "pr-info");
     if (prs.mode === "timed") info.append(el("span", null, `${Math.min(pr.n + (pr.a == null ? 1 : 0), PR_ROUND)} / ${PR_ROUND}`), el("b", "pr-clock", prTime(Date.now() - pr.t0)));
     else info.append(el("span", null, `${pr.right} / ${pr.n} right`), el("span", null, pr.streak > 1 ? `${pr.streak} in a row` : ""));
     info.append(button("Stop", { cls: "linkbtn", tip: "End this round", onClick: () => { prStop(); prDraw(); } }));
-    head.append(replay, info);
+    head.append(replay, size, info);
     stage.append(head);
     // the verdict, once answered: what it was, and the way on
     const verdict = el("div", "pr-verdict" + (pr.a == null ? "" : ok ? " ok" : " bad"));
@@ -10132,14 +10148,15 @@ function prDraw(sec = $("merchant")) {
     if (pr.a != null) {
       const it = MER.items[q.id], row = el("div", "pr-was");
       const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, `${it[7]} · ID ${q.sid}`));
-      const again = button(null, { cls: "mc-play", icon: q.act === "u" ? "pickup" : "drop", tip: "Hear it again", onClick: e => merPlay(q.sid, q.act, e.currentTarget) });
+      const again = button(null, { cls: "mc-play", icon: "pickup", tip: "Hear it again", onClick: e => prSound(q.sid, e.currentTarget) });
       row.append(merPic(it), nm, again);
       stage.append(row);
     }
     if (prs.level === "card") {
-      // every card that can come up, in Live's order and look, in Live's place (the left half): right click to hear one
-      const sids = new Set([...pool.keys()].map(id => MER.items[id][6]));
-      const bySound = new Map(); pool.forEach((p, id) => { const s = MER.items[id][6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(MER.items[id]); });
+      // the cards Live shows with this size picked: same order, look and place (the left half). Right click to hear one
+      const fit = [...pool.keys()].filter(id => prFits(MER.items[id], q.size));
+      const sids = new Set(fit.map(id => MER.items[id][6]));
+      const bySound = new Map(); fit.forEach(id => { const s = MER.items[id][6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(MER.items[id]); });
       const sg = el("div", "mc-sgrid pr-cards");
       MER.sounds.forEach(([sid]) => {
         if (!sids.has(sid)) return;
@@ -10163,10 +10180,10 @@ function prDraw(sec = $("merchant")) {
       const opts = el("div", "pr-opts");
       q.opts.forEach((id, i) => {
         const it = MER.items[id], o = el("button", "pr-opt" + (pr.a == null ? "" : id === q.id || it[6] === q.sid ? " ok" : id === pr.a ? " bad" : " past")); o.type = "button";
-        const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, it[7]));
+        const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, prFits(it, q.size) ? it[7] : `${it[7]} · ${it[4]}×${it[5]}`)); // the size only when it isn't the one shown above
         o.append(el("kbd", null, String(i + 1)), merPic(it), nm);
         if (pr.a != null) o.dataset.tip = "ID " + it[6] + " · click to hear it";
-        o.addEventListener("click", () => { if (pr.a == null) prAnswer(id); else merPlay(it[6], q.act, o); });
+        o.addEventListener("click", () => { if (pr.a == null) prAnswer(id); else prSound(it[6], o); });
         opts.append(o);
       });
       stage.append(opts);
