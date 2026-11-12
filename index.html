@@ -619,6 +619,7 @@
   .mp-colhead { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 8px; }
   .mp-colhead h3 { font-size: 11.5px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin: 0; }
   .mp-coltab { color: var(--fg-strong); }
+  .mp-colx { display: none; } /* phones only (the block at the end) */
   .rt-sechead:empty { display: none; }
   .rt-sec h3.rt-sechead { justify-content: flex-end; }
   .mp-side > .rt-sec:first-child { border-top: 0; padding-top: 0; }
@@ -1831,6 +1832,8 @@
     .mp-left > *, .mp-right > * { width: min(330px, calc(100vw - 68px)); }
     #maps.hide-left > .mp-left, #maps.hide-right > .mp-right { width: 0; box-shadow: none; }
     .mp-railtab { padding: 10px 0; }
+    .mp-colx { display: block; margin: -6px -6px -6px 0; padding: 2px 8px; font-size: 22px; line-height: 1; font-weight: 400; color: var(--muted); background: none; border: 0; }
+    .mp-colx:hover { color: var(--fg-strong); border: 0; }
     /* Merchant: map and mode, cargo type and price, side by side; the six sizes in one row */
     .mc-side { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
     .mc-side > :not(.mc-half) { grid-column: 1 / -1; }
@@ -7298,6 +7301,9 @@ function buildMapView(slug, m) {
     };
     // its title, then the tab open in it ("Routes · Yours"); it folds from its bar: the open tab again
     const h = el("h3", null, title); h.append(el("span", "mp-coltab")); head.append(h);
+    // an X to fold it (phones only, by CSS: on a computer the open tab folds it)
+    const x = el("button", "x mp-colx"); x.type = "button"; x.setAttribute("aria-label", "Close " + title); x.textContent = "×";
+    x.addEventListener("click", () => fold(true)); head.append(x);
     col.append(head); return { col, fold };
   };
   const L = column("mp-left", "Filters", "layers", "leftHidden"), R = column("mp-right", "Routes", "route", "sideHidden");
@@ -8263,7 +8269,12 @@ function setHere(pt, opts = {}) {
   hereSel = { pt: at, t0, routes: suggestRoutes(v.m, at, { t0 }), on: {}, pick: opts.pick || keep, rerouted: !!opts.rerouted };
   refreshPlan();
 }
-function pickPlan(kind) { const s = planSrc(); if (!s) return; s.pick = kind; planStep = -1; planOpen = true; planHover = null; refreshPlan(); swapIn(mapView.side); }
+function pickPlan(kind) {
+  const s = planSrc(); if (!s) return; s.pick = kind; planStep = -1; planOpen = true; planHover = null; refreshPlan(); swapIn(mapView.side);
+  phoneShowMap();
+}
+// on a phone a column covers the map: once a route is picked, fold it so the route shows (its steps stay a tab away)
+function phoneShowMap() { const v = mapView; if (v && isPhone() && !mapsUI.sideHidden && !routeEdit && v.foldRight) v.foldRight(true); }
 // open one of your routes where it belongs: on its spawn, or where it starts mid-raid
 function openSaved(r) {
   const v = mapView;
@@ -8271,6 +8282,7 @@ function openSaved(r) {
   if (sp) selectSpawn(sp, { pick: "r:" + r.id });
   else { mapsUI.hereT0 = r.t0 || 0; setHere([r.pts[0][0], r.pts[0][1]], { pick: "r:" + r.id }); }
   centreOn({ x: r.pts[0][0], y: r.pts[0][1] });
+  phoneShowMap();
 }
 // a detour: on a suggestion it switches on and off; on your route it becomes a point of it
 function toggleDetour(key) {
@@ -8987,7 +8999,9 @@ function drawRail() {
     b.append(icon(ic), el("span", null, label)); b.dataset.tip = on === k ? "Hide routes" : label;
     b.disabled = !!routeEdit; // drawing a route: the column shows the editor
     b.addEventListener("click", () => {
-      if (on === k && !(planOpen && planSrc() && planSrc().fin)) { v.foldRight(true); return; } // the open tab again: fold the column
+      // the open tab again: fold the column (on a computer, with a route open, it goes back to the list instead; a phone always folds)
+      if (on === k && (isPhone() || !(planOpen && planSrc() && planSrc().fin))) { v.foldRight(true); return; }
+      if (!open && k === rtTab && planOpen) { v.foldRight(false); return; } // folded with a route open: back to its steps, not the list
       rtTab = k; planOpen = false; planHover = null; planStep = -1;
       if (k !== "code") codePreview = null; // a friend's route shows only while you look at it in Codes
       if (!open) v.foldRight(false);

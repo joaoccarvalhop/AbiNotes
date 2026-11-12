@@ -125,7 +125,7 @@ O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os p
   - **Overlays:** ocupam o ecrã todo, com o X no canto.
   - **Caixas de filtros (`filterBox`):** fecham atrás de um botão "Filters" (`.f-fold`, só no telemóvel). Ficam à vista "Sort by" e "Clear", quando há filtros. Aberto ou fechado fica igual durante a visita (`filtersOpen`).
   - **Tabelas:** o Market mostra Item, Price e Change, sem o Change abaixo de 400 px; Like New e Worn ficam um por linha. As tabelas largas (Gear) deslizam com o nome fixo à esquerda.
-  - **Maps:** o mapa ocupa o ecrã entre as duas barras de separadores. As colunas abrem por cima dele, uma de cada vez, e começam fechadas (`phoneMapSeen`). Tocar no chão fecha a coluna aberta, e "Pick your spawn" fecha a das rotas. Há pinça para o zoom (dois dedos, em `bindMapInput`).
+  - **Maps:** o mapa ocupa o ecrã entre as duas barras de separadores. As colunas abrem por cima dele, uma de cada vez, e começam fechadas (`phoneMapSeen`). Tocar no chão fecha a coluna aberta, e "Pick your spawn" fecha a das rotas. Cada coluna tem um × (`.mp-colx`, só no telemóvel), e o separador aberto fecha-a sempre. Escolher uma rota fecha a coluna para se ver a rota (`phoneShowMap`); o mesmo separador reabre-a nos passos dessa rota (também no computador). Há pinça para o zoom (dois dedos, em `bindMapInput`).
   - **Merchant:**
     - Live: o Map e o Mode lado a lado, assim como o Cargo type e o Cargo price (`.mc-half`); os 6 tamanhos numa fila; os sons em 2 colunas. O primeiro som escolhido leva aos Candidates.
     - Practice: a banca primeiro, depois as respostas e as definições no fim (`.pr-grid`). A banca tem 6 colunas (`prCols()`), e abrir uma caixa leva às respostas.
