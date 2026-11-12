@@ -11,7 +11,7 @@ Funciona offline. Abre-se diretamente no browser (`file://`) e não precisa de s
 | Ficheiro / pasta | O que é |
 |---|---|
 | `index.html` | A página inteira: CSS, HTML e todo o código. Tem de continuar a ser um ficheiro só, que abre por `file://`. Chama-se `index.html` para o site do GitHub Pages abrir sem nada no fim do endereço. |
-| `builds.js` | Os teus dados. Define `window.ABI_BUILDS` com: <br>• builds por arma <br>• `loadouts` <br>• `keybinds` <br>• `routes` (rotas) <br>• `nav` (paredes e aberturas que editaste) |
+| `builds.js` | O conteúdo partilhado, igual para toda a gente. Define `window.ABI_BUILDS` com as builds por arma e os `loadouts` sugeridos. Não leva nada pessoal (keybinds, rotas, os teus loadouts): isso fica no browser de cada um (secção 2). |
 | `merchant.js` | Dados do Field Merchant (`window.ABI_MERCHANT`), tirados do ABI Builder por `tools/merchant_extract.py`: itens, os 38 sons, e as caixas de cada mapa/modo com o peso de cada item. |
 | `merchant-sounds.js` | Os 76 sons do Merchant (`window.ABI_MERCHANT_SOUNDS`), em data URLs, gerados por `tools/merchant_sounds.py`. São um `.js` e não `.ogg` soltos porque uma página aberta com duplo clique não consegue usar `fetch` em ficheiros locais. Se o ficheiro faltar, os sons vêm do ABI Builder. |
 | `prices.js` | Os preços. Define `window.ABI_PRICES`, com `items` e `snapshots` (uma leitura do mercado por data). |
@@ -25,17 +25,25 @@ Os slugs dos mapas são `farm`, `valley`, `northridge`, `armory`, `tv-station` e
 
 ---
 
-## 2. Gravar
+## 2. O que é de cada um
 
-- **Save** descarrega o `builds.js` e/ou o `prices.js` atualizados. Depois substitui os ficheiros na pasta.
-- Até carregares em Save, as alterações ficam guardadas como **rascunho** no browser (localStorage).
-  - Se fechares a página sem gravar, na próxima vez aparece um aviso no canto: "Unsaved changes… restored", com "Discard them" e ×.
-  - O rascunho guarda builds, loadouts, keybinds, rotas e paredes.
-- Algumas coisas são preferências pessoais e ficam **só no browser**, sem nunca ir para os ficheiros:
-  - favoritos;
-  - "In game";
-  - filtros;
-  - a última secção aberta.
+Já não há botão Save nem "Unsaved". Há duas camadas:
+
+- **Partilhado:** o `builds.js` e o `prices.js`, iguais para toda a gente que abre o site. Só mudam por commit (por exemplo, preços novos de um vídeo).
+- **Teu:** o que cada pessoa junta ou muda fica no browser dela (`K.mine`) e grava-se sozinho a cada alteração (`setDirty()`, o nome ficou do tempo do Save).
+  - `mineOf()` calcula a camada comparando `data`/`market` com os ficheiros. `applyMine()` volta a pô-la por cima ao abrir a página.
+  - Guarda:
+    - keybinds;
+    - rotas e paredes;
+    - os teus loadouts;
+    - builds juntadas, ou tiradas/mudadas (`buildsGone`, por arma + JSON da build);
+    - itens e leituras de preços que os ficheiros não têm.
+  - Quando os ficheiros são atualizados, o partilhado novo aparece e o teu continua por cima. Não há conflitos nem avisos.
+  - **Loadouts:** os do `builds.js` são partilhados (`sharedLoIds`). Editar um cria uma cópia tua ao lado ("Save as yours", "based on …") e só os teus têm Delete. O separador "Yours" mostra só os teus.
+  - **Keybinds:** toda a gente começa no Default do jogo. O "My setup" (`KB_MINE`) só aparece, uma vez, na cópia local (`file://`) de quem fez a página.
+  - **Migração:** os rascunhos antigos (`K.draft`, `K.priceDraft`) são lidos uma vez, passam para `K.mine` (sem contar builds como tiradas) e são apagados.
+- O resto das preferências também fica só no browser: favoritos, "In game", filtros, tier lists, smelts, códigos do Trading, a última secção aberta.
+- **Backup** (Share > Backup): "Download backup" gera um `.json` com todas as chaves `abi-*` do localStorage. "Restore a backup" pede confirmação, substitui essas chaves e recarrega a página. Serve para guardar as coisas ou passá-las para outro PC ou browser.
 
 ## 3. Partilhar
 
@@ -64,7 +72,7 @@ O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os p
    | `button(label, {cls, tip, icon, onClick})` | cria um botão completo |
 
 3. Estado partilhado lido desde o arranque (por exemplo, os filtros do Builds).
-4. Rascunhos, gravar e nomes das builds.
+4. A camada pessoal (`mineOf`, `applyMine`, `setDirty`) e os nomes das builds.
 5. Áreas (Home, Builds, Loadouts, Market, Gear, Maps, Merchant, Smelter, Keybinds, Tier list) e as suas barras. "Home" é também o primeiro separador do topo (o logótipo continua a levar lá).
 6. Catálogo de equipamento, a aba Gear e a **overlay de detalhe** (`openGear`, `openExtra`, `openWeapon`). As stats base das armas (sem acessórios) estão em `WEAPON_STATS`, lidas do wiki do ABI Builder; os nomes seguem os do `builds.js` (ex.: "Deagle", "Mosin", "ZC807"). As stats de cada build (com acessórios) estão em `BUILD_STATS`, pelo código sem o "Mod Gun-": só existem para as builds publicadas no ABI Builder. As do So1o não estão online; a folha dele só tem custo, TTK e notas.
 7. **Overlays**:
@@ -370,7 +378,7 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 - O `.nojekyll` faz o GitHub servir os ficheiros tal como estão.
 - O `index.html` tem `noindex`, para não aparecer no Google.
 - O `.gitignore` deixa de fora o zip, o `tools/out/` (dados de trabalho grandes) e o `__pycache__`.
-- No Pages o Save grava no PC de quem o usa, não no site: as alterações fazem-se nesta pasta e depois faz-se push.
+- O conteúdo partilhado muda-se nesta pasta (`builds.js`, `prices.js`) e depois faz-se commit e push. O que cada pessoa faz no site fica no browser dela (secção 2).
 
 ---
 
@@ -386,4 +394,4 @@ python -m http.server 8765 --bind 127.0.0.1
 
 Corre-o dentro da pasta do projeto.
 
-Abre http://127.0.0.1:8765/. O browser guarda dados separados para cada endereço, por isso os rascunhos daqui não se misturam com os do `file://`.
+Abre http://127.0.0.1:8765/. O browser guarda dados separados para cada endereço, por isso o que fazes aqui não se mistura com o do `file://` nem com o do site.

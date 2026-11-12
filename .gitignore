@@ -7,6 +7,12 @@ tools/out/
 __pycache__/
 *.pyc
 
+# Market recordings used to read prices
+*.mp4
+*.mkv
+*.mov
+*.webm
+
 # Editor / OS junk
 .vscode/
 .idea/

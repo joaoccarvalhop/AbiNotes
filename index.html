@@ -108,8 +108,6 @@
   button:disabled { opacity: .4; cursor: default; filter: none; }
   button:disabled:hover { border-color: var(--key-line); color: var(--fg-strong); }
   button.primary:disabled:hover { color: var(--accent-ink); border-color: var(--accent); }
-  .dirty { font-size: 12px; color: var(--balanced); display: inline-flex; gap: 6px; align-items: center; }
-  .dirty::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--balanced); }
   [hidden] { display: none !important; }
 
   .notice-line { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
@@ -1730,9 +1728,7 @@
       <div class="gs-pop" role="listbox" hidden></div>
     </div>
     <div class="savebox">
-      <span class="dirty" id="dirty" hidden>Unsaved</span>
-      <button type="button" id="share-open" title="Share with friends, or import what they sent">Share</button>
-      <button type="button" class="primary" id="save" disabled>Save</button>
+      <button type="button" id="share-open" title="Share with friends, import what they sent, or back up your stuff">Share</button>
     </div>
    </div>
    <div class="bar sub" id="sub-builds">
@@ -2055,6 +2051,7 @@ const K = {
   maps: "abi-builds-maps-v1",
   merchant: "abi-merchant-ui-v1", merRefs: "abi-merchant-refs-v1", merMine: "abi-merchant-mine-v1", merOcr: "abi-merchant-ocr-v1",
   smelt: "abi-smelter-v1", tiers: "abi-tiers-v1", trade: "abi-trading-v1",
+  mine: "abi-mine-v1", // what you added or changed on top of builds.js and prices.js (the drafts above are only read once, to move them here)
   raidClock: "abi-raid-clock", raidMarks: "abi-raid-marks", // sessionStorage: this tab only
 };
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2137,8 +2134,6 @@ let bPanel = null;
 /* ---------- data ---------- */
 let fileData = window.ABI_BUILDS ? clone(window.ABI_BUILDS) : null;
 let data = fileData ? clone(fileData) : { version: 2, categories: [] };
-let dirty = false;
-let pricesDirty = false; // prices.js has its own changes (see the market section)
 let pricesFile = window.ABI_PRICES ? clone(window.ABI_PRICES) : null;
 let market = pricesFile ? clone(pricesFile) : { version: 1, items: [], snapshots: [] };
 const notice = $("notice");
@@ -2147,10 +2142,6 @@ if (!fileData) {
   notice.hidden = false;
   notice.textContent = "builds.js wasn't found. Keep index.html and builds.js together in the same folder.";
 }
-// a short fingerprint of a file's content: a draft remembers which file it was made from
-function fingerprint(o) { const s = JSON.stringify(o || null); let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return h; }
-// everything a draft can hold (routes and walls too, or a draft with only those would look unchanged and be thrown away)
-const sameData = (a, b) => JSON.stringify([a.categories, a.loadouts || [], a.keybinds || null, a.routes || [], a.nav || {}]) === JSON.stringify([b.categories, b.loadouts || [], b.keybinds || null, b.routes || [], b.nav || {}]);
 // notice lines with buttons, one per message
 function noticeLine(text, actions) {
   notice.hidden = false;
@@ -2161,40 +2152,85 @@ function noticeLine(text, actions) {
   const x = el("button", "x", "×"); x.type = "button"; x.title = "Hide this"; x.setAttribute("aria-label", "Hide this"); x.addEventListener("click", done); line.append(x);
   notice.append(line);
 }
+/* ---------- yours, on top of the shared files ----------
+   builds.js and prices.js are what everyone gets from the site. What each person adds or changes (loadouts, builds, routes,
+   keybinds, walls, prices) is a small layer kept in their own browser and saved on every change: an update of the files never
+   wipes it, and nobody gets someone else's setup. Share > Backup puts it (and every other setting) in one file. */
+const buildKey = (weapon, b) => weapon + "|" + JSON.stringify(b);
+const sharedLoIds = new Set(((fileData && fileData.loadouts) || []).map(l => l.id));
+const isMine = lo => !sharedLoIds.has(lo.id); // a loadout you made (editing a shared one makes your own copy)
+let seedMyKeys = false;
+function mineOf() {
+  const m = { v: 1 };
+  if (data.keybinds && data.keybinds.presets.length) m.keybinds = data.keybinds;
+  if (data.routes && data.routes.length) m.routes = data.routes;
+  if (data.nav && Object.keys(data.nav).length) m.nav = data.nav;
+  const los = (data.loadouts || []).filter(isMine);
+  if (los.length) m.loadouts = los;
+  // builds: the ones you added, and the shared ones you removed or changed, by weapon
+  const had = new Set(), has = new Set(), add = [];
+  (fileData ? fileData.categories : []).forEach(c => c.weapons.forEach(w => w.builds.forEach(b => had.add(buildKey(w.name, b)))));
+  data.categories.forEach(c => c.weapons.forEach(w => w.builds.forEach(b => { const k = buildKey(w.name, b); has.add(k); if (!had.has(k)) add.push({ weapon: w.name, build: b }); })));
+  const gone = [...had].filter(k => !has.has(k));
+  if (add.length) m.builds = add;
+  if (gone.length) m.buildsGone = gone;
+  // prices: the items and readings the file doesn't have
+  const fp = pricesFile || { items: [], snapshots: [] }, ids = new Set(fp.items.map(i => i.id));
+  const items = market.items.filter(i => !ids.has(i.id)), snaps = [];
+  market.snapshots.forEach(s => {
+    const f = fp.snapshots.find(x => x.date === s.date && x.source === s.source), prices = {};
+    Object.entries(s.prices).forEach(([id, v]) => { if (!f || JSON.stringify(f.prices[id]) !== JSON.stringify(v)) prices[id] = v; });
+    if (Object.keys(prices).length) snaps.push({ date: s.date, source: s.source, prices });
+  });
+  if (items.length) m.items = items;
+  if (snaps.length) m.snapshots = snaps;
+  return m;
+}
+function applyMine(m) {
+  data = fileData ? clone(fileData) : { version: 2, categories: [] };
+  market = pricesFile ? clone(pricesFile) : { version: 1, items: [], snapshots: [] };
+  if (!Array.isArray(data.loadouts)) data.loadouts = [];
+  if (!m) return;
+  if (m.keybinds) data.keybinds = m.keybinds;
+  if (m.routes) data.routes = m.routes;
+  if (m.nav) data.nav = m.nav;
+  (m.loadouts || []).forEach(l => { if (!data.loadouts.some(x => x.id === l.id)) data.loadouts.push(l); });
+  const gone = new Set(m.buildsGone || []), guns = data.categories.flatMap(c => c.weapons);
+  guns.forEach(w => { w.builds = w.builds.filter(b => !gone.has(buildKey(w.name, b))); });
+  (m.builds || []).forEach(x => { const w = guns.find(g => g.name === x.weapon); if (w && !w.builds.some(b => b.code === x.build.code && b.tier === x.build.tier)) insertBuild(w, x.build); });
+  (m.items || []).forEach(it => { if (!market.items.some(i => i.id === it.id)) market.items.push(it); });
+  (m.snapshots || []).forEach(s => {
+    const f = market.snapshots.find(x => x.date === s.date && x.source === s.source);
+    if (f) Object.assign(f.prices, s.prices); else market.snapshots.push(s);
+  });
+}
 {
-  const raw = ls.get(K.draft);
-  const d = raw && raw.data ? raw.data : raw; // older drafts were the data itself
-  if (d && d.categories && fileData && !sameData(d, fileData)) {
-    if (!raw.data || raw.base === fingerprint(fileData)) {
-      // same file as when the draft was made: bring the changes back
-      data = d; dirty = true;
-      noticeLine("Unsaved changes from last time were restored.", [["Discard them", () => { data = clone(fileData); setDirty(false); render(); renderKeys(); refreshMaps(); }]]);
-    } else {
-      // builds.js changed since: never overwrite it silently
-      noticeLine("You have unsaved changes from before builds.js was updated.", [
-        ["Restore them", () => { data = d; setDirty(true); render(); renderKeys(); refreshMaps(); }],
-        ["Discard them", () => ls.del(K.draft)],
-      ]);
-    }
+  let m = ls.get(K.mine);
+  if (!m) {
+    // first visit after the change: the old drafts held the whole files, so keep only what was yours in them
+    const raw = ls.get(K.draft), d = raw && raw.data ? raw.data : raw;
+    const rawP = ls.get(K.priceDraft), p = rawP && rawP.data ? rawP.data : rawP;
+    if (d && d.categories) { data = d; if (!Array.isArray(data.loadouts)) data.loadouts = []; }
+    if (p && p.items) market = p;
+    // the local copy started with the maker's own keybinds: keep them there, once, as a preset of his (see kbUserPresets)
+    seedMyKeys = location.protocol === "file:" && !(data.keybinds && data.keybinds.presets && data.keybinds.presets.length);
+    m = mineOf(); delete m.buildsGone; // an old draft may predate builds added since: never read those as removed
+    if (Object.keys(m).length > 1) ls.set(K.mine, m);
+    ls.del(K.draft); ls.del(K.priceDraft);
   }
+  applyMine(m);
 }
 
 const saved = ls.get(K.saved) || {};
 const openSet = new Set(ls.get(K.open) || []);
 
-function setDirty(v) {
-  dirty = v;
-  if (v) ls.set(K.draft, { base: fingerprint(fileData), data });
-  else if (fileData) ls.del(K.draft); // if builds.js didn't load, keep the draft
-  refreshSave();
+// every change is kept at once, in this browser (the names stay from when there was a Save button)
+function setDirty() {
+  if (fileData && pricesFile) ls.set(K.mine, mineOf()); // without the files there is nothing to compare with: keep what was there
+  else noticeLine("A data file didn't load, so this change can't be kept. Reload the page.", []);
   if (area === "home") setTimeout(renderHome, 0); // Home sums everything up: after any change it is drawn again (after the change's own redraw)
 }
-// one Save button for both files: builds.js and prices.js
-function refreshSave() {
-  const any = dirty || pricesDirty;
-  $("save").disabled = !any;
-  $("dirty").hidden = !any;
-}
+const setPricesDirty = setDirty;
 
 // "H416 1 Budget", "H416 1B Budget", "MP-133 4 Troll", "MP-133 4B Thermal"
 // a build can carry its own name; otherwise the name is built from weapon, tier and position
@@ -4272,7 +4308,7 @@ function renderLoadouts(quiet) {
     new: (x, y) => (y.lo.added || "").localeCompare(x.lo.added || "") || y.i - x.i, az: (x, y) => x.lo.name.localeCompare(y.lo.name),
     tiers: (x, y) => (tlLoScore(y.lo) ?? -1) - (tlLoScore(x.lo) ?? -1) || x.i - y.i, // the best average first; none ranked go last
   }[loF.sort] || ((x, y) => x.i - y.i);
-  const list = rows.filter(({ lo, cost, level }) => (loTier === "all" || (loTier === "fav" ? isFav(lo) : level === loTier))
+  const list = rows.filter(({ lo, cost, level }) => (loTier === "all" || (loTier === "fav" ? isFav(lo) : loTier === "mine" ? isMine(lo) : level === loTier))
     && (!q || norm([lo.name, lo.gun, lo.author, lo.ammo, ...(lo.tags || [])].join(" ")).includes(q))
     && cost >= loF.min && (loF.max == null || cost <= loF.max)
     && any(loF.kind, [loKind(lo)]) && any(loF.map, lo.tags || []) && any(loF.style, lo.tags || []) && any(loF.prot, [loProt(lo)]))
@@ -4280,6 +4316,7 @@ function renderLoadouts(quiet) {
   panel.sync(list.length);
   if (!list.length) {
     res.append(el("p", "nores", loTier === "fav" && !data.loadouts.some(isFav) ? "No favorites yet. Click the star on a loadout to keep it here."
+      : loTier === "mine" && !data.loadouts.some(isMine) ? "None of yours yet. Add a loadout, or edit any of them to keep your own copy."
       : !data.loadouts.length ? "No loadouts yet. Make the first one with Add loadout." : loFiltered() ? "No loadout matches these filters." : "No loadout matches your search."));
     return;
   }
@@ -4321,7 +4358,7 @@ function renderLoadouts(quiet) {
 (function loBar() {
   const bar = $("sub-loadouts");
   const nav = el("nav", "g-jump"); nav.setAttribute("role", "tablist"); nav.setAttribute("aria-label", "Loadout levels");
-  [["all", "All"], ["fav", "Favorites"], ...LO_TIERS.map(t => [t.key, t.label])].forEach(([k, label]) => {
+  [["all", "All"], ["fav", "Favorites"], ["mine", "Yours"], ...LO_TIERS.map(t => [t.key, t.label])].forEach(([k, label]) => {
     const b = el("button", null, label); b.type = "button"; b.setAttribute("role", "tab"); b.dataset.k = k;
     if (LO_TIERS.some(t => t.key === k)) b.title = LEVEL_TIP;
     b.addEventListener("click", () => { loTier = k; ls.set(K_LO, k); mark(); renderLoadouts(); });
@@ -4418,10 +4455,11 @@ function openLoadout(i) {
     toast([el("span", null, "Loadout deleted: "), el("b", null, lo.name)]);
   });
   // the editor opens in this overlay's place, with ← Back to it (present())
-  const edit = button("Edit", { icon: "edit", tip: "Change this loadout", onClick: () => openLoEditor(data.loadouts.indexOf(lo)) });
+  // a shared loadout stays as it is for everyone: editing it makes your own copy, and only yours can be deleted
+  const edit = button("Edit", { icon: "edit", tip: isMine(lo) ? "Change this loadout" : "Make your own copy of this loadout and change it", onClick: () => openLoEditor(data.loadouts.indexOf(lo)) });
   const share = button("Share", { icon: "share", tip: "Send this loadout to a friend", onClick: () => openShare({ loadouts: [lo.id || lo.name] }) });
   const acts = el("div", "m-actions"); acts.append(share, edit);
-  foot.append(del, acts);
+  foot.append(isMine(lo) ? del : el("span"), acts);
 
   body.scrollTop = 0;
   present(lm, lo.name, () => openLoadout(data.loadouts.indexOf(lo)));
@@ -4684,8 +4722,9 @@ function leMsg(t, k) { const m = $("le-msg"); m.textContent = t; m.className = "
 function openLoEditor(i) {
   leIndex = i;
   const lo = data.loadouts[i] || { tier: loTier !== "all" ? loTier : "budget", tags: [], author: "" };
-  $("le-h").textContent = i >= 0 ? "Edit loadout" : "Add a loadout";
-  $("le-submit").textContent = i >= 0 ? "Save changes" : "Add loadout";
+  const shared = i >= 0 && !isMine(lo); // saving makes your own copy
+  $("le-h").textContent = shared ? "Your copy of this loadout" : i >= 0 ? "Edit loadout" : "Add a loadout";
+  $("le-submit").textContent = shared ? "Save as yours" : i >= 0 ? "Save changes" : "Add loadout";
   $("le-name").value = lo.name || "";
   leTags = new Set(lo.tags || []); markTags();
   pk.build.set(lo.build ? (lo.gun || "") + "|" + lo.build : ""); pk.helmet.set(lo.helmet || ""); pk.armor.set(lo.armor || "");
@@ -4723,7 +4762,8 @@ $("le-form").addEventListener("submit", async e => {
   const prev = data.loadouts[leIndex];
   if (!w && !(prev && prev.gun)) { leMsg("That build is no longer in the list. Choose another one.", "err"); return; }
   // a removed build keeps the weapon it was made for
-  const lo = { id: prev && prev.id ? prev.id : loNewId(name), name, tier: "budget", tags: LO_TAGS.filter(t => leTags.has(t)), gun: w ? w.gun.name : (pick.gun || prev.gun), build: pick.code };
+  const copy = prev && !isMine(prev); // editing a shared loadout: the changes become your own copy, the shared one stays
+  const lo = { id: prev && prev.id && !copy ? prev.id : loNewId(name), name, tier: "budget", tags: LO_TAGS.filter(t => leTags.has(t)), gun: w ? w.gun.name : (pick.gun || prev.gun), build: pick.code };
   const put = (k, v) => { if (v) lo[k] = v; };
   put("ammo", ammoText(lo.gun));
   ["helmet", "armor", "rig", "pack", "headset"].forEach(k => put(k, pk[k].get()));
@@ -4739,6 +4779,14 @@ $("le-form").addEventListener("submit", async e => {
     const strip = o => { const c = { ...o }; delete c.id; delete c.added; delete c.based; return c; };
     const same = (a, b) => { a = strip(a); b = strip(b); return JSON.stringify(a, Object.keys(a).sort()) === JSON.stringify(b, Object.keys(b).sort()) && Object.keys(a).length === Object.keys(b).length; };
     if (same(old, lo)) { leMsg("No changes to save."); return; }
+    if (copy) {
+      if (lo.author === old.author) lo.author = "Me";
+      lo.based = old.name; lo.added = new Date().toISOString().slice(0, 10);
+      data.loadouts.splice(leIndex + 1, 0, lo); // next to the one it came from
+      setDirty(); render(); closeLe(); closeLo(true); openLoadout(data.loadouts.indexOf(lo)); // the copy opens on its own, no ← Back to the editor
+      toast([el("span", null, "Saved as yours: "), el("b", null, lo.name)]);
+      return;
+    }
     const yes = await confirmBox({ title: "Save changes?", body: [el("span", "c-name", lo.name)], ok: "Save changes", cancel: "Keep editing" });
     if (!yes) return;
     data.loadouts[leIndex] = lo;
@@ -4747,43 +4795,14 @@ $("le-form").addEventListener("submit", async e => {
     data.loadouts.push(lo);
   }
   setDirty(true);
-  if (loTier !== "all" && loTier !== "fav" && loTier !== lo.tier) { loTier = "all"; ls.set(K_LO, loTier); $("sub-loadouts").querySelectorAll(".g-jump button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.k === "all"))); }
+  if (loTier !== "all" && loTier !== "fav" && loTier !== "mine" && loTier !== lo.tier) { loTier = "all"; ls.set(K_LO, loTier); $("sub-loadouts").querySelectorAll(".g-jump button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.k === "all"))); }
   render(); navBack() || closeLe(); // saved from a loadout's overlay: back to it, showing the change
   toast([el("span", null, old ? "Loadout updated: " : "Loadout added: "), el("b", null, lo.name)]);
 });
 
 /* ---------- market: in-game prices over time (prices.js) ---------- */
-const K_PDRAFT = K.priceDraft, K_MCAT = K.marketCat;
-{
-  const raw = ls.get(K_PDRAFT);
-  const d = raw && raw.data ? raw.data : raw;
-  if (d && d.items && pricesFile && JSON.stringify(d) !== JSON.stringify(pricesFile)) {
-    if (!raw.data || raw.base === fingerprint(pricesFile)) { // same check as builds: an old-format draft has no base to compare
-      market = d; pricesDirty = true;
-      noticeLine("Unsaved price changes from last time were restored.", [["Discard them", () => { market = clone(pricesFile); setPricesDirty(false); renderMarket(); renderGear(); renderLoadouts(); }]]);
-    } else {
-      // prices.js was updated (e.g. a new video): ask, never replace it silently
-      noticeLine("You have unsaved price changes from before prices.js was updated.", [
-        ["Restore them", () => { market = d; setPricesDirty(true); renderMarket(); renderGear(); renderLoadouts(); }],
-        ["Discard them", () => ls.del(K_PDRAFT)],
-      ]);
-    }
-  }
-  if (!pricesFile) noticeLine("prices.js wasn't found. Keep it in the same folder as index.html.", []);
-}
-function setPricesDirty(v) {
-  pricesDirty = v;
-  if (v) ls.set(K_PDRAFT, { base: fingerprint(pricesFile), data: market });
-  else if (pricesFile) ls.del(K_PDRAFT);
-  refreshSave();
-  if (area === "home") setTimeout(renderHome, 0);
-}
-function pricesText() {
-  market.snapshots.sort((a, b) => a.date.localeCompare(b.date));
-  const body = JSON.stringify(market, null, 2)
-    .replace(/\{\s+("id"[^{}]*?)\s+\}/g, (m, inner) => "{ " + inner.replace(/\s*\n\s*/g, " ") + " }");
-  return "// ABI market prices. index.html reads this file. Each snapshot is one look at the in-game market; prices are in Koen.\nwindow.ABI_PRICES = " + body + ";\n";
-}
+const K_MCAT = K.marketCat;
+if (!pricesFile) noticeLine("prices.js wasn't found. Keep it in the same folder as index.html.", []);
 
 // "350k", "1.2M", "245 000" -> 350000 ...
 function parseKoen(s) {
@@ -5315,7 +5334,7 @@ const KB_GAME = [
   { id: "game-survival", name: "Survival", binds: { ...gameBase, creep: ["Caps Lock", "hold"], leanl: ["Q", "hold"], leanr: ["E", "hold"], quickheal: ["X", ""] } },
   { id: "game-tactical", name: "Tactical", binds: { ...gameBase, crouch: ["Left Ctrl", ""], sightmag: ["Alt+Z", ""], quickheal: ["C", ""] } },
 ];
-// my setup, used the first time (it then lives in builds.js and can be edited)
+// the maker's own setup: only his local copy starts with it (kbUserPresets); everyone else starts on the game's presets
 const KB_MINE = {
   fwd: ["W", "hold"], back: ["S", "hold"], left: ["A", "hold"], right: ["D", "hold"], crouch: ["C", ""], prone: ["Z", ""], creep: ["Caps Lock", ""],
   leanl: ["Alt+A", "hold"], leanr: ["Alt+D", "hold"], sprint: ["Left Shift", ""], jump: ["Space", ""], interact: ["F", ""], ability: ["~", ""], freecam: ["Mouse 5", "hold"],
@@ -5330,7 +5349,11 @@ const KB_MINE = {
 };
 const K_KB = K.kbPreset;
 function kbUserPresets() {
-  if (!data.keybinds || !Array.isArray(data.keybinds.presets)) data.keybinds = { presets: [{ id: "mine", name: "My setup", binds: clone(KB_MINE) }] };
+  // everyone starts on the game's presets; the ones you make are yours (only the maker's local copy starts with his)
+  if (!data.keybinds || !Array.isArray(data.keybinds.presets)) {
+    data.keybinds = { presets: seedMyKeys ? [{ id: "mine", name: "My setup", binds: clone(KB_MINE) }] : [] };
+    if (seedMyKeys) { seedMyKeys = false; setDirty(); }
+  }
   return data.keybinds.presets;
 }
 const kbAll = () => [...kbUserPresets(), ...KB_GAME];
@@ -5572,7 +5595,7 @@ function kbBar() {
   const bar = $("sub-keybinds"); bar.textContent = "";
   const cur = kbCurrent();
   const dd = ddSelect("Preset", [
-    { group: "My presets" }, ...kbUserPresets().map(p => [p.id, p.name, `Your preset · ${kbChanged(p)} changed from default`]),
+    ...(kbUserPresets().length ? [{ group: "My presets" }] : []), ...kbUserPresets().map(p => [p.id, p.name, `Your preset · ${kbChanged(p)} changed from default`]),
     { group: "Game presets" }, ...KB_GAME.map(p => [p.id, p.name, "Game preset · read only"]),
     { sep: true }, { act: "Add preset (a copy of the game default)", run: () => kbNew(KB_GAME[0]) }, { act: `Duplicate “${cur.name}”`, run: () => kbNew(cur) },
   ], () => cur.id, id => { kbActive = id; ls.set(K_KB, kbActive); renderKeys(); });
@@ -5584,7 +5607,7 @@ function kbBar() {
   if (kbEditable(cur)) {
     left.append(button("Rename", { icon: "edit", tip: "Rename this preset", onClick: () => kbRename(cur) }));
     left.append(button("Share", { icon: "share", tip: "Send this preset to a friend", onClick: () => openShare({ keybinds: [cur.id] }) }));
-    if (kbUserPresets().length > 1) left.append(button("Delete", { icon: "trash", tip: "Delete this preset", onClick: () => kbDelete(cur) }));
+    left.append(button("Delete", { icon: "trash", tip: "Delete this preset", onClick: () => kbDelete(cur) }));
   } else left.append(button("Duplicate to edit", { icon: "copy", tip: "Make your own copy of this game preset", onClick: () => kbNew(cur) }));
   if (kbInfo) left.append(infoDot(kbInfo));
   bar.append(left);
@@ -5616,10 +5639,10 @@ function kbRename(p, fresh) {
   inp.addEventListener("blur", () => done(true));
 }
 async function kbDelete(p) {
-  const yes = await confirmBox({ title: "Delete this preset?", body: [el("span", "c-name", p.name), el("p", null, "Its keybinds will be gone after you save.")], ok: "Delete preset", danger: true });
+  const yes = await confirmBox({ title: "Delete this preset?", body: [el("span", "c-name", p.name), el("p", null, "Its keybinds will be gone.")], ok: "Delete preset", danger: true });
   if (!yes) return;
   const list = kbUserPresets(); list.splice(list.indexOf(p), 1);
-  kbActive = list[0].id; ls.set(K_KB, kbActive);
+  kbActive = (list[0] || KB_GAME[0]).id; ls.set(K_KB, kbActive); // with none of yours left, back to the game's default
   setDirty(true); renderKeys();
   toast([el("span", null, "Preset deleted: "), el("b", null, p.name)]);
 }
@@ -6141,64 +6164,29 @@ $("form").addEventListener("submit", async e => {
   editing = null;
 });
 
-/* ---------- save to builds.js ---------- */
-function fileText() {
-  const out = { version: 2, updated: new Date().toISOString().slice(0, 10), categories: data.categories, loadouts: data.loadouts || [], keybinds: data.keybinds || { presets: [] }, routes: data.routes || [] };
-  if (data.nav && Object.keys(data.nav).length) out.nav = data.nav; // walls and openings you changed on the maps
-  const body = JSON.stringify(out, null, 2)
-    .replace(/\{\s+("tier"[^{}]*?)\s+\}/g, (m, inner) => "{ " + inner.replace(/\s*\n\s*/g, " ") + " }");
-  return "// ABI Hub builds. index.html reads this file. Edit the JSON by hand, or use Add build + Save in the page.\nwindow.ABI_BUILDS = " + body + ";\n";
+/* ---------- backup: everything this browser keeps for the hub, in one file, and back ----------
+   Your loadouts, builds, routes, keybinds and prices (the layer on top of the shared files), and every other setting: tier lists,
+   smelts, trading codes, favourites, filters. Restoring replaces what's here, then reloads. */
+const BACKUP_APP = "ABI Hub backup";
+function backupKeys() { const out = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^abi-/.test(k)) out[k] = localStorage.getItem(k); } } catch (e) {} return out; }
+function downloadBackup() {
+  const text = JSON.stringify({ app: BACKUP_APP, v: 1, at: today(), keys: backupKeys() });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  a.download = `abi-hub-backup-${today()}.json`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast([el("span", null, "Backup ready: "), el("b", null, a.download)]);
 }
-const idb = {
-  open() { return new Promise((res, rej) => { const r = indexedDB.open("abi-builds", 1); r.onupgradeneeded = () => r.result.createObjectStore("h"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
-  async get(k) { const d = await this.open(); return new Promise(res => { const r = d.transaction("h").objectStore("h").get(k); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); },
-  async set(k, v) { const d = await this.open(); return new Promise(res => { const t = d.transaction("h", "readwrite"); t.objectStore("h").put(v, k); t.oncomplete = res; t.onerror = res; }); },
-};
-// where to write a file: a remembered handle, a new one from the picker, "download" or "cancelled"
-async function fileHandle(key, name) {
-  if (!window.showSaveFilePicker) return "download";
+async function restoreBackup(text) {
+  let b = null; try { b = JSON.parse(text); } catch (e) {}
+  if (!b || b.app !== BACKUP_APP || !b.keys) return "That isn't an ABI Hub backup file.";
+  const yes = await confirmBox({ title: "Restore this backup?", body: [el("span", "c-name", `Made on ${fmtDate(b.at)}`), el("p", null, "It replaces everything this browser keeps for the hub now.")], ok: "Restore", danger: true });
+  if (!yes) return "";
   try {
-    let h = null;
-    try { h = await idb.get(key); } catch (e) {}
-    if (h && (await h.requestPermission({ mode: "readwrite" })) !== "granted") h = null;
-    if (!h) {
-      h = await showSaveFilePicker({ suggestedName: name, types: [{ description: name, accept: { "text/javascript": [".js"] } }] });
-      try { await idb.set(key, h); } catch (e) {}
-    }
-    return h;
-  } catch (e) { return e && e.name === "AbortError" ? "cancelled" : "download"; }
+    Object.keys(backupKeys()).forEach(k => localStorage.removeItem(k));
+    Object.entries(b.keys).forEach(([k, v]) => { if (/^abi-/.test(k)) localStorage.setItem(k, v); });
+  } catch (e) { return "This browser wouldn't keep the backup (storage is full or blocked)."; }
+  location.reload();
+  return "";
 }
-async function writeTo(h, name, text) {
-  if (h !== "download") { try { const w = await h.createWritable(); await w.write(text); await w.close(); return "saved"; } catch (e) {} }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([text], { type: "text/javascript" }));
-  a.download = name; document.body.append(a); a.click(); a.remove();
-  return "downloaded";
-}
-$("save").addEventListener("click", async () => {
-  const btn = $("save"), downloaded = [];
-  // a file that didn't load is never written over
-  if (dirty && !fileData) { noticeLine("builds.js didn't load, so it can't be saved over. Fix or restore it, then reload.", []); return; }
-  if (pricesDirty && !pricesFile) { noticeLine("prices.js didn't load, so it can't be saved over. Fix or restore it, then reload.", []); return; }
-  // ask for both places first, while the click still counts
-  const hb = dirty ? await fileHandle("file", "builds.js") : null; if (hb === "cancelled") return;
-  const hp = pricesDirty ? await fileHandle("file-prices", "prices.js") : null; if (hp === "cancelled") return;
-  if (hb) {
-    const r = await writeTo(hb, "builds.js", fileText());
-    if (r === "saved") { fileData = clone(data); setDirty(false); } else downloaded.push("builds.js");
-  }
-  if (hp) {
-    const r = await writeTo(hp, "prices.js", pricesText());
-    if (r === "saved") { pricesFile = clone(market); setPricesDirty(false); } else downloaded.push("prices.js");
-  }
-  // a download keeps the changes as unsaved until the file is back in the folder
-  if (downloaded.length) {
-    noticeLine(`${downloaded.join(" and ")} ${downloaded.length > 1 ? "were" : "was"} downloaded. Move ${downloaded.length > 1 ? "them" : "it"} into this folder, replacing the old ${downloaded.length > 1 ? "ones" : "one"}, then reload the page.`, []);
-    return;
-  }
-  btn.textContent = "Saved ✓"; setTimeout(() => btn.textContent = "Save", 1500);
-});
-window.addEventListener("beforeunload", e => { if (dirty || pricesDirty) { e.preventDefault(); e.returnValue = ""; } });
 
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 /* ---------- share: pick what to send (loadouts, routes, keybinds, builds, prices) as a code or a file; import picks what to keep ----------
@@ -6289,22 +6277,22 @@ function openShare(preset) {
 function drawShare() {
   const top = $("sm-top"); top.textContent = "";
   const titles = el("div", "gm-titles"), h = el("h2", null, "Share & import"); h.id = "sm-title";
-  titles.append(h, el("p", null, "Send your stuff to friends as a code or a file, or bring theirs in"));
+  titles.append(h, el("p", null, "Send your stuff to friends, bring theirs in, or keep a backup"));
   const ic = el("span", "g-img huge sm-ic"); ic.append(icon("share"));
   top.append(ic, titles);
   const body = $("sm-body"); body.textContent = "";
-  const share = el("div", "gm-panel"), imp = el("div", "gm-panel");
-  // two tabs, one frame: the hidden one still takes its room (overlays keep their size)
+  const share = el("div", "gm-panel"), imp = el("div", "gm-panel"), bak = el("div", "gm-panel");
+  // the tabs share one frame: the hidden ones still take their room (overlays keep their size)
   const nav = el("nav", "g-jump gm-tabs"); nav.setAttribute("role", "tablist");
-  [["share", "Share", share], ["import", "Import", imp]].forEach(([k, label, panel]) => {
+  [["share", "Share", share], ["import", "Import", imp], ["backup", "Backup", bak]].forEach(([k, label, panel]) => {
     const b = el("button", null, label); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(shareTab === k));
     panel.classList.toggle("off", shareTab !== k); panel.inert = shareTab !== k;
     b.addEventListener("click", () => { if (shareTab !== k) { shareTab = k; drawShare(); } });
     nav.append(b);
   });
-  const panels = el("div", "gm-panels"); panels.append(share, imp);
+  const panels = el("div", "gm-panels"); panels.append(share, imp, bak);
   body.append(nav, panels);
-  drawSharePanel(share); drawImportPanel(imp);
+  drawSharePanel(share); drawImportPanel(imp); drawBackupPanel(bak);
   drawShareFoot();
 }
 
@@ -6473,6 +6461,23 @@ function groupedPick(kind, items, set, redraw) {
   });
   return box;
 }
+// the Backup tab: the same drop zone as Import, for your own file; downloading is in the footer
+function drawBackupPanel(box) {
+  const zone = el("div", "sh-drop");
+  const ic = el("span", "sh-drop-ic"); ic.append(icon("download"));
+  const file = el("input"); file.type = "file"; file.accept = ".json,application/json"; file.hidden = true;
+  const msg = el("p", "sh-drop-msg");
+  const load = async text => { const why = await restoreBackup(text); msg.textContent = why; msg.classList.toggle("err", !!why); zone.classList.toggle("bad", !!why); };
+  const open = el("button", null, "Restore a backup"); open.type = "button"; open.prepend(icon("upload")); open.addEventListener("click", () => file.click());
+  file.addEventListener("change", () => { const f = file.files[0]; file.value = ""; if (f) f.text().then(load); });
+  zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("over"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+  zone.addEventListener("drop", e => { e.preventDefault(); zone.classList.remove("over"); const f = e.dataTransfer.files[0]; if (f) f.text().then(load); });
+  const btns = el("div", "sh-drop-btns"); btns.append(open, file);
+  zone.dataset.tip = "Loadouts, builds, routes, keybinds and prices you added, tier lists, smelts, trading codes, favourites and filters";
+  zone.append(ic, el("b", null, "Everything you made here, in one file"), el("small", null, "It all lives in this browser. Download a backup to keep it safe or move it to another PC, then restore it there."), btns, msg);
+  box.append(zone);
+}
 // the Import tab: a drop zone until something is read, then the same layout as Share
 let importKind = null;
 function drawImportPanel(box) {
@@ -6627,6 +6632,9 @@ function drawShareFoot() {
         () => window.prompt("Copy this code:", text));
     });
     acts.append(dl, code);
+  } else if (shareTab === "backup") {
+    info.textContent = "Saved by itself in this browser";
+    acts.append(button("Download backup", { cls: "primary", icon: "download", onClick: downloadBackup }));
   } else {
     const n = importPick ? importPick.size + (importPick.prices ? 1 : 0) : 0;
     info.textContent = importPack ? (n ? `${n} thing${n === 1 ? "" : "s"} to bring in` : "Nothing ticked") : "Paste a code or open a file";
@@ -6757,7 +6765,7 @@ function openAbout() {
     });
     body.append(gmSection(title, list));
   });
-  body.append(el("p", "gm-note ab-foot", "A fan-made tool for friends. Not made or endorsed by the game's developers."));
+  body.append(el("p", "gm-note ab-foot", "Made by XeruD. A fan-made tool for friends, not made or endorsed by the game's developers."));
   present(dlg, "About", openAbout);
 }
 
@@ -6837,7 +6845,7 @@ function renderHome() {
 
 /* ---------- maps: the six raid maps (copied from maps.tcno.co for offline use), their markers, and your own routes ----------
    A map is one layer (tiles, floor plan, routes) moved and scaled as a whole; markers and route points sit in it too but
-   undo the scale (--k) so they keep their size. Routes live in builds.js (data.routes) and travel as short share codes. */
+   undo the scale (--k) so they keep their size. Routes are yours (data.routes, kept in this browser) and travel as short share codes. */
 const MAP_LIST = [["farm", "Farm"], ["valley", "Valley"], ["northridge", "Northridge"], ["armory", "Armory"], ["tv-station", "TV Station"], ["airport", "Airport"]];
 const MAP_CODE = { farm: "FARM", valley: "VALLEY", northridge: "NORTH", armory: "ARMORY", "tv-station": "TV", airport: "AIRPORT" };
 const ROUTE_COLORS = ["#e0662f", "#00d9ff", "#9fc58a", "#e0a23f", "#c77dff", "#ff5a6e", "#f1f1f1"];
@@ -10573,7 +10581,7 @@ function openSearchAll(v) {
 })();
 
 // each part draws on its own: one bad record shows a note instead of stopping the whole page
-safely("Sections", markAreas); safely("Builds", () => { buildNav(); render(); }); safely("Gear", renderGear); setDirty(dirty);
+safely("Sections", markAreas); safely("Builds", () => { buildNav(); render(); }); safely("Gear", renderGear);
 showSections(false);
 renderMapsBar();
 if (area === "maps") setTimeout(() => safely("Maps", renderMaps), 0);

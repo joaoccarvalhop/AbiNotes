@@ -89,12 +89,14 @@ ARMAS
   rato por cima para ver os números com os acessórios (a verde o que melhora, a vermelho
   o que piora).
 
-GUARDAR AS TUAS ALTERAÇÕES
-- Quando mudas alguma coisa aparece "Unsaved" no topo. Carrega em "Save".
-- No Chrome/Edge, da primeira vez o browser pergunta onde guardar: escolhe o builds.js
-  (e o prices.js, se mudaste preços) DESTA pasta. Depois disso guarda sozinho.
-- No Firefox o Save descarrega o ficheiro: substitui o builds.js desta pasta pelo descarregado.
-- Se fechares sem guardar, a página lembra-se e oferece recuperar na próxima vez.
+AS TUAS COISAS
+- Tudo o que fazes (keybinds, rotas, os teus loadouts e builds, preços que escreves, tier lists...)
+  grava-se sozinho no teu browser. Não há botão Save.
+- Os builds e loadouts que vêm com a página são iguais para todos. Editar um loadout cria uma
+  cópia tua, que aparece em Loadouts > "Yours".
+- Keybinds: começas nos presets do jogo. "Duplicate to edit" faz o teu.
+- Share > Backup: "Download backup" guarda tudo num ficheiro. "Restore a backup" põe-no noutro
+  PC ou browser (substitui o que lá estiver).
 
 PARTILHAR COM AMIGOS
 - Botão "Share" no topo:
@@ -115,4 +117,4 @@ PESQUISA E KEYS
 NOTA
 Os mapas e marcadores foram copiados de maps.tcno.co (TroubleChute), só para uso entre amigos.
 Todas as fontes (So1o, ABI Builder, o wiki do jogo, skrux, TroubleChute...) estão na página:
-Home > "About & sources", no fundo.
+Home > "About & sources", no fundo. Feito por XeruD.
