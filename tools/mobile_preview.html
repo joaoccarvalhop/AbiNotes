@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ABI Hub on phones</title>
+<!-- the hub in phone-sized frames, to check the phone layout from a desktop browser: serve the folder
+     (python -m http.server 8765) and open http://127.0.0.1:8765/tools/mobile_preview.html
+     Each frame is its own page: window.frames[0], [1]… can be scripted from the console; go("maps") opens a section in all -->
+<style>
+  body { margin: 0; padding: 12px; background: #0b0b0c; color: #aaa; font: 12px "Segoe UI", sans-serif; display: flex; gap: 14px; align-items: flex-start; }
+  figure { margin: 0; display: grid; gap: 4px; }
+  iframe { border: 1px solid #333; background: #000; }
+</style>
+</head>
+<body>
+  <figure><iframe src="../index.html" width="360" height="760"></iframe><figcaption>360 × 760</figcaption></figure>
+  <figure><iframe src="../index.html" width="412" height="760"></iframe><figcaption>412 × 760</figcaption></figure>
+<script>
+  // open a section in every frame
+  // no fades in the frames (a frame out of focus may never finish them, and pictures of the layout come out dim)
+  document.querySelectorAll("iframe").forEach(f => f.addEventListener("load", () => {
+    const s = f.contentDocument.createElement("style"); s.textContent = "*, *::before, *::after { animation: none !important; transition: none !important; }";
+    f.contentDocument.head.append(s);
+  }));
+  window.wins = () => [...document.querySelectorAll("iframe")].map(f => f.contentWindow);
+  window.go = area => wins().forEach(w => { const b = w.document.querySelector(`[data-area="${area}"]`); if (b) b.click(); });
+</script>
+</body>
+</html>

@@ -32,8 +32,15 @@ ROTAS NOS MAPAS
   rotas dele. "Yours" agrupa as tuas pelo spawn. Passa o rato numa rota tua para a partilhar.
 - Cada coluna fecha com a setinha no topo; uma tira fina volta a abri-la.
 
+NO TELEMÓVEL
+- O site funciona no telemóvel: os filtros abrem com o botão "Filters", no Maps os painéis
+  abrem por cima do mapa (dois dedos fazem zoom) e o Merchant pode ouvir pelo microfone.
+
 MERCADOR (MERCHANT)
-- Abre esta parte no Edge ou no Chrome: o Firefox não consegue partilhar o som do jogo.
+- Para ouvir o jogo diretamente, abre esta parte no Edge ou no Chrome do computador: o Firefox,
+  o Safari e os telemóveis não conseguem partilhar o som do jogo.
+- "Listen with mic": ouve pelo microfone (no telemóvel, ao pé das colunas do PC). Acerta menos
+  do que ouvir o jogo diretamente; baixa o "Match needed" e usa o "Teach a sound" se falhar.
 - À esquerda: o mapa e o modo, o tamanho do item (o espaço que ocupa na caixa), e o
   tipo e o preço da caixa. Com tipo e preço escolhidos aparece a probabilidade de cada item.
 - "Listen to game": no aviso do browser escolhe a janela do jogo e marca "Share audio"

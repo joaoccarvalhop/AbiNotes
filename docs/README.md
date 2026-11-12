@@ -118,6 +118,20 @@ O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os p
 - **Palavras**: inglês americano (color, caliber, recognize, favorite). Nas builds e nos loadouts diz-se "level"; "tier" fica para a proteção do equipamento e para a Tier list.
 - **Listas vazias** dentro dos painéis usam `emptyNote()`: "No … yet" quando não há nada, "Nothing matches these filters." ou "Nothing matches your search." quando está escondido.
 - **Overlays à espera de algo** (Import, Backup, Price reader sem a janela do jogo) usam a mesma caixa `.sh-drop`: ícone num círculo, título, uma linha e o botão. A overlay mantém o tamanho e a caixa fica ao centro (`.mc-wait`).
+- **Telemóvel**: um único bloco no fim do CSS (`@media (max-width: 760px)`), para as regras do computador ficarem como estão. No JS, `isPhone()` usa a mesma largura.
+  - **Topo:** o logótipo, a pesquisa e o Share numa linha; as secções e as sub-barras em linhas que deslizam para o lado, sem partir.
+  - **Overlays:** ocupam o ecrã todo, com o X no canto.
+  - **Caixas de filtros (`filterBox`):** fecham atrás de um botão "Filters" (`.f-fold`, só no telemóvel). Ficam à vista "Sort by" e "Clear", quando há filtros. Aberto ou fechado fica igual durante a visita (`filtersOpen`).
+  - **Tabelas:** o Market mostra Item, Price e Change, sem o Change abaixo de 400 px; Like New e Worn ficam um por linha. As tabelas largas (Gear) deslizam com o nome fixo à esquerda.
+  - **Maps:** o mapa ocupa o ecrã entre as duas barras de separadores. As colunas abrem por cima dele, uma de cada vez, e começam fechadas (`phoneMapSeen`). Tocar no chão fecha a coluna aberta, e "Pick your spawn" fecha a das rotas. Há pinça para o zoom (dois dedos, em `bindMapInput`).
+  - **Merchant:**
+    - Live: o Map e o Mode lado a lado, assim como o Cargo type e o Cargo price (`.mc-half`); os 6 tamanhos numa fila; os sons em 2 colunas. O primeiro som escolhido leva aos Candidates.
+    - Practice: a banca primeiro, depois as respostas e as definições no fim (`.pr-grid`). A banca tem 6 colunas (`prCols()`), e abrir uma caixa leva às respostas.
+  - **Smelter:** as 4 caixas numa fila.
+  - **Trading:** o estado em cima e o próximo reset por baixo; na barra do dia, uma hora sim, outra não.
+  - **Tier list:** filas mais baixas e os Unranked presos ao fundo do ecrã: toca no item e depois na fila.
+  - **Toque (`@media (hover: none)`):** o que aparece com o rato por cima fica sempre visível (o Share das rotas, o lixo, o ⓘ dos itens). Tocar em algo que só informa mostra o tooltip uns segundos; tocar num botão só faz a ação.
+  - **Para ver:** `tools/mobile_preview.html` mostra o site em duas molduras de telemóvel (360 e 412 px). `go("maps")` abre uma secção nas duas.
 - **Números**: preços com `fmtKoen` (também no Merchant). Os custos já não levam "≈". Os tooltips são todos `data-tip`.
 - **Animações**: usam sempre o conjunto global `motion` (JS) e as classes `.a-*` (CSS), para serem iguais em todas as secções. Uma animação nova entra aí, não fica presa a uma secção.
   - Os keyframes antigos (`enter`, `pop`, `ddin`, `m-in`/`m-out`, `toast-in`, `mpswap`) também passaram a ser só fades. Assim as secções, as overlays, as dropdowns, os avisos e os cartões dos loadouts entram sem saltar. Ficam com movimento só o anel a pulsar no mapa e o deslizar das colunas dos Maps.
@@ -241,7 +255,11 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
 - **Dados**: `merchant.js`. Um "perfil" é o stock que vários mapas/modos partilham. Caixas com o mesmo nome e preço juntam-se numa só (`merCargos`), e as probabilidades misturam-se pelo peso de cada uma (`merOdds`). "Worth on average" é a soma de preço de venda × probabilidade.
   - O que há em cada caixa é igual em todos os mapas; o mapa e o modo só mudam a frequência das caixas e, nos modos de infeção, a mistura das caixas com o mesmo nome e preço.
   - As probabilidades só aparecem quando os filtros deixam uma única caixa (tipo + preço).
-- **Ouvir o jogo** (`merListen`): a partilha de ecrã do browser (`getDisplayMedia`) traz o som e a imagem da janela. Só funciona no Edge/Chrome; o Firefox não partilha som.
+- **Ouvir o jogo** (`merListen`): a partilha de ecrã do browser (`getDisplayMedia`) traz o som e a imagem da janela. Só funciona no Edge/Chrome no computador; o Firefox, o Safari e os telemóveis não partilham som (`merCan.share`).
+  - **Listen with mic** (`merListen(true)`, `merLive.mic`): ouve pelo microfone (`getUserMedia`, sem cancelamento de eco nem de ruído), por exemplo o telemóvel ao lado das colunas. Não traz imagem, por isso não há Price reader.
+    - O som ouvido pelo ar parece-se menos com as referências, por isso o microfone tem o seu próprio "Match needed" (`merUI.needMic`, 55% por omissão; `merNeed()` escolhe o que está em uso).
+    - O Teach funciona igual e aprende como o teu microfone ouve cada som.
+  - **Onde não dá para partilhar o som** (`merCan`): no lugar do botão aparece uma nota curta ("Listening to the game needs Chrome or Edge on a computer"; no telemóvel, "listens through the mic") com o porquê no tooltip. O "Listen with mic" passa a botão principal e o Price reader desaparece.
   - O som é cortado em frames de 1024 amostras (passo 512, 48 kHz). Cada frame passa a energia em 24 bandas logarítmicas (`merFeature`, com FFT nossa).
   - Um som 5 dB acima do fundo dispara uma comparação (`merFrame`). Primeiro tira-se o ruído de fundo, depois correlaciona-se o "desenho" tempo × banda com cada referência (`merSimilar`). Ganha a mais parecida, se passar o "Match" (65% por omissão).
   - **Apanhar + largar**: um segundo som até 20 s depois do primeiro lê-se em par com ele. Um item só ganha o par se estiver entre os melhores dos dois sons. Se os sons discordarem, fica a resposta do primeiro, porque os sons de largar parecem-se mais entre itens e sozinhos enganam-se mais.

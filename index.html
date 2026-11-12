@@ -1052,6 +1052,7 @@
   /* Sort by: the last group, on the right; the box's label says what it is, so the button shows only the choice */
   .lo-f.f-sort { margin-left: auto; justify-items: end; } .lo-f.f-sort .dd > button { padding: 4px 10px; } .lo-f.f-sort .dd > button .k { display: none; }
   /* Clear: a quiet button on the same line as the filter buttons, right after them */
+  .f-fold { display: none; } /* phones only (the block at the end) */
   .f-clear { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--muted); background: none; border: 1px dashed var(--line-2); }
   .f-clear:hover { color: var(--accent); border: 1px dashed var(--accent); }
   /* the same room in every section: the bar, the box, then the list */
@@ -1083,6 +1084,7 @@
   .m-table td.m-cat { color: var(--muted); }
   .m-table td.m-price small { font-weight: 400; color: var(--dim); font-size: 11px; }
   .m-table td.m-price .m-conds { display: block; }
+  .m-conds span + span::before { content: " · "; }
   .m-chg.up { color: #d98a6a; } .m-chg.down { color: var(--ok); } .m-chg.same { color: var(--dim); }
   .m-date.stale { color: var(--balanced); }
   .m-th { display: block; padding: 6px 8px; font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
@@ -1374,9 +1376,9 @@
   }
   @media (max-width: 720px) {
     details.gun > summary { grid-template-columns: 120px 1fr; grid-template-areas: "thumb name" "thumb chips"; row-gap: 4px; gap: 4px 12px; }
-    .thumb { grid-area: thumb; height: 56px; }
-    .gname { grid-area: name; } .chips { grid-area: chips; }
-    .range { display: none; }
+    details.gun > summary .thumb { grid-area: thumb; height: 56px; } /* only the Builds list: other grids place their own pictures */
+    details.gun > summary .gname { grid-area: name; } details.gun > summary .chips { grid-area: chips; }
+    details.gun > summary .range { display: none; }
     .gbody { grid-template-columns: 1fr; }
     .tools { flex: 1 1 100%; flex-wrap: wrap; margin-left: 0; } #q { flex: 1 1 140px; }
   }
@@ -1437,6 +1439,8 @@
   .mc-status { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
   .mc-level { width: 60px; height: 4px; background: linear-gradient(to right, var(--ok) var(--p), var(--line-2) var(--p)); }
   .mc-live { border-color: var(--ok); color: var(--ok); }
+  .mc-cant { margin: 0; font-size: 12px; line-height: 1.4; color: var(--muted); cursor: help; } /* this browser can't share the game's sound */
+  .mc-tools .mc-mic { justify-self: center; padding: 2px 6px; font-size: 12.5px; }
   /* a sound: its number, the two ways it plays, and the items that make it */
   .mc-sgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 0; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; align-content: start; }
   .mc-scard { display: grid; align-content: start; gap: 10px; padding: 10px; background: var(--key-bg); border: 1px solid var(--line); cursor: pointer; transition: border-color .12s; }
@@ -1760,6 +1764,128 @@
   .sm-entry b { text-align: right; } .sm-eins { display: flex; gap: 3px; } .sm-arrow { color: var(--dim); text-align: center; }
   @media (max-width: 1100px) { .sm-lower { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 760px) { .sm-station { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sm-to { display: none; } .sm-stats { grid-template-columns: minmax(0, 1fr); } .sm-stat + .sm-stat { border-left: 0; border-top: 1px solid var(--line); } .sm-stat { padding-left: 0; } }
+
+  /* ---------- phones: one block, so the desktop rules above stay as they are ----------
+     the top bar keeps to two short rows (logo, search, Share; then the sections, sliding sideways), every row of tabs
+     slides instead of wrapping, overlays take the whole screen, and filter boxes wrap instead of scrolling */
+  @media (max-width: 760px) {
+    :root { --gap-top: 12px; }
+    .page { padding: 0 12px 40px; scrollbar-gutter: auto; }
+    .bar { padding-inline: 12px; gap: 0 10px; }
+    .bar.main { flex-wrap: wrap; align-items: center; gap: 0 10px; }
+    .logo { order: 1; padding: 9px 0; font-size: 15px; }
+    .gsearch { order: 2; flex: 1; min-width: 0; margin-left: 4px; }
+    .gsearch input { width: 100%; }
+    .gs-pop { position: fixed; left: 8px; right: 8px; top: auto; width: auto; max-height: 70dvh; }
+    .savebox { order: 3; margin-left: 0; }
+    .savebox button { padding: 6px 10px; }
+    nav.areas, nav.cats, .g-jump { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    nav.areas::-webkit-scrollbar, nav.cats::-webkit-scrollbar, .g-jump::-webkit-scrollbar { display: none; }
+    nav.areas { order: 4; flex-basis: 100%; margin: 0 -12px; padding: 0 6px; }
+    nav.areas button { padding: 10px 10px 9px; flex: none; }
+    .bar.sub { min-height: 0; flex-wrap: wrap; }
+    .bar.sub > nav, .bar.sub > .g-jump { flex-basis: 100%; margin: 0 -12px; padding: 0 6px; }
+    nav.cats button, .g-jump button { padding: 10px 8px 8px; flex: none; }
+    .tools { margin-left: 0; width: 100%; flex-wrap: wrap; padding: 6px 0 8px; }
+    .tools input[type=search], #q { flex: 1; width: auto; min-width: 120px; }
+    /* overlays: the whole screen */
+    dialog.modal { width: 100vw; height: 100dvh; max-width: none; border: 0; border-top: 2px solid var(--accent); }
+    dialog.modal.confirm { width: calc(100vw - 24px); height: fit-content; border: 1px solid var(--line-2); border-top: 2px solid var(--accent); }
+    /* filter boxes: the groups wrap, Sort by takes its own line */
+    .lo-filters { flex-wrap: wrap; overflow: visible; gap: 12px 16px; padding: 12px; }
+    .lo-filters:has(> .f-sort) { padding-right: 12px; }
+    .lo-f { flex: 0 1 auto; min-width: 0; }
+    .lo-f .g-seg { flex-wrap: wrap; }
+    .lo-f.f-sort { position: static; padding: 0; background: none; margin-left: auto; justify-items: end; }
+    /* folded: the Filters button, Clear while something is filtered, and Sort by, on one line */
+    .f-fold { display: inline-flex; align-self: end; gap: 6px; padding: 6px 10px; font-weight: 600; }
+    .f-fold[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+    .lo-filters:not(.open) > .lo-f:not(.f-sort):not(.f-clearg) { display: none; }
+    .lo-filters:not(.open) > .lo-f.f-clearg > small { display: none; }
+    .lo-filters:not(.open) { align-items: end; }
+    .lo-filters.open > .lo-f:not(.f-sort):not(.f-clearg) { flex-basis: 100%; }
+    .lo-cost-f { width: 100%; } .lo-range { flex: 1; width: auto; }
+    /* a loadout card: the gun's picture and name on one line, its ammo under them */
+    .lo-gun { grid-template-columns: 96px minmax(0, 1fr); gap: 6px 10px; }
+    .lo-gun .thumb { height: 44px; } .lo-gun .am-badges { grid-column: 2; justify-self: start; }
+    .notice { right: 8px; left: 8px; bottom: 8px; width: auto; }
+    /* Market: item, price and change; the category, trend and date are one tap away (the price overlay) */
+    .m-table th:nth-child(2), .m-table td:nth-child(2), .m-table th:nth-child(5), .m-table td:nth-child(5), .m-table th:nth-child(6), .m-table td:nth-child(6) { display: none; }
+    .m-table .g-name b { white-space: normal; }
+    .m-table td.m-price { white-space: nowrap; } .m-table td.m-price .m-conds span { display: block; line-height: 1.35; } .m-conds span + span::before { content: none; }
+    .g-table th, .g-table td { padding-left: 6px; padding-right: 6px; }
+    .g-table { min-width: 0; width: 100%; }
+    /* wide tables (Gear's stats) slide sideways under a name that stays put */
+    .g-table:not(.m-table) th:first-child, .g-table:not(.m-table) td:first-child { position: sticky; left: 0; z-index: 1; background: #151617; box-shadow: 8px 0 8px -8px #000; }
+    .g-table:not(.m-table) td.g-name b { white-space: normal; display: block; max-width: 128px; line-height: 1.25; }
+    .g-table td.g-name .g-img { width: 32px; height: 32px; }
+    /* Maps: the map fills the screen between the two tab bars; a column opens over the map (one at a time, JS) */
+    #maps:not([hidden]) { grid-template-columns: 34px minmax(0, 1fr) 34px; }
+    #maps > .mp-rail-l { grid-column: 1; } #maps > .mp-view { grid-column: 2; } #maps > .mp-rail-r { grid-column: 3; }
+    #maps > .mp-left, #maps > .mp-right { grid-column: 1 / -1; grid-row: 1; position: absolute; top: 0; bottom: 0; z-index: 6; width: min(330px, calc(100% - 68px)); box-shadow: 0 0 30px -6px #000; }
+    #maps > .mp-left { left: 34px; } #maps > .mp-right { right: 34px; }
+    .mp-left > *, .mp-right > * { width: min(330px, calc(100vw - 68px)); }
+    #maps.hide-left > .mp-left, #maps.hide-right > .mp-right { width: 0; box-shadow: none; }
+    .mp-railtab { padding: 10px 0; }
+    /* Merchant: map and mode, cargo type and price, side by side; the six sizes in one row */
+    .mc-side { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
+    .mc-side > :not(.mc-half) { grid-column: 1 / -1; }
+    .mc-sizes { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .mc-sizes button { height: 46px; padding: 3px 2px; }
+    .mc-sgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mc-main > .mc-panel { max-height: none; }
+    .mc-grid.fit, .mc-grid { height: auto !important; }
+    /* Merchant practice: the stall first, the answers under it, the settings last */
+    .pr-grid > .mc-side { order: 2; }
+    .pr-grid .pr-stallp { order: -1; }
+    .pr-stallwrap { overflow: visible; }
+    .pr-head { flex-wrap: wrap; gap: 8px; }
+    .pr-head .pr-replay { height: 36px; padding: 0 12px; }
+    .pr-head .pr-replay + .pr-replay { margin-left: -4px; }
+    .pr-size { height: 36px; }
+    .pr-info { flex-basis: 100%; margin-left: 0; justify-content: space-between; }
+    .pr-verdict { flex-wrap: wrap; padding: 8px 12px; }
+    .pr-opts { grid-template-columns: minmax(0, 1fr); }
+    .pr-blabel { font-size: 9.5px; top: 3px; left: 4px; right: 3px; line-height: 1.15; hyphens: auto; overflow-wrap: normal; word-break: normal; }
+    /* Smelter: the three items and what came out in one row of small tiles */
+    .sm-station { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .sm-tile .pk-btn { height: 112px; padding: 12px 4px 8px; gap: 6px; }
+    .sm-tile .pk-btn .mc-pic, .sm-tile .pk-btn .g-img { width: 46px; height: 46px; } .sm-tile .pk-btn .mc-pic img { width: 42px; height: 42px; }
+    .sm-tile .pk-btn .g-label b, .sm-tile .pk-btn .g-label small { font-size: 11px; }
+    .sm-tile .pk-btn::after { top: 8px; right: 6px; }
+    /* Trading: the word and what to do on one line, the next reset under them; every other hour on the day's bar */
+    .tr-now { grid-template-columns: auto minmax(0, 1fr); padding: 12px; }
+    .tr-next { grid-column: 1 / -1; justify-items: start; text-align: left; grid-template-columns: auto auto; align-items: baseline; gap: 2px 10px; }
+    .tr-next small { grid-column: 1 / -1; }
+    .tr-next b { font-size: 22px; }
+    .tr-hours span:nth-child(even) { display: none; }
+    /* Tier list: lower rows, and the unranked items held at the bottom of the screen (tap one, then tap its row) */
+    .tl-row { grid-template-columns: 54px minmax(0, 1fr) 28px; min-height: 66px; }
+    .tl-name { font-size: 24px; }
+    .tl-pool { position: sticky; bottom: 0; z-index: 4; max-height: 36dvh; padding: 10px 12px; grid-template-rows: auto minmax(0, 1fr); box-shadow: 0 -14px 24px -14px #000; background: #141516; }
+    .tl-poolzone { overflow-y: auto; }
+    .tl-poolzone:has(.thumb) { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+    .tl-poolzone .tl-item .thumb { height: 34px; }
+    .tl-del { opacity: 1; }
+    /* overlays: the X stays in the top corner; the header and body lose some padding */
+    .m-head { position: relative; flex-wrap: nowrap; padding: 14px 52px 12px 14px; gap: 10px; }
+    .m-head > .x, .m-head .x:last-child { position: absolute; top: 10px; right: 10px; }
+    .gm-top { gap: 10px; } .gm-top .g-img.huge, .gm-top .sm-ic { width: 52px; height: 52px; } .gm-titles h2 { font-size: 18px; }
+    .gm-body, .m-body { padding-left: 14px; padding-right: 14px; }
+    .gm-tabs { margin: 0 -14px; padding: 0 6px; } /* edge to edge, as with the wider padding */
+    .gm-sub { flex-wrap: wrap; gap: 4px 10px; }
+    .m-foot { padding-left: 14px; padding-right: 14px; flex-wrap: wrap; gap: 8px; }
+    .lm-weapon { grid-template-columns: 110px minmax(0, 1fr); gap: 10px; } .lm-weapon .thumb { height: 50px; }
+    .lm-weapon code, .lm-weapon .lm-code { word-break: break-all; white-space: normal; }
+  }
+  /* touch screens: what a mouse finds by hovering is simply there (share a route, delete a stop, a tier, a code; an item's ⓘ) */
+  @media (hover: none) {
+    .rt-share, .re-del, .re2-step .re-del, .tl-del, .tl-info, .tr-code .sm-del { opacity: 1; }
+    .mp-view .mp-contact { opacity: 1; }
+  }
+  @media (max-width: 400px) {
+    .m-table th:nth-child(4), .m-table td:nth-child(4) { display: none; } /* the change shows in the price overlay */
+  }
 </style>
 </head>
 <body class="booting">
@@ -2117,6 +2243,9 @@ const K = {
   raidClock: "abi-raid-clock", raidMarks: "abi-raid-marks", // sessionStorage: this tab only
 };
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// a phone-sized screen (the same width as the CSS block for phones at the end of the styles)
+const isPhone = () => matchMedia("(max-width: 760px)").matches;
+let phoneMapSeen = false; // Maps on a phone opens with its side columns shut, once per visit
 
 /* ---------- shared motion: every section uses these, so things come in, change and get picked the same way everywhere.
    Sections are drawn again whole on each click, so motion.changed() tells what really changed and only that moves ---------- */
@@ -2343,11 +2472,22 @@ function showTip(node) {
 }
 const hideTip = () => { tipLayer(false); tipBox.hidden = true; tipFor = null; };
 const tipTarget = t => t && t.closest && t.closest("[data-tip],[title]");
-document.addEventListener("mouseover", e => { const n = tipTarget(e.target); if (n && n !== tipFor) showTip(n); else if (!n && tipFor) hideTip(); });
-document.addEventListener("mouseout", e => { if (tipFor && !tipFor.contains(e.relatedTarget)) hideTip(); });
-document.addEventListener("focusin", e => { const n = tipTarget(e.target); if (n) showTip(n); });
+// touch screens have no hover: a tap on something that only informs (the ⓘ, a label, a number) shows its tip for a few
+// seconds; a tap on something that acts (a button, a card) just acts. The mouse events a tap fakes right after are ignored
+let touchAt = 0, tipTimer = 0;
+const acts = n => n.matches(".g-info") ? false : !!n.closest("button, a, input, select, textarea, label, [role=button], [role=tab], .mc-scard, .pr-box");
+document.addEventListener("pointerdown", e => {
+  if (e.pointerType !== "touch") return;
+  touchAt = Date.now(); clearTimeout(tipTimer); hideTip();
+  const n = tipTarget(e.target);
+  if (n && !acts(n)) { showTip(n); tipTimer = setTimeout(hideTip, 3500); }
+}, true);
+const fromTouch = () => Date.now() - touchAt < 900;
+document.addEventListener("mouseover", e => { if (fromTouch()) return; const n = tipTarget(e.target); if (n && n !== tipFor) showTip(n); else if (!n && tipFor) hideTip(); });
+document.addEventListener("mouseout", e => { if (fromTouch()) return; if (tipFor && !tipFor.contains(e.relatedTarget)) hideTip(); });
+document.addEventListener("focusin", e => { if (fromTouch()) return; const n = tipTarget(e.target); if (n) showTip(n); });
 document.addEventListener("focusout", hideTip);
-document.addEventListener("mousedown", hideTip);
+document.addEventListener("mousedown", () => { if (!fromTouch()) hideTip(); });
 document.addEventListener("scroll", hideTip, { passive: true, capture: true }); // any scroll, the page or a list
 
 function safely(part, fn) {
@@ -4263,8 +4403,15 @@ function ddSelect(label, options, get, set) {
 }
 
 // the filter box every section uses (the Loadouts look): small labelled groups side by side; "Sort by" sits last, on the right
+// on a phone the box would fill the screen: it folds behind a "Filters" button (shown only there, by CSS); open or shut
+// is kept for the visit, so a section drawn again keeps it as it was
+let filtersOpen = false;
 function filterBox() {
-  const box = el("div", "lo-filters");
+  const box = el("div", "lo-filters" + (filtersOpen ? " open" : ""));
+  const fold = el("button", "f-fold"); fold.type = "button"; fold.append(icon("tiers"), el("span", null, "Filters"));
+  fold.setAttribute("aria-expanded", String(filtersOpen));
+  fold.addEventListener("click", () => { filtersOpen = !filtersOpen; box.classList.toggle("open", filtersOpen); fold.setAttribute("aria-expanded", String(filtersOpen)); });
+  box.append(fold);
   box.group = (label, node, tip, cls) => { const g = el("div", "lo-f" + (cls ? " " + cls : "")), h = el("small", null, label); if (tip) h.dataset.tip = tip; g.append(h, node); box.append(g); return g; };
   box.sort = dd => box.group("Sort by", dd, null, "f-sort");
   // Clear: right after the last filter, on the buttons' line, only while something is filtered (call it after the groups, before Sort by)
@@ -5080,8 +5227,12 @@ function renderMarket() {
     const pc = el("td", "num m-price", fmtKoen(r.price)); pc.dataset.tip = priceTip(null, r.it);
     const lastR = r.h[r.h.length - 1];
     if (mCond === "all") {
-      const cl = condLine(lastR);
-      if (cl) { pc.prepend(el("small", "m-new", "New ")); pc.append(el("small", "m-conds", cl)); }
+      if (condLine(lastR)) {
+        // one piece per condition: on one line with dots on a wide screen, one under the other on a phone
+        const cs = el("small", "m-conds");
+        CONDS.filter(([k]) => k !== "new" && lastR.all[k] != null).forEach(([k, label]) => cs.append(el("span", null, `${label} ${fmtKoen(lastR.all[k])}`)));
+        pc.prepend(el("small", "m-new", "New ")); pc.append(cs);
+      }
     } else if (lastR && typeof lastR.all === "object" && lastR.all[mCond + "Dur"]) pc.append(el("small", "m-conds", `Durability ${lastR.all[mCond + "Dur"]}`)); // one condition: its durability under the price
     tr.append(nm, el("td", "m-cat", catLabel(r.it.cat)), pc, chg, tr2, dt);
     tr.addEventListener("click", () => openPrice(r.it.id));
@@ -7104,7 +7255,9 @@ function buildMapView(slug, m) {
     const col = el("aside", "mp-col " + cls), head = el("div", "mp-colhead");
     const fold = hide => {
       const v = mapView; let last = v.view.getBoundingClientRect().left;
-      mapsUI[key] = hide; saveMapsUI(); syncCols();
+      mapsUI[key] = hide;
+      if (!hide && isPhone()) mapsUI[key === "leftHidden" ? "sideHidden" : "leftHidden"] = true; // a phone has room for one at a time
+      saveMapsUI(); syncCols();
       // while the column slides, the map's left edge moves: follow it frame by frame so the map itself doesn't move
       v.keepLeft = true; const t0 = performance.now();
       const step = now => {
@@ -7130,6 +7283,8 @@ function buildMapView(slug, m) {
   const S = m.scale, W = m.bounds[1][0] * S, H = m.bounds[1][1] * S;
   svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   mapView = { slug, m, S, W, H, k: 1, tx: 0, ty: 0, view, world, tiles, floor, circles, svg, marks, handles, side, card, hint, layers, routesPop, rail, lrail, foldRight: R.fold, foldLeft: L.fold };
+  // on a phone the columns open over the map: it starts with both shut, so the map is what you see
+  if (isPhone() && !phoneMapSeen) { phoneMapSeen = true; mapsUI.leftHidden = true; mapsUI.sideHidden = true; }
   syncCols();
   drawMapLayers(); drawMarkers(); drawRoutes(); renderLayers(); renderMapSide();
   setTimeout(() => {
@@ -8298,13 +8453,33 @@ function bindMapInput() {
     e.preventDefault(); openMarkMenu(e);
   });
   let drag = null;
+  // two fingers: pinch to zoom (the wheel's job on a computer), the map follows the point between them
+  const fingers = new Map(); let pinch = null;
+  const mid = () => { const [a, b] = [...fingers.values()], r = view.getBoundingClientRect(); return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2 - r.left, y: (a.y + b.y) / 2 - r.top }; };
   view.addEventListener("pointerdown", e => {
+    if (e.pointerType !== "touch") return;
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 2) { pinch = mid(); drag = null; view.classList.remove("panning"); }
+  }, true);
+  view.addEventListener("pointermove", e => {
+    if (!fingers.has(e.pointerId)) return;
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!pinch || fingers.size < 2) return;
+    const m = mid();
+    v.tx += m.x - pinch.x; v.ty += m.y - pinch.y; // the pair moved: the map goes with them
+    if (pinch.d) zoomAt(m.d / pinch.d, m.x, m.y); else applyMapView();
+    pinch = m;
+  }, true);
+  const lift = e => { fingers.delete(e.pointerId); if (fingers.size < 2) pinch = null; };
+  view.addEventListener("pointerup", lift, true); view.addEventListener("pointercancel", lift, true);
+  view.addEventListener("pointerdown", e => {
+    if (pinch) return;
     if (e.button !== 0 || e.target.closest(".mp-floors, .mp-zoom, .mp-card, .mp-layers, .mp-rtpop, .mp-sidetab, .ly-btn, .mp-ctx, .mp-hint, .mp-navbar, .mp-dock, .mp-dockpop, .mp-you, .mp-markx, .mp-pt, .mp-mk, .mp-det, .mp-contact, .mp-circle.spawn, polyline.hit")) return;
     drag = { x: e.clientX, y: e.clientY, tx: v.tx, ty: v.ty, moved: false, closing: !!v.ctxMenu || !!v.dockPop };
     view.setPointerCapture(e.pointerId);
   });
   view.addEventListener("pointermove", e => {
-    if (!drag) return;
+    if (!drag || pinch) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
     if (drag.moved) { v.tx = drag.tx + dx; v.ty = drag.ty + dy; applyMapView(); view.classList.add("panning"); }
@@ -8317,7 +8492,10 @@ function bindMapInput() {
       const [x, y] = toMapUnits(v, e), ctx = routeContext(v.m), sp = ctx.spawns.filter(q => markerShown(q, v.m)).sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
       if (sp && Math.hypot(sp.x - x, sp.y - y) < ctx.W * .05) selectSpawn(sp);
     }
-    else if (d && !d.moved) closeCard(); // a click on the ground only closes things
+    else if (d && !d.moved) { // a click on the ground only closes things (on a phone, the column open over the map too)
+      closeCard();
+      if (isPhone()) { if (!mapsUI.leftHidden) v.foldLeft(true); if (!mapsUI.sideHidden && !routeEdit) v.foldRight(true); }
+    }
   });
   // fit when it first gets a size, and again after a resize if you hadn't zoomed
   if (window._mapRO) window._mapRO.disconnect(); // one watcher at a time: the previous map's view is gone
@@ -9059,6 +9237,7 @@ function askSpawn(on, why) {
   const v = mapView; if (!v) return;
   v.askSpawn = on; v.view.classList.toggle("pickspawn", on);
   if (!on) { hereWaiting = null; newWaiting = false; }
+  if (on && isPhone() && !mapsUI.sideHidden && v.foldRight) v.foldRight(true); // on a phone the column covers the map: get it out of the way
   if (on) {
     v.hint.textContent = "";
     if (why === "new") { newWaiting = true; v.hint.append("Click the spawn your route starts at"); }
@@ -9394,20 +9573,32 @@ async function merLoadRefs(ctx) {
 }
 
 /* listening: the shared window's sound, cut into frames; a sudden sound is compared with every reference */
-const merLive = { on: false, stream: null, ctx: null, node: null, video: null, frames: [], tail: new Float32Array(0), floor: null, wait: null, quiet: 0, level: -90, last: null, clip: null, hist: [] };
-async function merListen() {
+const merLive = { on: false, mic: false, stream: null, ctx: null, node: null, video: null, frames: [], tail: new Float32Array(0), floor: null, wait: null, quiet: 0, level: -90, last: null, clip: null, hist: [] };
+// what this browser can do: share a window with its sound (Chrome or Edge on a computer; not Firefox, Safari or phones),
+// and listen through a microphone (any browser, on https or a local file)
+const merCan = (() => {
+  const ua = navigator.userAgent, md = navigator.mediaDevices;
+  const phone = /Android|iPhone|iPad|iPod|Mobile/i.test(ua), chromium = /Chrome\/|Edg\//.test(ua) && !/Firefox\//.test(ua);
+  return { share: !!(md && md.getDisplayMedia) && chromium && !phone, mic: !!(md && md.getUserMedia) && (isSecureContext || location.protocol === "file:"), phone };
+})();
+// the match a sound needs: heard through the air (the mic) it never comes as close as from the game itself, so it has its own
+const merNeed = () => merLive.mic || (!merLive.on && !merCan.share) ? (merUI.needMic ?? .55) : merUI.need;
+async function merListen(mic = false) {
   if (merLive.on) return merStop();
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || /Firefox\//.test(navigator.userAgent)) {
-    toast([el("b", null, "Open the page in Edge or Chrome to listen"), el("span", null, "This browser can't share a window's sound.")]); return;
-  }
+  if (!mic && !merCan.share) { toast([el("b", null, "Needs Chrome or Edge on a computer"), el("span", null, merCan.mic ? " · Listen with mic works here" : "")]); return; }
   let stream;
-  try {
-    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 8 }, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, systemAudio: "include", windowAudio: "window", selfBrowserSurface: "exclude" });
-  } catch (e) { return; } // you closed the share window
-  if (!stream.getAudioTracks().length) {
-    stream.getTracks().forEach(t => t.stop());
-    toast([el("b", null, "No sound came with the share"), el("span", null, "Share again and tick \"Share audio\". If the window has no such box, share the entire screen with \"Share system audio\".")]);
-    return;
+  if (mic) {
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+    catch (e) { toast([el("b", null, "No microphone"), el("span", null, " · allow it in the browser to listen")]); return; }
+  } else {
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 8 }, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, systemAudio: "include", windowAudio: "window", selfBrowserSurface: "exclude" });
+    } catch (e) { return; } // you closed the share window
+    if (!stream.getAudioTracks().length) {
+      stream.getTracks().forEach(t => t.stop());
+      toast([el("b", null, "No sound came with the share"), el("span", null, "Share again and tick \"Share audio\". If the window has no such box, share the entire screen with \"Share system audio\".")]);
+      return;
+    }
   }
   const ctx = new AudioContext({ sampleRate: 48000 }); merRate = ctx.sampleRate; merBandEdges = null;
   const src = ctx.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));
@@ -9419,16 +9610,17 @@ async function merListen() {
   };
   const mute = ctx.createGain(); mute.gain.value = 0; // the processor needs an output to run; nothing is played back
   src.connect(node); node.connect(mute); mute.connect(ctx.destination);
-  const video = el("video"); video.muted = true; video.playsInline = true; video.srcObject = new MediaStream(stream.getVideoTracks()); video.play().catch(() => {});
-  Object.assign(merLive, { on: true, stream, ctx, node, video, frames: [], tail: new Float32Array(0), floor: null, wait: null, prev: null });
+  let video = null; // the game's picture, for the price reader (a mic has none)
+  if (!mic) { video = el("video"); video.muted = true; video.playsInline = true; video.srcObject = new MediaStream(stream.getVideoTracks()); video.play().catch(() => {}); }
+  Object.assign(merLive, { on: true, mic, stream, ctx, node, video, frames: [], tail: new Float32Array(0), floor: null, wait: null, prev: null });
   stream.getTracks().forEach(t => t.addEventListener("ended", () => merStop()));
   merLoadRefs(ctx);
-  merOcrStart();
+  if (!mic) merOcrStart();
   merDraw();
 }
 function merStop() {
   if (!merLive.on) return;
-  merLive.on = false;
+  merLive.on = false; merLive.mic = false;
   merLive.stream.getTracks().forEach(t => t.stop());
   try { merLive.node.disconnect(); merLive.ctx.close(); } catch (e) { /* already closed */ }
   merOcrStop();
@@ -9478,16 +9670,16 @@ function merMatch(F, before) {
     const both = [...ids].filter(([id, s]) => s >= cTop - .05 && (prev.ids.get(id) || 0) >= pTop - .05)
       .map(([id, s]) => ({ id, s: Math.min(s, prev.ids.get(id)) })).sort((a, b) => b.s - a.s);
     merLive.prev = null; // a pair is used once: the next sound starts a new item
-    if (both.length && both[0].s >= merUI.need - .05) {
+    if (both.length && both[0].s >= merNeed() - .05) {
       const alt = both.slice(1, 3).filter(r => r.s > both[0].s - .06);
       merHeard(both[0].id, "ud", both[0].s, alt); return;
     }
     if (prev.shown) { merDraw(); return; } // they disagree: keep what the first sound said
   }
-  if (ev.top.s >= merUI.need - .15) merLive.prev = ev; // a near miss still helps the next sound
-  if (ev.top.s < merUI.need) { merDraw(); return; }
+  if (ev.top.s >= merNeed() - .15) merLive.prev = ev; // a near miss still helps the next sound
+  if (ev.top.s < merNeed()) { merDraw(); return; }
   ev.shown = true;
-  const top = ev.top, alt = ranked.filter(r => r.id !== top.id).slice(0, 2).filter(r => r.s > top.s - .08 && r.s >= merUI.need - .1);
+  const top = ev.top, alt = ranked.filter(r => r.id !== top.id).slice(0, 2).filter(r => r.s > top.s - .08 && r.s >= merNeed() - .1);
   merHeard(top.id, top.act, top.s, alt);
 }
 // a sound, heard or picked by hand
@@ -9698,12 +9890,22 @@ let merTeachOn = false;
 // listening and the price reader, on top of the left column (the status shows only while listening)
 function merTools() {
   const box = el("div", "mc-tools");
-  box.append(
-    button(merLive.on ? "Stop listening" : "Listen to game", { cls: merLive.on ? "mc-live" : "primary", tip: merLive.on ? "Stop sharing the game window" : "Share the game window with its sound: the page tells which item a cargo holds by the sound it makes", onClick: merListen }),
-    button("Price reader", { icon: "chart", tip: "Reads the cargo's price off the game and sets Cargo price for you", onClick: openMerOcr }));
+  const micTip = "Listen through this device's microphone, with the game's sound on speakers: put it near them. Less sure than the game's own sound; Teach a sound helps it learn your room";
+  if (merLive.on) box.append(button("Stop listening", { cls: "mc-live", tip: merLive.mic ? "Stop the microphone" : "Stop sharing the game window", onClick: () => merListen() }));
+  else if (merCan.share) {
+    box.append(button("Listen to game", { cls: "primary", tip: "Share the game window with its sound: the page tells which item a cargo holds by the sound it makes", onClick: () => merListen() }));
+    if (merCan.mic) box.append(button("Listen with mic", { cls: "linkbtn mc-mic", tip: micTip, onClick: () => merListen(true) }));
+  } else {
+    // this browser can't share the game's sound: say so where the button would be, and offer the mic
+    const why = el("p", "mc-cant", merCan.phone ? "On a phone the page listens through the mic" : "Listening to the game needs Chrome or Edge on a computer");
+    why.dataset.tip = "Sharing a window with its sound only exists in Chrome and Edge on a computer. Without it, the mic hears the game from the speakers, or click the sound you heard";
+    box.append(why);
+    if (merCan.mic) box.append(button("Listen with mic", { cls: "primary", tip: micTip, onClick: () => merListen(true) }));
+  }
+  if (merCan.share && !merLive.mic) box.append(button("Price reader", { icon: "chart", tip: "Reads the cargo's price off the game and sets Cargo price for you", onClick: openMerOcr }));
   if (merLive.on) {
     const st = el("div", "mc-status"), lv = el("i", "mc-level"); lv.style.setProperty("--p", Math.max(0, Math.min(100, (merLive.level + 80) * 1.4)) + "%");
-    st.append(lv, el("span", null, merRefs.state === "loading" ? "Getting the game's sounds…" : merRefs.state === "failed" ? "No reference sounds: teach some" : "Listening"));
+    st.append(lv, el("span", null, merRefs.state === "loading" ? "Getting the game's sounds…" : merRefs.state === "failed" ? "No reference sounds: teach some" : merLive.mic ? "Listening · mic" : "Listening"));
     box.append(st);
   }
   return box;
@@ -9811,8 +10013,8 @@ function merDraw() {
     Object.assign(merUI, { map: m, mode, ctype: null, cprice: null }); redraw();
   });
   const mm = ddSelect("Mode", modesOf(merUI.map).map(mode => [mode, merModeName(mode)]), () => merUI.mode, mode => { Object.assign(merUI, { mode, ctype: null, cprice: null }); redraw(); });
-  group("Map", null, md);
-  group("Mode", null, mm);
+  group("Map", null, md).classList.add("mc-half"); // side by side on a phone
+  group("Mode", null, mm).classList.add("mc-half");
   const sizes = el("div", "mc-sizes");
   MER_SIZES.forEach(s => {
     const on = (merUI.sizes || []).includes(s), b = el("button", null); b.type = "button"; b.setAttribute("aria-pressed", String(on));
@@ -9826,14 +10028,16 @@ function merDraw() {
   const sizeGroup = group("Item size", "The room the hidden item takes in the cargo. Pick one or more", sizes);
   const sizeHead = el("div", "mc-fh"); sizeHead.append(sizeGroup.firstChild, rot); sizeGroup.prepend(sizeHead);
   const types = [...new Set(v.cargos.filter(c => !merUI.cprice || c.price === merUI.cprice).map(c => c.name))].sort();
-  group("Cargo type", null, ddSelect("Type", [["", "All cargo types"], ...types.map(t => [t, t])], () => merUI.ctype || "", val => { merUI.ctype = val || null; redraw(); }));
+  group("Cargo type", null, ddSelect("Type", [["", "All cargo types"], ...types.map(t => [t, t])], () => merUI.ctype || "", val => { merUI.ctype = val || null; redraw(); })).classList.add("mc-half");
   const prices = [...new Set(v.cargos.filter(c => !merUI.ctype || c.name === merUI.ctype).map(c => c.price))].sort((a, b) => a - b);
-  group("Cargo price", merOcrRun.price ? "Set by the price reader" : null, ddSelect("Price", [["", "All cargo prices"], ...prices.map(p => [String(p), fmtKoen(p)])], () => merUI.cprice ? String(merUI.cprice) : "", val => { merUI.cprice = val ? +val : null; redraw(); }));
+  group("Cargo price", merOcrRun.price ? "Set by the price reader" : null, ddSelect("Price", [["", "All cargo prices"], ...prices.map(p => [String(p), fmtKoen(p)])], () => merUI.cprice ? String(merUI.cprice) : "", val => { merUI.cprice = val ? +val : null; redraw(); })).classList.add("mc-half");
   // recognising sounds: how alike they must be, and teaching your own
   const lis = el("div", "mc-f mc-lis");
   const need = el("label", "mc-need"); need.dataset.tip = "How alike a sound must be to count. Lower it if sounds are missed, raise it if wrong ones show";
-  const rg = el("input"); rg.type = "range"; rg.min = 50; rg.max = 95; rg.step = 1; rg.value = Math.round(merUI.need * 100);
-  const rv = el("span", null, rg.value + "%"); rg.addEventListener("input", () => { merUI.need = rg.value / 100; rv.textContent = rg.value + "%"; }); rg.addEventListener("change", saveMerUI);
+  // the mic keeps its own level (sound through the air matches less), so the slider moves the one in use
+  const micLevel = merLive.mic || (!merLive.on && !merCan.share);
+  const rg = el("input"); rg.type = "range"; rg.min = 35; rg.max = 95; rg.step = 1; rg.value = Math.round(merNeed() * 100);
+  const rv = el("span", null, rg.value + "%"); rg.addEventListener("input", () => { merUI[micLevel ? "needMic" : "need"] = rg.value / 100; rv.textContent = rg.value + "%"; }); rg.addEventListener("change", saveMerUI);
   need.append(rg, rv);
   const teach = button(merTeachOn ? "Done teaching" : "Teach a sound", { cls: "linkbtn", tip: "Save the last sound the page heard as one of the 38, so it's recognized next time (yours count alongside the usual ones)", onClick: () => { merTeachOn = !merTeachOn; merDraw(); } });
   lis.append(el("small", null, "Match needed"), need, teach);
@@ -9886,6 +10090,8 @@ function merDraw() {
       // not sure which it was? click another to add it: the chances then count all the sounds picked; click a picked one to drop it
       const sel = merSel(), next = sel.includes(id) ? sel.filter(x => x !== id) : [...sel, id];
       merUI.sound = next[0] || null; merUI.also = next.slice(1); saveMerUI(); merPopId = id; merDraw();
+      // on a phone the candidates sit under the sounds: the first sound picked takes you down to them
+      if (isPhone() && sel.length === 0 && next.length) { const cp = $("merchant").querySelector(".mc-candp"); if (cp) pageEl.scrollTop += cp.getBoundingClientRect().top - pageEl.getBoundingClientRect().top - 8; }
     };
     card.addEventListener("click", pick);
     card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
@@ -9996,7 +10202,9 @@ function merBar() {
    it holds: click one to hear it picked up and dropped, then answer with its card (Live's cards, in Live's place) or pick the
    item; the box then shows what it held. A free stall of 24 boxes or a timed one of 20; what's inside follows the cargo odds
    or gives every sound the same chance; the sounds you miss can come back more. Kept in this browser (K.merPractice). ---------- */
-const PR_ROUND = 20, PR_FREE = 24, PR_COLS = 9;
+const PR_ROUND = 20, PR_FREE = 24;
+// the stall's width in cells: 9 like the game, 6 on a phone (9 would make the boxes too small to read or tap)
+const prCols = () => isPhone() ? 6 : 9;
 const prs = Object.assign({ level: "card", mode: "free", src: "cargo", weak: true, stats: {}, best: {} }, ls.get(K.merPractice) || {});
 const savePr = () => ls.set(K.merPractice, prs);
 // the stall being played (not kept): boxes [{ x, y, w, h, id, cargo, ans }], cur = the box open, q = its question
@@ -10036,15 +10244,15 @@ function prFill(n) {
     }
     const it = MER.items[id]; let w = it[4], h = it[5];
     if (w !== h && Math.random() < .5) [w, h] = [h, w];
-    if (w > PR_COLS) [w, h] = [h, w];
+    if (w > prCols()) [w, h] = [h, w];
     items.push({ id, cargo: c.name, price: c.price, w, h, ans: null });
   }
   items.sort((a, b) => b.w * b.h - a.w * a.h || Math.random() - .5);
   const taken = [], free = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (taken[j] && taken[j][i]) return false; return true; };
   items.forEach(b => {
     for (let y = 0; ; y++) {
-      let x = 0; while (x + b.w <= PR_COLS && !free(x, y, b.w, b.h)) x++;
-      if (x + b.w <= PR_COLS) { b.x = x; b.y = y; for (let j = y; j < y + b.h; j++) { taken[j] = taken[j] || []; for (let i = x; i < x + b.w; i++) taken[j][i] = true; } return; }
+      let x = 0; while (x + b.w <= prCols() && !free(x, y, b.w, b.h)) x++;
+      if (x + b.w <= prCols()) { b.x = x; b.y = y; for (let j = y; j < y + b.h; j++) { taken[j] = taken[j] || []; for (let i = x; i < x + b.w; i++) taken[j][i] = true; } return; }
     }
   });
   return items.sort((a, b) => a.y - b.y || a.x - b.x); // in reading order, for Enter (the next box)
@@ -10081,6 +10289,8 @@ function prOpen(i) {
   pr.cur = i; pr.q = { id: b.id, sid, size, opts };
   if (!pr.t0) pr.t0 = Date.now();
   prDraw(); setTimeout(prHear, 120);
+  // on a phone the answers sit under the stall: go to them
+  if (isPhone()) { const a = $("merchant").querySelector(".pr-ans"); if (a) pageEl.scrollTop += a.getBoundingClientRect().top - pageEl.getBoundingClientRect().top - 8; }
 }
 function prAnswer(x) { // x: a sound id (card level) or an item id (item level)
   const b = pr.boxes[pr.cur]; if (!pr.q || !b || b.ans) return;
@@ -10118,7 +10328,7 @@ function prDraw(sec = $("merchant")) {
   const keepCards = sec.querySelector(".pr-cards")?.scrollTop || 0, keepStall = sec.querySelector(".pr-stallwrap")?.scrollTop || 0;
   sec.textContent = "";
   const first = motion.opened("merchant");
-  const grid = el("div", "mc-grid");
+  const grid = el("div", "mc-grid pr-grid"); // pr-grid: on a phone the stall comes first and the settings last (CSS)
 
   /* the settings, on the left like Live's filters */
   const side = el("aside", "mc-panel mc-side");
@@ -10251,7 +10461,7 @@ function prDraw(sec = $("merchant")) {
   const sh = el("h3", "mc-h", "Stall"); sh.append(el("small", null, `${merUI.map} · ${merModeName(merUI.mode)}`));
   stallP.append(sh);
   const wrap = el("div", "pr-stallwrap"), stall = el("div", "pr-stall");
-  stall.style.setProperty("--cols", PR_COLS);
+  const cols = Math.max(prCols(), ...pr.boxes.map(b => b.x + b.w)); stall.style.setProperty("--cols", cols); // a stall laid out on a wider screen keeps its columns
   pr.boxes.forEach((bx, i) => {
     const d = el("button", "pr-box" + (i === pr.cur && !bx.ans ? " cur" : "") + (bx.ans ? (bx.ans.ok ? " ok" : " bad") : "")); d.type = "button";
     d.style.gridColumn = `${bx.x + 1} / span ${bx.w}`; d.style.gridRow = `${bx.y + 1} / span ${bx.h}`;
@@ -10268,7 +10478,7 @@ function prDraw(sec = $("merchant")) {
   sec.append(grid);
   merFit();
   // square cells: a row as tall as a column is wide
-  requestAnimationFrame(() => { stall.style.gridAutoRows = Math.floor((stall.clientWidth - (PR_COLS - 1) * 3) / PR_COLS) + "px"; wrap.scrollTop = keepStall; });
+  requestAnimationFrame(() => { stall.style.gridAutoRows = Math.floor((stall.clientWidth - (cols - 1) * 3) / cols) + "px"; wrap.scrollTop = keepStall; });
   if (first) motion.stagger([side, ans, stallP]);
   else if (done) { motion.pop(verdict); motion.flash(stall.children[pr.cur]); }
 }
