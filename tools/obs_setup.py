@@ -137,11 +137,13 @@ disp = next(s for s in base["sources"] if s["id"] == "monitor_capture")
 sc_t = next(s for s in base["sources"] if s["id"] == "scene")
 item_t = sc_t["settings"]["items"][0]
 
-screen_nc = source(disp, "monitor_capture", "Screen (no pointer)", {**disp["settings"], "capture_cursor": False})
+# method 2 = "Windows 10 (1903 and up)": on a laptop with two GPUs OBS runs on the NVIDIA one while the screen hangs off
+# the AMD one, and the default (DXGI duplication) then captures black
+screen_nc = source(disp, "monitor_capture", "Screen (no pointer)", {**disp["settings"], "capture_cursor": False, "method": 2})
 collection("ABI_Prices", "ABI Prices", [screen_nc, scene(sc_t, item_t, "Market", screen_nc)], base)
 
 game = source(disp, "game_capture", "Game Capture", {"capture_mode": "any_fullscreen", "capture_cursor": False, "allow_transparency": False, "limit_framerate": False, "anti_cheat_hook": True})
-screen = source(disp, "monitor_capture", "Display Capture", {**disp["settings"], "capture_cursor": True})
+screen = source(disp, "monitor_capture", "Display Capture", {**disp["settings"], "capture_cursor": True, "method": 2})
 collection("Gameplay", "Gameplay", [game, screen, scene(sc_t, item_t, "Game", game), scene(sc_t, item_t, "Screen", screen)], base)
 
 pick = (sys.argv[1] if len(sys.argv) > 1 else "record").lower()
