@@ -120,6 +120,8 @@ O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os p
 - **Overlays à espera de algo** (Import, Backup, Price reader sem a janela do jogo) usam a mesma caixa `.sh-drop`: ícone num círculo, título, uma linha e o botão. A overlay mantém o tamanho e a caixa fica ao centro (`.mc-wait`).
 - **Telemóvel**: um único bloco no fim do CSS (`@media (max-width: 760px)`), para as regras do computador ficarem como estão. No JS, `isPhone()` usa a mesma largura.
   - **Topo:** o logótipo, a pesquisa e o Share numa linha; as secções e as sub-barras em linhas que deslizam para o lado, sem partir.
+    - Uma linha que desliza fica esbatida do lado onde há mais (`.more-l` / `.more-r`, postas por `slideRows` / `slideEdges` ao deslizar, a cada clique e ao redimensionar).
+    - O separador escolhido, se estiver fora de vista, desliza para o meio sempre que muda (`n.slideOn`).
   - **Overlays:** ocupam o ecrã todo, com o X no canto.
   - **Caixas de filtros (`filterBox`):** fecham atrás de um botão "Filters" (`.f-fold`, só no telemóvel). Ficam à vista "Sort by" e "Clear", quando há filtros. Aberto ou fechado fica igual durante a visita (`filtersOpen`).
   - **Tabelas:** o Market mostra Item, Price e Change, sem o Change abaixo de 400 px; Like New e Worn ficam um por linha. As tabelas largas (Gear) deslizam com o nome fixo à esquerda.
