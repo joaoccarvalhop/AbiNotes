@@ -502,6 +502,8 @@
   .sh-badges .sh-how { padding: 2px 20px 2px 6px; font-size: 11.5px; }
   /* import: the drop zone before anything is read */
   .sh-drop { display: grid; justify-items: center; gap: 8px; margin-top: 16px; padding: 26px 22px 20px; text-align: center; border: 1px dashed var(--line-2); background: rgba(255,255,255,.02); transition: border-color .15s, background-color .15s; }
+  .gm-body:has(> .mc-wait) { display: flex; align-items: center; justify-content: center; } /* an empty overlay keeps its size: the box sits in the middle */
+  .sh-drop.mc-wait { width: min(520px, 100%); margin: 0 0 6%; padding: 40px 28px 32px; }
   .sh-drop.over { border-color: var(--accent); background: rgba(224,102,47,.08); }
   .sh-drop.bad { border-color: rgba(224,102,47,.6); }
   .sh-drop-ic { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: rgba(224,102,47,.12); color: var(--accent); }
@@ -3414,6 +3416,7 @@ const ICON_PATHS = {
   plus: "M8 3.5v9M3.5 8h9",
   minus: "M3.5 8h9",
   download: "M8 2.5v8M4.5 7l3.5 3.5L11.5 7M3 13.5h10",
+  screen: "M1.5 2.5h13v8.5h-13zM5.5 14h5M8 11v3",
   upload: "M8 10.5v-8M4.5 6L8 2.5 11.5 6M3 13.5h10",
   check: "M3 8.5l3.2 3L13 4.5",
   info: "M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM8 7.2v4.3M8 4.6v.4",
@@ -9904,8 +9907,12 @@ function openMerOcr() {
   // the footer only ever holds actions (the X closes, like every overlay)
   const body = $("merocr-body"), foot = $("merocr-foot"); body.textContent = ""; foot.textContent = "";
   if (!merLive.on || !merLive.video || !merLive.video.videoWidth) {
-    body.append(el("p", "gm-note", "Listen to the game first: the reader looks at the same window you share."));
-    if (!merLive.on) body.append(button("Listen to game", { cls: "primary", onClick: async () => { await merListen(); setTimeout(openMerOcr, 600); } }));
+    // nothing to read yet: the same centred box as Import and Backup
+    const zone = el("div", "sh-drop mc-wait"), ic = el("span", "sh-drop-ic"); ic.append(icon("screen"));
+    zone.append(ic, el("b", null, merLive.on ? "No picture from the game yet" : "Share the game window first"),
+      el("small", null, merLive.on ? "Share the game window itself, not only its sound." : "The reader reads the price from the window you share with Listen to game."));
+    if (!merLive.on) { const btns = el("div", "sh-drop-btns"); btns.append(button("Listen to game", { cls: "primary", onClick: async () => { await merListen(); setTimeout(openMerOcr, 600); } })); zone.append(btns); }
+    body.append(zone);
     present(dlg, "Price reader", openMerOcr);
     return;
   }

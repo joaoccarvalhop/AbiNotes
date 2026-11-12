@@ -117,6 +117,7 @@ O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os p
 - **Overlays**: todas abrem com `present()`, incluindo os editores de build e de loadout, o seletor de teclas e o price reader. Assim têm "← Back", e Cancel, Esc e guardar voltam à overlay de onde vieste. O rodapé só tem ações (o X fecha; já não há "Close" nem "Done").
 - **Palavras**: inglês americano (color, caliber, recognize, favorite). Nas builds e nos loadouts diz-se "level"; "tier" fica para a proteção do equipamento e para a Tier list.
 - **Listas vazias** dentro dos painéis usam `emptyNote()`: "No … yet" quando não há nada, "Nothing matches these filters." ou "Nothing matches your search." quando está escondido.
+- **Overlays à espera de algo** (Import, Backup, Price reader sem a janela do jogo) usam a mesma caixa `.sh-drop`: ícone num círculo, título, uma linha e o botão. A overlay mantém o tamanho e a caixa fica ao centro (`.mc-wait`).
 - **Números**: preços com `fmtKoen` (também no Merchant). Os custos já não levam "≈". Os tooltips são todos `data-tip`.
 - **Animações**: usam sempre o conjunto global `motion` (JS) e as classes `.a-*` (CSS), para serem iguais em todas as secções. Uma animação nova entra aí, não fica presa a uma secção.
   - Os keyframes antigos (`enter`, `pop`, `ddin`, `m-in`/`m-out`, `toast-in`, `mpswap`) também passaram a ser só fades. Assim as secções, as overlays, as dropdowns, os avisos e os cartões dos loadouts entram sem saltar. Ficam com movimento só o anel a pulsar no mapa e o deslizar das colunas dos Maps.
