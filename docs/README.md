@@ -378,6 +378,7 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 | `merchant_sounds.py` | Descarrega os sons do Merchant para `merchant-sounds.js`. Corre-se depois do `merchant_extract.py` se o jogo trouxer sons novos. |
 | `merchant_sound_test.js`, `merchant_ocr_test.js`, `merchant_ocr_card_test.js` | Testes do Merchant para a consola do browser (ver 4.6). O último usa `merchant_ocr_sample.webp`. |
 | `maps_add_multi.py [--dry]` | Junta ao `data.js` de cada mapa os marcadores que no `markers.json` têm vários sítios, um por sítio. Não repete nada. |
+| `obs_prices_setup.py` | Prepara o OBS para gravar o mercado: perfil e cenas "ABI Prices" (ao lado dos teus), ecrã inteiro a 30 fps, qualidade "Indistinguishable" em NVENC, hybrid MP4 em `videos/`, sem o rato, F9 grava e F10 pára. Fecha o OBS antes de correr. |
 | `make_zip.py` | Gera o `ABI-Hub.zip` para os amigos: a página, os dados, `images/`, `maps/` (sem `nav-fix.json`) e o `LEIA-ME.txt` de `tools/zip/`. Só quando pedido. |
 | `navlib.py` | Biblioteca partilhada: a mesma grelha que a página constrói, e imagens. |
 | `floors_probe.py`, `categories_probe.py`, `routes_probe.py` | Sondas: o que as plantas, as categorias e os dados de rotas contêm. |
