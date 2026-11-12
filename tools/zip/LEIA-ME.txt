@@ -5,7 +5,7 @@ COMO ABRIR
 1. Extrai o zip para uma pasta (não abras os ficheiros de dentro do zip).
 2. Abre "index.html" no Chrome, Edge ou Firefox (duplo clique).
 3. Mantém tudo junto na mesma pasta: index.html, builds.js, prices.js, merchant.js,
-   merchant-sounds.js, e as pastas "maps" e "images".
+   merchant-ocr.js, merchant-sounds.js, e as pastas "maps" e "images".
 
 O QUE PRECISA DE INTERNET
 - As imagens das armas e do equipamento vêm da internet.
@@ -53,12 +53,11 @@ MERCADOR (MERCHANT)
 - Clica num candidato para ver todas as caixas onde pode sair, com a chance e o ganho.
 - "Teach a sound": se um som for mal reconhecido, apanha o item no jogo, carrega em
   Teach e clica no cartão certo. Fica a contar para a próxima.
-- "Price reader": no jogo, põe o rato em cima de uma caixa para aparecer o cartão com o
-  preço e carrega em "Take a new picture". Desenha uma caixa desde a moeda até ao fim do
-  preço e escreve o que vês (em saldo aparecem dois preços: escreve os dois). Faz isto
-  com 2 ou 3 caixas até saber todos os dígitos. Depois, sempre que passares o rato numa
-  caixa, o preço é posto sozinho, esteja o cartão onde estiver.
-  Ensina-o com o jogo no tamanho em que jogas: se mudares a resolução, ensina outra vez.
+- Preço da caixa: com "Listen to game" ligado, passa o rato numa caixa no jogo e o preço é
+  posto sozinho (já sabe os números do jogo, não precisa de ser ensinado).
+- "Price reader": só se ler mal. Põe o rato numa caixa, "Take a new picture", desenha uma
+  caixa à volta do cartão e escreve o preço (com ou sem vírgulas; em saldo, os dois).
+  Usa o jogo no tamanho em que jogas (um vídeo numa janela pequena não serve).
 
 - "Practice" (separador por baixo do topo do Merchant): treina o ouvido numa banca como a do jogo.
   Cada caixa tem o tamanho do item e o tipo de carga (passa o rato para ver o preço). Clica numa

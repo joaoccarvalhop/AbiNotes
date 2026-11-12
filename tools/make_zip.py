@@ -11,7 +11,7 @@ TOP = "ABI Hub"
 SKIP = {"nav-fix.json"}  # the tools' input: its fixes are already built into nav.js
 
 def files():
-    for f in ("index.html", "builds.js", "prices.js", "merchant.js", "merchant-sounds.js"):
+    for f in ("index.html", "builds.js", "prices.js", "merchant.js", "merchant-ocr.js", "merchant-sounds.js"):
         yield os.path.join(ROOT, f), f
     yield os.path.join(ROOT, "tools", "zip", "LEIA-ME.txt"), "LEIA-ME.txt"
     for top in ("images", "maps"):  # everything in them (maps: each map plus the shared icons)

@@ -2218,6 +2218,7 @@
   document.write('<script src="builds.js?t=' + Date.now() + '"><\/script>');
   document.write('<script src="prices.js?t=' + Date.now() + '"><\/script>');
   document.write('<script src="merchant.js?t=' + Date.now() + '"><\/script>');
+  document.write('<script src="merchant-ocr.js"><\/script>'); // the price reader's built-in digits and coin (may be missing: then it is taught by hand)
   document.write('<script src="merchant-sounds.js"><\/script>'); // the merchant's sounds, so they work offline (may be missing: then they come from ABI Builder)
 </script>
 <script>
@@ -9738,6 +9739,17 @@ function merHeard(id, act, score, alt) {
    price, and teach the digits from what you see. Without a coin in the box, it reads the box where it is */
 const merOcr = Object.assign({ box: null, glyphs: [], anchor: null }, ls.get(K.merOcr) || {}); // box: fractions of the picture; glyphs: [{ ch, v, ar, rh, top }]; anchor: the coin, see merSetAnchor
 if (merOcr.v !== 2) Object.assign(merOcr, { v: 2, box: null, glyphs: [], anchor: null }); // taught before the reader looked for the coin: measured differently, so taught again
+// built in (merchant-ocr.js): the game's digits and the price card's coin, so it reads with nothing taught. The font never
+// changes; the picture's size does, and the reader scales the coin to the window. Used until you teach it, and again
+// after "Forget the digits"; what you teach goes on top of them
+function merBuiltin() {
+  const B = window.ABI_MERCHANT_OCR; if (!B || B.v !== 1) return null;
+  const unhex = s => Array.from({ length: s.length / 2 }, (_, i) => parseInt(s.substr(i * 2, 2), 16));
+  return { box: { ...B.box }, anchor: { ...B.anchor, fw: B.fw, t: unhex(B.anchor.t), f: unhex(B.anchor.f) },
+    glyphs: B.glyphs.map(([ch, v, ar, rh, top]) => ({ ch, v: [...v].map(d => +d / 9), ar, rh, top })) };
+}
+function merUseBuiltin() { const B = merBuiltin(); if (B) Object.assign(merOcr, B, { builtin: true }); return !!B; }
+if (!merOcr.glyphs.length) merUseBuiltin();
 const merOcrRun = { timer: 0, read: null, price: null, canvas: el("canvas") };
 const MG = { W: 10, H: 14 };
 function merGrab(box, src, scale = 1) { // the box out of a picture (the shared window now, or a still of it), as grey values
@@ -10575,26 +10587,27 @@ function openMerOcr() {
   const wrap = el("div", "mc-stillwrap"), boxEl = el("i", "mc-box"), foundEl = el("i", "mc-box found"); wrap.append(still, boxEl, foundEl);
   const place = (e, b) => { e.hidden = !b; if (b) Object.assign(e.style, { left: b.x * 100 + "%", top: b.y * 100 + "%", width: b.w * 100 + "%", height: b.h * 100 + "%" }); };
   const showBox = b => place(boxEl, b);
-  showBox(merOcr.box); foundEl.hidden = true;
-  let from = null;
+  showBox(merOcr.builtin ? null : merOcr.box); foundEl.hidden = true; // the built-in box is on another picture: not drawn on yours
+  let from = null, drawn = !merOcr.builtin;
   const at = e => { const r = still.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
   still.addEventListener("pointerdown", e => { from = at(e); still.setPointerCapture(e.pointerId); });
   still.addEventListener("pointermove", e => { if (!from) return; const p = at(e); showBox({ x: Math.min(from[0], p[0]), y: Math.min(from[1], p[1]), w: Math.abs(p[0] - from[0]), h: Math.abs(p[1] - from[1]) }); });
   still.addEventListener("pointerup", e => {
     if (!from) return; const p = at(e), b = { x: Math.min(from[0], p[0]), y: Math.min(from[1], p[1]), w: Math.abs(p[0] - from[0]), h: Math.abs(p[1] - from[1]) }; from = null;
-    if (b.w > .005 && b.h > .005) { merOcr.box = b; merSetAnchor(still); ls.set(K.merOcr, merOcr); test(); }
+    if (b.w > .005 && b.h > .005) { drawn = true; merOcr.box = b; merSetAnchor(still); ls.set(K.merOcr, merOcr); test(); }
   });
   // 2. teach: type what the box shows
   const known = el("p", "gm-note"), out = el("p", "mc-read");
   const inp = el("input"); inp.type = "text"; inp.placeholder = "e.g. 16,000 20,000"; inp.setAttribute("aria-label", "What the price says");
   const learn = button("Learn these digits", { onClick: () => {
-    if (!merOcr.box || !inp.value.trim()) return;
+    if (!inp.value.trim()) return;
+    if (!drawn || !merOcr.box) { out.textContent = "Draw a box round the card on the picture first."; out.classList.add("bad"); return; }
     // the box may hold the whole card: narrow it to the price's line first (and take the commas the game shows)
     const fit = merFitBox(still, inp.value); if (fit) showBox(merOcr.box);
     const img = merAfterCoin(still); if (!img) return; // the picture you see, not what the window shows now
     const err = merTeach(img, fit || merCommas(inp.value)); out.textContent = err || (fit ? "Learned. The box now holds just the price." : "Learned."); out.classList.toggle("bad", !!err); if (!err) { inp.value = ""; test(); }
   } });
-  const forget = button("Forget the digits", { cls: "linkbtn", onClick: () => { merOcr.glyphs = []; ls.set(K.merOcr, merOcr); test(); } });
+  const forget = button(merOcr.builtin ? "Start again" : "Forget the digits", { cls: "linkbtn", tip: "Back to the digits it came with", onClick: () => { merOcr.glyphs = []; merOcr.builtin = false; ls.del(K.merOcr); if (!merUseBuiltin()) Object.assign(merOcr, { box: null, anchor: null }); showBox(merOcr.box); test(); } });
   const row = el("div", "mc-teachrow"); row.append(inp, learn, forget);
   function test() {
     const have = [...new Set(merOcr.glyphs.map(g => g.ch))].sort().join(" ");
@@ -10612,7 +10625,9 @@ function openMerOcr() {
   body.append(
     gmSection("1. Where the price shows", el("p", "gm-note", "In game, hold the mouse over a cargo so its card shows the price. Take a new picture, then drag a box round the card. The card follows the mouse, so the reader looks for its coin anywhere on screen."), wrap,
       button("Take a new picture", { cls: "linkbtn", onClick: () => { still.getContext("2d").drawImage(v, 0, 0); test(); } })),
-    gmSection("2. Teach the digits", el("p", "gm-note", "Type the price (commas or not). On sale it shows two: type both, e.g. 16000 20000. The box then shrinks to the price. Do it with a few cargos until every digit is known."), row, known),
+    gmSection(merOcr.builtin ? "2. Teach it (only if it misreads)" : "2. Teach the digits", el("p", "gm-note", merOcr.builtin
+      ? "It already knows the game's digits. If step 3 reads a price wrong, type what the card shows (commas or not) and Learn: it adds yours."
+      : "Type the price (commas or not). On sale it shows two: type both, e.g. 16000 20000. The box then shrinks to the price. Do it with a few cargos until every digit is known."), row, known),
     gmSection("3. Check", out, button("Read again", { cls: "linkbtn", onClick: test })));
   test();
   present(dlg, "Price reader", openMerOcr);
