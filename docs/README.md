@@ -259,20 +259,21 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
   - `tools/merchant_ocr_test.js`: preços desenhados.
   - `tools/merchant_ocr_card_test.js`: o cartão real em `tools/merchant_ocr_sample.webp`, no sítio onde estava, movido e numa janela mais pequena.
 - **Separadores** (`sub-merchant`, `merBar`): "Live" (a página de sempre) e "Practice". A escolha fica em `merUI.tab`. O `merDraw` passa para o `prDraw` quando o separador aberto é o Practice.
-- **Practice** (`prDraw`, `prs` em `K.merPractice`, a ronda em `pr`): toca um som e tu respondes.
+- **Practice** (`prDraw`, `prs` em `K.merPractice`, a banca em `pr`): uma banca como a do mercador no jogo.
+  - **A banca** (`prFill`): 24 caixas ("Free") ou 20 contra o relógio ("20, timed", a melhor fica em `prs.best`), numa grelha de 9 colunas.
+    - Cada caixa é uma carga real do mapa/modo (tipo e preço).
+    - O tamanho da caixa é o do item que tem dentro (às vezes rodado). As maiores são arrumadas primeiro.
+    - O rótulo é o tipo de carga. Ao passar o rato aparece o tipo e o preço, como o cartão do jogo.
+  - **What's inside:**
+    - "Cargo odds": o item sai pelas odds da carga da caixa.
+    - "All alike": cada som com a mesma probabilidade, e a caixa é uma carga que pode ter esse item.
+  - **Abrir uma caixa** (`prOpen`): toca o pick-up e depois o drop (`prSound`) e mostra o tamanho. Espaço volta a tocar e Enter abre a caixa seguinte.
   - **Answer with:**
-    - "Sound card": os cartões do Live, na mesma ordem e no mesmo sítio (metade esquerda, `mc-main`), para treinar a mão. A ronda fica à direita, onde estão os Candidates.
-    - "Item": 4 itens, cada um com um som diferente (itens com o mesmo som não se distinguem). Teclas 1–4.
-  - **Round:** "Free", ao teu ritmo (Enter para o seguinte), ou "20 sounds" contra o relógio. A melhor ronda de cada nível fica em `prs.best`.
-  - **Sounds:**
-    - "All alike": cada som com a mesma probabilidade.
-    - "A real cargo": as odds da carga escolhida, ou de todas as do mapa/modo (`prPool`). Usa o mapa, o modo e a carga do `merUI`, os mesmos do Live.
-  - **Weak sounds first:** o peso de cada som é multiplicado por 1 + 4 × a taxa de erro (`prMiss`, que começa em 50% para sons nunca ouvidos).
-  - Como no jogo: toca o pick-up e depois o drop (`prSound`), e mostra o tamanho do item (`pr.q.size`, o desenho do filtro de tamanho). Espaço volta a tocar.
-  - Com o tamanho à vista, só aparecem os cartões com itens desse tamanho, rodado ou não (`prFits`, como o filtro do Live com Rotate). No nível Item, as 3 alternativas são do mesmo tamanho sempre que possível.
-  - Depois de responder: verde no que era, vermelho no que escolheste, e o item que era, com o som.
-  - "Your ear": acerto total, os 5 sons mais falhados (clica para ouvir), as melhores rondas e "Start over".
-  - Antes de começar e no fim de uma ronda aparece a caixa `.sh-drop` ao centro.
+    - "Sound card": os cartões que o Live mostra com essa carga e esse tamanho escolhidos (`prBoxItems` + `prFits`), na mesma ordem e no sítio do Live (metade esquerda). A banca fica onde estão os Candidates.
+    - "Item": 4 itens com sons diferentes, do mesmo tamanho sempre que possível. Teclas 1–4.
+  - Depois de responder: verde no que era, vermelho no que escolheste, e a caixa passa a mostrar o item. Clica na caixa para o ouvir; o tooltip diz o que valia contra o preço da carga.
+  - **Weak sounds first:** o peso de cada item é multiplicado por 1 + 4 × a taxa de erro do seu som (`prMiss`, que começa em 50% para sons nunca ouvidos).
+  - "Your ear": acerto total, os 5 sons mais falhados (clica para ouvir), as melhores bancas e "Start over".
 
 ### 4.7 Smelter
 

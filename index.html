@@ -1477,6 +1477,19 @@
   .pr-opt kbd { display: grid; place-items: center; width: 22px; height: 22px; font: 600 11.5px inherit; color: var(--dim); border: 1px solid var(--line-2); }
   .pr-opt.ok { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); opacity: 1; }
   .pr-opt.bad { border-color: #d0473a; box-shadow: inset 0 0 0 1px #d0473a; }
+  /* the stall: boxes on a 9-column grid, each the size of its item, labelled with its cargo type like the merchant's */
+  .mc-main > .pr-ans { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
+  .mc-main > .pr-stallp { grid-template-rows: auto minmax(0, 1fr); }
+  .pr-stallwrap { min-height: 0; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
+  .pr-stall { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: 56px; gap: 3px; }
+  .pr-box { position: relative; display: grid; place-items: center; padding: 0; min-width: 0; font-weight: 400; background: var(--key-bg); border: 1px solid var(--line); overflow: hidden; }
+  .pr-box:hover { border-color: var(--line-2); background: rgba(255,255,255,.05); }
+  .pr-blabel { position: absolute; top: 4px; left: 5px; right: 5px; font-size: 10.5px; line-height: 1.2; color: var(--muted); text-align: left; overflow-wrap: anywhere; }
+  .pr-box.cur { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .pr-box.ok { border-color: color-mix(in srgb, var(--ok) 70%, transparent); } .pr-box.bad { border-color: rgba(208,71,58,.75); }
+  .pr-box.ok .pr-blabel, .pr-box.bad .pr-blabel { color: var(--dim); }
+  .pr-box .mc-pic { width: 44px; height: 44px; margin-top: 12px; } .pr-box .mc-pic img { width: 38px; height: 38px; }
+  .pr-verdict.end b { color: var(--fg-strong); }
   .pr-acc { margin: 0; font-size: 12.5px; color: var(--fg); }
   .pr-weak { display: grid; gap: 2px; }
   .pr-wrow { display: flex; justify-content: space-between; padding: 5px 8px; font-size: 12.5px; font-weight: 400; background: var(--key-bg); border: 1px solid transparent; }
@@ -9956,58 +9969,63 @@ function merBar() {
   bar.append(nav);
 }
 
-/* ---------- Merchant practice: a sound plays, you answer with its card (or the item), the same cards as Live in the same
-   places, so the hand learns where each one is. Free or a timed round of 20; sounds evenly or as a real cargo holds them;
-   the ones you miss can come back more. Your hits per sound and best rounds are kept in this browser (K.merPractice). ---------- */
-const PR_ROUND = 20;
-const prs = Object.assign({ level: "card", mode: "free", src: "even", weak: true, stats: {}, best: {} }, ls.get(K.merPractice) || {});
+/* ---------- Merchant practice: a stall like the merchant's in game. Boxes of this map/mode's cargo types, each the size of what
+   it holds: click one to hear it picked up and dropped, then answer with its card (Live's cards, in Live's place) or pick the
+   item; the box then shows what it held. A free stall of 24 boxes or a timed one of 20; what's inside follows the cargo odds
+   or gives every sound the same chance; the sounds you miss can come back more. Kept in this browser (K.merPractice). ---------- */
+const PR_ROUND = 20, PR_FREE = 24, PR_COLS = 9;
+const prs = Object.assign({ level: "card", mode: "free", src: "cargo", weak: true, stats: {}, best: {} }, ls.get(K.merPractice) || {});
 const savePr = () => ls.set(K.merPractice, prs);
-// the round being played (not kept): q = the question { id: item, sid, act, opts }, a = what you answered
-const pr = { q: null, a: null, n: 0, right: 0, streak: 0, top: 0, t0: 0, t1: 0, timer: 0, done: false, on: false };
-function prStop() { clearInterval(pr.timer); Object.assign(pr, { q: null, a: null, n: 0, right: 0, streak: 0, top: 0, t0: 0, t1: 0, done: false, on: false }); }
-// what can come up, with how likely: every sound alike, or the items of the cargo picked (all of this map/mode's cargos when none is)
-function prPool() {
-  const out = new Map(); // item id -> weight
-  if (prs.src === "cargo") {
-    const v = merView(), cs = v.picked.length ? v.picked : v.cargos;
-    cs.forEach(c => c.odds.forEach((p, id) => out.set(id, (out.get(id) || 0) + p / cs.length)));
-  } else {
-    // MER.items is keyed by id (as text); the cargos use the number, so the same here
-    const bySound = new Map(); Object.entries(MER.items).forEach(([k, it]) => { const s = it[6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(+k); });
-    bySound.forEach(ids => ids.forEach(id => out.set(id, 1 / ids.length))); // each sound as likely as the next, its items share it
-  }
-  return out;
-}
+// the stall being played (not kept): boxes [{ x, y, w, h, id, cargo, ans }], cur = the box open, q = its question
+const pr = { boxes: [], cur: null, q: null, n: 0, right: 0, streak: 0, top: 0, t0: 0, t1: 0, timer: 0, done: false, on: false };
+function prStop() { clearInterval(pr.timer); clearTimeout(prPlayT); Object.assign(pr, { boxes: [], cur: null, q: null, n: 0, right: 0, streak: 0, top: 0, t0: 0, t1: 0, done: false, on: false }); }
 // how often you miss a sound (a sound never heard counts as a little shaky)
 const prMiss = sid => { const [seen, ok] = prs.stats[sid] || [0, 0]; return (seen - ok + 1) / (seen + 2); };
+const prWeak = id => prs.weak ? 1 + 4 * prMiss(MER.items[id][6]) : 1;
 function prPick(weights) {
   const list = [...weights], tot = list.reduce((s, [, w]) => s + w, 0); let r = Math.random() * tot;
   for (const [k, w] of list) { r -= w; if (r <= 0) return k; }
   return list.length ? list[list.length - 1][0] : null;
 }
-function prNext() {
-  const pool = prPool(); if (!pool.size) return;
-  const w = new Map();
-  pool.forEach((p, id) => { const sid = MER.items[id][6]; w.set(id, p * (prs.weak ? 1 + 4 * prMiss(sid) : 1)); });
-  let id = prPick(w);
-  if (pr.q && pool.size > 1) for (let i = 0; i < 4 && MER.items[id][6] === pr.q.sid; i++) id = prPick(w); // rarely the same sound twice in a row
-  const it = MER.items[id], sid = it[6], size = [it[4], it[5]];
-  // the item level: the item and three others from the pool, each with a different sound (items that sound the same can't be
-  // told apart), of the same size first: the game shows the size, so a guess by size alone would be too easy
-  let opts = null;
-  if (prs.level === "item") {
-    const others = [...pool.keys()].filter(x => MER.items[x][6] !== sid).sort(() => Math.random() - .5), used = new Set([sid]);
-    const same = x => prFits(MER.items[x], size);
-    opts = [id];
-    for (const x of [...others.filter(same), ...others.filter(x => !same(x))]) { if (opts.length === 4) break; if (!used.has(MER.items[x][6])) { used.add(MER.items[x][6]); opts.push(x); } }
-    opts.sort(() => Math.random() - .5);
-  }
-  pr.q = { id, sid, size, opts }; pr.a = null;
-  if (!pr.t0) pr.t0 = Date.now();
-  prDraw(); setTimeout(prHear, 150);
-}
 // an item of this size, turned either way (as Live's size filter with Rotate on)
 const prFits = (it, [w, h]) => (it[4] === w && it[5] === h) || (it[4] === h && it[5] === w);
+// what this map/mode's cargos can hold: item id -> the cargo types it comes in
+function prPool() {
+  const out = new Map();
+  merCargos().forEach(c => c.odds.forEach((p, id) => { if (!out.has(id)) out.set(id, new Set()); out.get(id).add(c.name); }));
+  return out;
+}
+// a new stall: n boxes. A box is a cargo (one of each type in turn, as the merchant lays them out), its item drawn by the
+// cargo's odds, or with every sound alike; then the boxes are packed into 9 columns, biggest first
+function prFill(n) {
+  const cs = merCargos(), pool = prPool(); if (!cs.length) return [];
+  const bySound = new Map(); pool.forEach((t, id) => { const s = MER.items[id][6]; bySound.set(s, (bySound.get(s) || 0) + 1); });
+  const items = [];
+  for (let k = 0; k < n; k++) {
+    // a box is one real cargo (type and price, as the game's hover card shows them)
+    let id, c;
+    if (prs.src === "cargo") {
+      c = cs[Math.floor(Math.random() * cs.length)]; const w = new Map();
+      c.odds.forEach((p, i) => w.set(i, p * prWeak(i))); id = prPick(w);
+    } else {
+      const w = new Map(); pool.forEach((t, i) => w.set(i, prWeak(i) / bySound.get(MER.items[i][6])));
+      id = prPick(w); const holds = cs.filter(x => x.odds.has(id)); c = holds[Math.floor(Math.random() * holds.length)];
+    }
+    const it = MER.items[id]; let w = it[4], h = it[5];
+    if (w !== h && Math.random() < .5) [w, h] = [h, w];
+    if (w > PR_COLS) [w, h] = [h, w];
+    items.push({ id, cargo: c.name, price: c.price, w, h, ans: null });
+  }
+  items.sort((a, b) => b.w * b.h - a.w * a.h || Math.random() - .5);
+  const taken = [], free = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (taken[j] && taken[j][i]) return false; return true; };
+  items.forEach(b => {
+    for (let y = 0; ; y++) {
+      let x = 0; while (x + b.w <= PR_COLS && !free(x, y, b.w, b.h)) x++;
+      if (x + b.w <= PR_COLS) { b.x = x; b.y = y; for (let j = y; j < y + b.h; j++) { taken[j] = taken[j] || []; for (let i = x; i < x + b.w; i++) taken[j][i] = true; } return; }
+    }
+  });
+  return items.sort((a, b) => a.y - b.y || a.x - b.x); // in reading order, for Enter (the next box)
+}
 // as in the game: the pick-up, then the drop
 let prPlayT = 0;
 function prSound(sid, btn) {
@@ -10016,37 +10034,59 @@ function prSound(sid, btn) {
   prPlayT = setTimeout(() => merPlay(sid, "d", btn && btn.isConnected ? btn : null), 750);
 }
 const prHear = () => { if (pr.q) prSound(pr.q.sid, document.querySelector("#merchant .pr-replay")); };
+// what a box's cargo can hold (as Live with that cargo type and price picked)
+const prBoxItems = b => { const c = merCargos().find(x => x.name === b.cargo && x.price === b.price); return c ? [...c.odds.keys()] : [...prPool().keys()]; };
+// open a box: its question (the item level: the item and three others with other sounds, the same size first, since the
+// box already shows the size), then its sound
+function prOpen(i) {
+  const b = pr.boxes[i]; if (!b || b.ans || pr.done) return;
+  const it = MER.items[b.id], sid = it[6], size = [it[4], it[5]];
+  let opts = null;
+  if (prs.level === "item") {
+    const others = [...new Set([...prBoxItems(b), ...prPool().keys()])].filter(x => MER.items[x][6] !== sid).sort(() => Math.random() - .5), used = new Set([sid]);
+    const same = x => prFits(MER.items[x], size);
+    opts = [b.id];
+    for (const x of [...others.filter(same), ...others.filter(x => !same(x))]) { if (opts.length === 4) break; if (!used.has(MER.items[x][6])) { used.add(MER.items[x][6]); opts.push(x); } }
+    opts.sort(() => Math.random() - .5);
+  }
+  pr.cur = i; pr.q = { id: b.id, sid, size, opts };
+  if (!pr.t0) pr.t0 = Date.now();
+  prDraw(); setTimeout(prHear, 120);
+}
 function prAnswer(x) { // x: a sound id (card level) or an item id (item level)
-  if (!pr.q || pr.a != null) return;
-  pr.a = x;
+  const b = pr.boxes[pr.cur]; if (!pr.q || !b || b.ans) return;
   const ok = prs.level === "item" ? MER.items[x][6] === pr.q.sid : x === pr.q.sid;
+  b.ans = { x, ok };
   const s = prs.stats[pr.q.sid] || (prs.stats[pr.q.sid] = [0, 0]); s[0]++; if (ok) s[1]++;
   pr.n++; if (ok) { pr.right++; pr.streak++; pr.top = Math.max(pr.top, pr.streak); } else pr.streak = 0;
-  if (prs.mode === "timed" && pr.n >= PR_ROUND) {
-    pr.done = true; pr.t1 = Date.now(); clearInterval(pr.timer);
-    const key = prs.level, b = prs.best[key], t = pr.t1 - pr.t0;
-    if (!b || pr.right > b.right || (pr.right === b.right && t < b.ms)) { prs.best[key] = { right: pr.right, ms: t, at: today() }; pr.newBest = true; } else pr.newBest = false;
+  if (pr.boxes.every(x => x.ans)) {
+    pr.done = true; pr.t1 = Date.now(); clearInterval(pr.timer); pr.newBest = false;
+    if (prs.mode === "timed") {
+      const key = prs.level, best = prs.best[key], t = pr.t1 - pr.t0;
+      if (!best || pr.right > best.right || (pr.right === best.right && t < best.ms)) { prs.best[key] = { right: pr.right, ms: t, at: today() }; pr.newBest = true; }
+    }
   }
   savePr(); prDraw();
-  if (prs.mode === "timed" && !pr.done) setTimeout(() => { if (pr.a === x && pr.on) prNext(); }, ok ? 650 : 1400); // a wrong one stays up a little longer
 }
+const prNextBox = () => { const i = pr.boxes.findIndex(b => !b.ans); if (i >= 0) prOpen(i); };
 function prStart() {
   prStop(); pr.on = true;
+  pr.boxes = prFill(prs.mode === "timed" ? PR_ROUND : PR_FREE);
   if (prs.mode === "timed") pr.timer = setInterval(() => { const t = document.querySelector("#merchant .pr-clock"); if (t && pr.t0 && !pr.done) t.textContent = prTime(Date.now() - pr.t0); }, 250);
-  prNext();
+  prDraw();
 }
 const prTime = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
-// keys: Space hears it again, Enter goes on (free practice), 1–4 answer the item level
+// keys: Space hears the box again, Enter opens the next box, 1–4 answer the item level
 document.addEventListener("keydown", e => {
   if (area !== "merchant" || merUI.tab !== "practice" || !pr.on || e.target.closest("input, textarea, select, dialog") || e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.key === " ") { e.preventDefault(); prHear(); }
-  else if (e.key === "Enter" && pr.a != null && prs.mode === "free") { e.preventDefault(); prNext(); }
-  else if (prs.level === "item" && pr.q && pr.q.opts && /^[1-4]$/.test(e.key)) { const x = pr.q.opts[+e.key - 1]; if (x != null) prAnswer(x); }
+  else if (e.key === "Enter" && (!pr.q || pr.boxes[pr.cur].ans)) { e.preventDefault(); prNextBox(); }
+  else if (prs.level === "item" && pr.q && pr.q.opts && !pr.boxes[pr.cur].ans && /^[1-4]$/.test(e.key)) { const x = pr.q.opts[+e.key - 1]; if (x != null) prAnswer(x); }
 });
 
 function prDraw(sec = $("merchant")) {
   if (!sec || area !== "merchant" || merUI.tab !== "practice") return;
-  const keepCards = sec.querySelector(".pr-cards")?.scrollTop || 0;
+  const keepCards = sec.querySelector(".pr-cards")?.scrollTop || 0, keepStall = sec.querySelector(".pr-stallwrap")?.scrollTop || 0;
   sec.textContent = "";
   const first = motion.opened("merchant");
   const grid = el("div", "mc-grid");
@@ -10061,26 +10101,20 @@ function prDraw(sec = $("merchant")) {
     return g;
   };
   side.append(el("h3", "mc-h", "Practice"));
+  const places = merPlaces(), modesOf = m => (places.get(m) || []).map(([mode]) => mode);
+  group("Map", null, ddSelect("Map", [...places.keys()].map(m => [m, m]), () => merUI.map, m => { const mode = modesOf(m).includes(merUI.mode) ? merUI.mode : modesOf(m)[0]; Object.assign(merUI, { map: m, mode, ctype: null, cprice: null }); saveMerUI(); prStop(); prDraw(); }));
+  group("Mode", null, ddSelect("Mode", modesOf(merUI.map).map(mode => [mode, merModeName(mode)]), () => merUI.mode, mode => { Object.assign(merUI, { mode, ctype: null, cprice: null }); saveMerUI(); prStop(); prDraw(); }));
   group("Answer with", null, seg("level", [["card", "Sound card", "Click the card that makes it: the same click as in Live"], ["item", "Item", "Pick the item out of four, each with another sound"]]));
-  group("Round", null, seg("mode", [["free", "Free", "One sound after another, at your pace"], ["timed", `${PR_ROUND} sounds`, "Against the clock: your best round is kept"]]));
-  group("Sounds", null, seg("src", [["even", "All alike", "Every sound comes up as often"], ["cargo", "A real cargo", "As often as in the cargo picked below"]]));
-  if (prs.src === "cargo") {
-    const places = merPlaces(), modesOf = m => (places.get(m) || []).map(([mode]) => mode);
-    group("Map", null, ddSelect("Map", [...places.keys()].map(m => [m, m]), () => merUI.map, m => { const mode = modesOf(m).includes(merUI.mode) ? merUI.mode : modesOf(m)[0]; Object.assign(merUI, { map: m, mode, ctype: null, cprice: null }); saveMerUI(); prStop(); prDraw(); }));
-    group("Mode", null, ddSelect("Mode", modesOf(merUI.map).map(mode => [mode, merModeName(mode)]), () => merUI.mode, mode => { Object.assign(merUI, { mode, ctype: null, cprice: null }); saveMerUI(); prStop(); prDraw(); }));
-    const cs = merCargos();
-    group("Cargo", "The odds of this cargo decide what comes up. With none, all of this map's cargos", ddSelect("Cargo", [["", "Any cargo here"], ...cs.map(c => [c.key, `${c.name} · ${fmtKoen(c.price)}`])],
-      () => (cs.find(c => c.name === merUI.ctype && c.price === merUI.cprice) || {}).key || "",
-      k => { const c = cs.find(x => x.key === k); Object.assign(merUI, { ctype: c ? c.name : null, cprice: c ? c.price : null }); saveMerUI(); prStop(); prDraw(); }));
-  }
+  group("Stall", null, seg("mode", [["free", `${PR_FREE} boxes`, "At your pace"], ["timed", `${PR_ROUND}, timed`, "Against the clock: your best stall is kept"]]));
+  group("What's inside", null, seg("src", [["cargo", "Cargo odds", "Each box holds what its cargo type really holds, as often"], ["even", "All alike", "Every sound as often, whatever the cargo"]]));
   const weak = button("Weak sounds first", { cls: "mc-rot", icon: "chart", tip: "The sounds you miss come back more often", onClick: () => { prs.weak = !prs.weak; savePr(); prDraw(); } });
   weak.setAttribute("aria-pressed", String(!!prs.weak));
   side.append(weak);
-  // your record: the shakiest sounds (right click one to hear it), and the best rounds
+  // your record: the shakiest sounds (click one to hear it), and the best stalls
   const rec = el("div", "mc-f mc-lis"), all = Object.entries(prs.stats), seen = all.filter(([, [n]]) => n >= 2);
   const tot = all.reduce((a, [, [n, ok]]) => [a[0] + n, a[1] + ok], [0, 0]);
   rec.append(el("small", null, "Your ear"));
-  if (tot[0] < 5) rec.append(el("p", "gm-note", "Answer a few sounds to see which ones trip you up."));
+  if (tot[0] < 5) rec.append(el("p", "gm-note", "Open a few boxes to see which sounds trip you up."));
   else {
     rec.append(el("p", "pr-acc", `${Math.round(tot[1] / tot[0] * 100)}% right over ${plural(tot[0], "sound")}`));
     const worst = seen.map(([sid, [n, ok]]) => [+sid, ok / n, n]).filter(x => x[1] < 1).sort((a, b) => a[1] - b[1] || b[2] - a[2]).slice(0, 5);
@@ -10097,104 +10131,115 @@ function prDraw(sec = $("merchant")) {
     bests.forEach(k => { const b = prs.best[k], r = el("div"); r.append(el("span", null, k === "card" ? "Best, cards" : "Best, items"), el("b", null, `${b.right}/${PR_ROUND} · ${prTime(b.ms)}`)); bl.append(r); });
     rec.append(bl);
   }
-  if (Object.keys(prs.stats).length || bests.length) rec.append(button("Start over", { cls: "linkbtn", tip: "Forget your hits and best rounds", onClick: async () => {
-    if (!(await confirmBox({ title: "Forget your practice?", body: [el("p", null, "Your hits per sound and your best rounds go.")], ok: "Forget", danger: true }))) return;
+  if (Object.keys(prs.stats).length || bests.length) rec.append(button("Start over", { cls: "linkbtn", tip: "Forget your hits and best stalls", onClick: async () => {
+    if (!(await confirmBox({ title: "Forget your practice?", body: [el("p", null, "Your hits per sound and your best stalls go.")], ok: "Forget", danger: true }))) return;
     prs.stats = {}; prs.best = {}; savePr(); prDraw();
   } }));
   side.append(rec);
 
-  /* the stage: what's playing, the round, then the answers */
-  const stage = el("section", "mc-panel pr-stage");
-  const head = el("div", "pr-head");
-  const pool = prPool();
-  let cardsPanel = null;
   if (!pr.on) {
-    // before a round: one box, the same as every other "waiting" box
-    const zone = el("div", "sh-drop mc-wait"), ic = el("span", "sh-drop-ic"); ic.append(icon("pickup"));
-    const btns = el("div", "sh-drop-btns"); btns.append(button(prs.mode === "timed" ? `Start ${PR_ROUND} sounds` : "Start", { cls: "primary", onClick: prStart }));
-    zone.dataset.tip = "Space hears it again · Enter goes on · 1–4 pick an item";
-    zone.append(ic, el("b", null, prs.level === "card" ? "Hear a sound, click its card" : "Hear a sound, pick the item"),
-      el("small", null, prs.src === "cargo" ? "Sounds come up as often as in the cargo you picked." : "Every sound comes up as often."), btns);
-    if (!pool.size) { zone.querySelector("button").disabled = true; zone.querySelector("small").textContent = "Nothing in this cargo to play."; }
-    stage.append(zone); stage.classList.add("idle");
-  } else if (pr.done) {
-    const zone = el("div", "sh-drop mc-wait pr-end"), ic = el("span", "sh-drop-ic"); ic.append(icon(pr.newBest ? "star" : "check"));
-    const btns = el("div", "sh-drop-btns"); btns.append(button("Again", { cls: "primary", onClick: prStart }), button("Free practice", { onClick: () => { prs.mode = "free"; savePr(); prStart(); } }));
-    zone.append(ic, el("b", null, `${pr.right} of ${PR_ROUND} right · ${prTime(pr.t1 - pr.t0)}`),
-      el("small", null, pr.newBest ? "Your best round yet." : `Best: ${prs.best[prs.level].right}/${PR_ROUND} in ${prTime(prs.best[prs.level].ms)}. Longest streak this round: ${pr.top}.`), btns);
-    stage.append(zone); stage.classList.add("idle");
-  } else {
-    const q = pr.q, ok = pr.a != null && (prs.level === "item" ? MER.items[pr.a][6] === q.sid : pr.a === q.sid);
-    const replay = button("Hear it again", { cls: "mc-play pr-replay", icon: "pickup", tip: "The pick-up, then the drop (Space)", onClick: prHear });
-    // the size the game shows you, as Live's size filter draws it
-    const sz = `${q.size[0]}x${q.size[1]}`, size = el("span", "pr-size"); size.append(merSizeGlyph(sz), `${q.size[0]}×${q.size[1]}`);
-    size.dataset.tip = "The room it takes in the cargo, as the game shows it";
-    const info = el("div", "pr-info");
-    if (prs.mode === "timed") info.append(el("span", null, `${Math.min(pr.n + (pr.a == null ? 1 : 0), PR_ROUND)} / ${PR_ROUND}`), el("b", "pr-clock", prTime(Date.now() - pr.t0)));
-    else info.append(el("span", null, `${pr.right} / ${pr.n} right`), el("span", null, pr.streak > 1 ? `${pr.streak} in a row` : ""));
-    info.append(button("Stop", { cls: "linkbtn", tip: "End this round", onClick: () => { prStop(); prDraw(); } }));
-    head.append(replay, size, info);
-    stage.append(head);
-    // the verdict, once answered: what it was, and the way on
-    const verdict = el("div", "pr-verdict" + (pr.a == null ? "" : ok ? " ok" : " bad"));
-    if (pr.a == null) verdict.append(el("span", null, prs.level === "card" ? "Which card makes this sound?" : "Which item made this sound?"));
-    else {
-      const it = MER.items[q.id];
-      verdict.append(el("b", null, ok ? "Right" : "Not that one"), el("span", null, `ID ${q.sid} · ${it[0]}`));
-      if (prs.mode === "free") verdict.append(button("Next", { cls: "primary", tip: "Enter", onClick: prNext }));
-    }
-    stage.append(verdict);
-    // once answered: the item it was, so the sound gets a face
-    if (pr.a != null) {
-      const it = MER.items[q.id], row = el("div", "pr-was");
-      const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, `${it[7]} · ID ${q.sid}`));
-      const again = button(null, { cls: "mc-play", icon: "pickup", tip: "Hear it again", onClick: e => prSound(q.sid, e.currentTarget) });
-      row.append(merPic(it), nm, again);
-      stage.append(row);
-    }
-    if (prs.level === "card") {
-      // the cards Live shows with this size picked: same order, look and place (the left half). Right click to hear one
-      const fit = [...pool.keys()].filter(id => prFits(MER.items[id], q.size));
-      const sids = new Set(fit.map(id => MER.items[id][6]));
-      const bySound = new Map(); fit.forEach(id => { const s = MER.items[id][6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(MER.items[id]); });
-      const sg = el("div", "mc-sgrid pr-cards");
-      MER.sounds.forEach(([sid]) => {
-        if (!sids.has(sid)) return;
-        const list = bySound.get(sid).sort((a, b) => b[1] - a[1] || b[2] - a[2]);
-        const card = el("div", "mc-scard" + (pr.a == null ? "" : sid === q.sid ? " ok" : sid === pr.a ? " bad" : " past")); card.tabIndex = 0; card.setAttribute("role", "button");
-        card.dataset.tip = "Right click to hear it";
-        card.addEventListener("contextmenu", e => { e.preventDefault(); const act = card.dataset.next || "u"; card.dataset.next = act === "u" ? "d" : "u"; merPlay(sid, act, card); });
-        card.append(el("b", "mc-stitle", "ID " + sid));
-        const pics = el("div", "mc-spics");
-        list.slice(0, 5).forEach(it => { const p = merPic(it); p.dataset.tip = it[0]; pics.append(p); });
-        if (list.length > 5) pics.append(el("span", "mc-more", "+" + (list.length - 5)));
-        card.append(pics);
-        const go = () => prAnswer(sid);
-        card.addEventListener("click", go); card.addEventListener("keydown", e => { if (e.key === "Enter" && pr.a == null) { e.preventDefault(); go(); } });
-        sg.append(card);
-      });
-      cardsPanel = el("section", "mc-panel");
-      cardsPanel.append(el("h3", "mc-h", "Sounds"), sg);
-      requestAnimationFrame(() => { sg.scrollTop = keepCards; });
-    } else {
-      const opts = el("div", "pr-opts");
-      q.opts.forEach((id, i) => {
-        const it = MER.items[id], o = el("button", "pr-opt" + (pr.a == null ? "" : id === q.id || it[6] === q.sid ? " ok" : id === pr.a ? " bad" : " past")); o.type = "button";
-        const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, prFits(it, q.size) ? it[7] : `${it[7]} · ${it[4]}×${it[5]}`)); // the size only when it isn't the one shown above
-        o.append(el("kbd", null, String(i + 1)), merPic(it), nm);
-        if (pr.a != null) o.dataset.tip = "ID " + it[6] + " · click to hear it";
-        o.addEventListener("click", () => { if (pr.a == null) prAnswer(id); else prSound(it[6], o); });
-        opts.append(o);
-      });
-      stage.append(opts);
-    }
+    // before a stall: one box, the same as every other "waiting" box
+    const stage = el("section", "mc-panel pr-stage idle");
+    const zone = el("div", "sh-drop mc-wait"), ic = el("span", "sh-drop-ic"); ic.append(icon("bag"));
+    const btns = el("div", "sh-drop-btns"); btns.append(button(prs.mode === "timed" ? "Start the clock" : "Open a stall", { cls: "primary", onClick: prStart }));
+    zone.dataset.tip = "Space hears the box again · Enter opens the next one · 1–4 pick an item";
+    zone.append(ic, el("b", null, prs.level === "card" ? "Open a box, click the card it sounds like" : "Open a box, pick what's inside"),
+      el("small", null, `A stall of ${merUI.map}'s cargos, ${merModeName(merUI.mode)}. You see each box's size and type, then hear it picked up and dropped.`), btns);
+    if (!merCargos().length) { zone.querySelector("button").disabled = true; zone.querySelector("small").textContent = "No cargo on this map and mode."; }
+    stage.append(zone);
+    grid.append(side, stage);
+    sec.append(grid); merFit();
+    if (first) motion.stagger([side, stage]);
+    return;
   }
-  if (cardsPanel) { const main = el("div", "mc-main"); main.append(cardsPanel, stage); grid.append(side, main); } // the cards where Live has them
-  else grid.append(side, stage);
+
+  /* the answer side (Live's sounds column): what's playing, the verdict, then the cards or the four items */
+  const ans = el("section", "mc-panel pr-ans");
+  const head = el("div", "pr-head");
+  const b = pr.boxes[pr.cur], q = b ? pr.q : null, done = b && b.ans;
+  if (q) {
+    head.append(button("Hear it again", { cls: "mc-play pr-replay", icon: "pickup", tip: "The pick-up, then the drop (Space)", onClick: prHear }));
+    const size = el("span", "pr-size"); size.append(merSizeGlyph(`${q.size[0]}x${q.size[1]}`), `${q.size[0]}×${q.size[1]}`); size.dataset.tip = "The room it takes, as the box shows it";
+    head.append(size);
+  }
+  const info = el("div", "pr-info");
+  if (prs.mode === "timed") info.append(el("span", null, `${pr.n} / ${PR_ROUND}`), el("b", "pr-clock", prTime((pr.t1 || Date.now()) - (pr.t0 || Date.now()))));
+  else info.append(el("span", null, `${pr.right} / ${pr.n} right`), el("span", null, pr.streak > 1 ? `${pr.streak} in a row` : ""));
+  if (!pr.done) info.append(button("Stop", { cls: "linkbtn", tip: "Close this stall", onClick: () => { prStop(); prDraw(); } }));
+  head.append(info);
+  ans.append(head);
+  const verdict = el("div", "pr-verdict" + (done ? (b.ans.ok ? " ok" : " bad") : ""));
+  if (pr.done) {
+    verdict.classList.add("end");
+    verdict.append(el("b", null, `${pr.right} of ${pr.boxes.length} right` + (prs.mode === "timed" ? ` · ${prTime(pr.t1 - pr.t0)}` : "")),
+      el("span", null, pr.newBest ? "Your best stall yet" : prs.mode === "timed" && prs.best[prs.level] ? `Best ${prs.best[prs.level].right}/${PR_ROUND} in ${prTime(prs.best[prs.level].ms)}` : `Longest streak: ${pr.top}`),
+      button("New stall", { cls: "primary", onClick: prStart }));
+  } else if (!q) verdict.append(el("span", null, "Click a box in the stall to hear what's inside"), button("First box", { tip: "Enter", onClick: prNextBox }));
+  else if (!done) verdict.append(el("span", null, prs.level === "card" ? "Which card makes this sound?" : "Which item is in the box?"));
+  else {
+    verdict.append(el("b", null, b.ans.ok ? "Right" : "Not that one"), el("span", null, `ID ${q.sid} · ${MER.items[q.id][0]}`), button("Next box", { cls: "primary", tip: "Enter", onClick: prNextBox }));
+  }
+  ans.append(verdict);
+  if (q && prs.level === "card") {
+    // the cards Live shows with this box's cargo and size picked: same order, look and place. Right click to hear one
+    const fit = prBoxItems(b).filter(id => prFits(MER.items[id], q.size));
+    const bySound = new Map(); fit.forEach(id => { const s = MER.items[id][6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(MER.items[id]); });
+    const sg = el("div", "mc-sgrid pr-cards");
+    MER.sounds.forEach(([sid]) => {
+      if (!bySound.has(sid)) return;
+      const list = bySound.get(sid).sort((a, c) => c[1] - a[1] || c[2] - a[2]);
+      const card = el("div", "mc-scard" + (!done ? "" : sid === q.sid ? " ok" : sid === b.ans.x ? " bad" : " past")); card.tabIndex = 0; card.setAttribute("role", "button");
+      card.dataset.tip = "Right click to hear it";
+      card.addEventListener("contextmenu", e => { e.preventDefault(); prSound(sid, card); });
+      card.append(el("b", "mc-stitle", "ID " + sid));
+      const pics = el("div", "mc-spics");
+      list.slice(0, 5).forEach(it => { const p = merPic(it); p.dataset.tip = it[0]; pics.append(p); });
+      if (list.length > 5) pics.append(el("span", "mc-more", "+" + (list.length - 5)));
+      card.append(pics);
+      const go = () => prAnswer(sid);
+      card.addEventListener("click", go); card.addEventListener("keydown", e => { if (e.key === "Enter" && !done) { e.preventDefault(); e.stopPropagation(); go(); } });
+      sg.append(card);
+    });
+    ans.append(sg);
+    requestAnimationFrame(() => { sg.scrollTop = keepCards; });
+  } else if (q) {
+    const opts = el("div", "pr-opts");
+    q.opts.forEach((id, i) => {
+      const it = MER.items[id], o = el("button", "pr-opt" + (!done ? "" : it[6] === q.sid ? " ok" : id === b.ans.x ? " bad" : " past")); o.type = "button";
+      const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, prFits(it, q.size) ? it[7] : `${it[7]} · ${it[4]}×${it[5]}`)); // the size only when it isn't the box's
+      o.append(el("kbd", null, String(i + 1)), merPic(it), nm);
+      if (done) o.dataset.tip = "ID " + it[6] + " · click to hear it";
+      o.addEventListener("click", () => { if (!done) prAnswer(id); else prSound(it[6], o); });
+      opts.append(o);
+    });
+    ans.append(opts);
+  }
+
+  /* the stall (Live's candidates column): boxes by size and type; opened ones show what they held */
+  const stallP = el("section", "mc-panel pr-stallp");
+  const sh = el("h3", "mc-h", "Stall"); sh.append(el("small", null, `${merUI.map} · ${merModeName(merUI.mode)}`));
+  stallP.append(sh);
+  const wrap = el("div", "pr-stallwrap"), stall = el("div", "pr-stall");
+  stall.style.setProperty("--cols", PR_COLS);
+  pr.boxes.forEach((bx, i) => {
+    const d = el("button", "pr-box" + (i === pr.cur && !bx.ans ? " cur" : "") + (bx.ans ? (bx.ans.ok ? " ok" : " bad") : "")); d.type = "button";
+    d.style.gridColumn = `${bx.x + 1} / span ${bx.w}`; d.style.gridRow = `${bx.y + 1} / span ${bx.h}`;
+    d.append(el("span", "pr-blabel", bx.cargo));
+    // hover: the cargo's type and price, like the game's card; once opened, what it held against what it cost
+    if (bx.ans) { const it = MER.items[bx.id], p = merPic(it); d.append(p); d.dataset.tip = `${it[0]} · ID ${it[6]} · sells for ${fmtKoen(it[2])}\n${bx.cargo} · ${fmtKoen(bx.price)}\nClick to hear it`; d.addEventListener("click", () => prSound(it[6], d)); }
+    else { d.dataset.tip = `${bx.cargo}\n${fmtKoen(bx.price)}`; d.addEventListener("click", () => prOpen(i)); }
+    stall.append(d);
+  });
+  wrap.append(stall); stallP.append(wrap);
+
+  const main = el("div", "mc-main"); main.append(ans, stallP);
+  grid.append(side, main);
   sec.append(grid);
   merFit();
-  if (first) motion.stagger([side, cardsPanel, stage].filter(Boolean));
-  else if (pr.a != null) motion.pop(stage.querySelector(".pr-verdict"));
+  // square cells: a row as tall as a column is wide
+  requestAnimationFrame(() => { stall.style.gridAutoRows = Math.floor((stall.clientWidth - (PR_COLS - 1) * 3) / PR_COLS) + "px"; wrap.scrollTop = keepStall; });
+  if (first) motion.stagger([side, ans, stallP]);
+  else if (done) { motion.pop(verdict); motion.flash(stall.children[pr.cur]); }
 }
 let merPopId = null, merMoreFrom = null; // the sound card just clicked; where the cards Show more added start
 // the level line moves while listening, without drawing everything again
