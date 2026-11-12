@@ -271,6 +271,11 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
     - A fonte do jogo nunca muda e cada algarismo é desenhado sempre igual. Os algarismos vêm dos preços do mercado e de um cartão; a moeda vem do cartão. O jogo estava a 1920×1080, e a moeda é ajustada ao tamanho da janela.
     - Usa estes até ensinares alguma coisa; o que ensinares junta-se a eles. "Start again" volta aos de origem.
     - Para os refazer: `tools/merchant_ocr_defaults.js`, a partir de `tools/merchant_ocr_market.jpg` e `tools/merchant_ocr_sample.webp`. O script imprime o texto do ficheiro.
+  - **Tipo de carga pelo nome** (`MER_LETTERS`, `merSpells`, `merNameOf`): 68 dos 304 preços de mapa/modo pertencem a mais de um tipo. Quando o preço lido é desses, lê-se também o nome por cima do preço (a linha 24 px acima da moeda, à escala da janela) e escolhe-se entre esses tipos.
+    - As letras vêm do `merchant-ocr.js` (`window.ABI_MERCHANT_OCR.letters`), só as que os nomes de carga usam. Cada letra tem 1–3 "looks", e um look pode ter 2–3 marcas (o "m" e o "M" partem-se em pedaços).
+    - O nome escolhe-se por alinhamento (programação dinâmica): cada letra gasta 1 a 3 marcas, uma marca a mais custa 0,6 e uma letra não vista 0,7, tudo a dividir pelo número de letras.
+    - Só aceita se o melhor ficar abaixo de 0,55 e 0,04 à frente do segundo. Se não, não mexe no tipo e o teste do Price reader diz "A or B: the name isn't clear".
+    - Para refazer as letras: `tools/merchant_ocr_letters.js`, a partir das frames e leituras de um vídeo do mercado em `tools/out` (as do `price_frames.py`).
   - **Ensinar** fica para quando lê mal: desenha-se uma caixa à volta do cartão numa imagem do jogo e escreve-se o preço.
   - A moeda (`merSetAnchor`) fica guardada em meia resolução e em resolução inteira. A cada 400 ms procura-se a moeda no ecrã todo com correlação normalizada a meia resolução e ajusta-se ao pixel. Depois lê-se o que está à direita dela.
   - A moeda também aparece no Total e no Owned. Por isso guardam-se os 5 melhores sítios e conta o primeiro número que seja preço de uma caixa do mapa.
@@ -409,6 +414,7 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 | `merchant_extract.py` | Volta a gerar o `merchant.js` a partir da página do mercador do ABI Builder (quando o jogo mudar). `merchant_probe.py` mostra o que a página tem. |
 | `merchant_sounds.py` | Descarrega os sons do Merchant para `merchant-sounds.js`. Corre-se depois do `merchant_extract.py` se o jogo trouxer sons novos. |
 | `merchant_ocr_defaults.js` | Refaz o `merchant-ocr.js`, os algarismos e a moeda de origem do leitor de preços (ver 4.6), a partir de `merchant_ocr_market.jpg` e `merchant_ocr_sample.webp`. Corre-se na consola e imprime o texto do ficheiro. |
+| `merchant_ocr_letters.js` | Refaz as letras dos nomes de carga do `merchant-ocr.js` (`letters`), a partir das frames e leituras de um vídeo do mercado em `tools/out`. Corre-se na consola e devolve o JSON. |
 | `merchant_sound_test.js`, `merchant_ocr_test.js`, `merchant_ocr_card_test.js` | Testes do Merchant para a consola do browser (ver 4.6). O último usa `merchant_ocr_sample.webp`. |
 | `maps_add_multi.py [--dry]` | Junta ao `data.js` de cada mapa os marcadores que no `markers.json` têm vários sítios, um por sítio. Não repete nada. |
 | `price_frames.py <frames> <out>` | Preços novos, passo 1. Primeiro, o ffmpeg tira 3 imagens por segundo do vídeo, já cortadas à volta da grelha do mercado (`crop=1460:880:370:110`, mais `mpdecimate`). Depois este script parte o vídeo em categorias pelo título (há categorias que só aparecem 1 segundo: chaves, cada munição). Em cada categoria guarda a primeira imagem já carregada, uma por cada terço de ecrã de scroll e a última. <br>Ao gravar, abre cada categoria no topo: se a primeira fila só aparecer já com a página descida, os nomes ficam cortados e é preciso ligá-los à mão, pela ordem e pela imagem (`read/batch_manual.json`). |

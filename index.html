@@ -9749,6 +9749,42 @@ function merBuiltin() {
     glyphs: B.glyphs.map(([ch, v, ar, rh, top]) => ({ ch, v: [...v].map(d => +d / 9), ar, rh, top })) };
 }
 function merUseBuiltin() { const B = merBuiltin(); if (B) Object.assign(merOcr, B, { builtin: true }); return !!B; }
+// the letters of the cargo names (merchant-ocr.js): each a few looks, a look being one to three marks (an "m" falls in three)
+const MER_LETTERS = (() => {
+  const L = window.ABI_MERCHANT_OCR && window.ABI_MERCHANT_OCR.letters; if (!L) return null;
+  const out = {}; Object.entries(L).forEach(([ch, looks]) => { out[ch] = looks.map(seq => seq.map(([v, ar, rh, top]) => ({ v: [...v].map(d => +d / 9), ar, rh, top }))); });
+  return out;
+})();
+// how unlike two marks are (the same measure merReadAll uses for digits)
+function merMarkGap(a, b) { let s = 0; for (let i = 0; i < a.v.length; i++) s += Math.abs(a.v[i] - b.v[i]); return s / a.v.length + .3 * Math.abs(a.ar - b.ar) + .5 * Math.abs(a.rh - b.rh) + .3 * Math.abs((a.top || 0) - (b.top || 0)); }
+// how well a line of marks spells a name: each letter takes one to three marks, a stray mark or a missed letter costs a
+// little; the lower the better (per letter)
+function merSpells(marks, name) {
+  const ch = [...name.replace(/\s/g, "")], n = marks.length, m = ch.length, INF = 1e9;
+  const dp = Array.from({ length: n + 1 }, () => new Float64Array(m + 1).fill(INF)); dp[0][0] = 0;
+  for (let i = 0; i <= n; i++) for (let j = 0; j <= m; j++) {
+    const c0 = dp[i][j]; if (c0 >= INF) continue;
+    if (i < n) dp[i + 1][j] = Math.min(dp[i + 1][j], c0 + .6); // a stray mark (the card's edge, a speck)
+    if (j < m) dp[i][j + 1] = Math.min(dp[i][j + 1], c0 + .7); // a letter not seen
+    if (j < m) for (let k = 1; k <= 3 && i + k <= n; k++) {
+      const looks = ((MER_LETTERS || {})[ch[j]] || []).filter(l => l.length === k);
+      const c = (looks.length ? Math.min(...looks.map(l => l.reduce((s, t, q) => s + merMarkGap(marks[i + q], t), 0) / k)) : (k === 1 ? .45 : .55)) + (k - 1) * .05;
+      dp[i + k][j + 1] = Math.min(dp[i + k][j + 1], c0 + c);
+    }
+  }
+  return dp[n][m] / Math.max(m, 1);
+}
+// which of these cargo types the price card names: the line over the price (found at its coin, at), spelled against each.
+// The card's text scales with the window (it was measured with the game at 1919 wide). null when none is clearly closest
+function merNameOf(src, at, names) {
+  if (!MER_LETTERS || !at || names.length < 2) return null;
+  const W = src.videoWidth || src.width, H = src.videoHeight || src.height, s = W / 1919, [X, Y] = at;
+  const x = Math.max(0, X - 4 * s), y = Math.max(0, Y - 24 * s);
+  const img = merGrab({ x: x / W, y: y / H, w: Math.min(230 * s, W - x) / W, h: 20 * s / H }, src); if (!img) return null;
+  const line = merGlyphs(img).sort((a, b) => b.length - a.length)[0]; if (!line) return null;
+  const ranked = names.map(n => [n, merSpells(line, n)]).sort((a, b) => a[1] - b[1]);
+  return ranked[0][1] < .55 && ranked[1][1] - ranked[0][1] > .04 ? ranked[0][0] : null;
+}
 if (!merOcr.glyphs.length) merUseBuiltin();
 const merOcrRun = { timer: 0, read: null, price: null, canvas: el("canvas") };
 const MG = { W: 10, H: 14 };
@@ -9953,11 +9989,17 @@ function merOcrStart() {
   merOcrRun.timer = setInterval(() => {
     if (!merOcr.box || !merOcr.glyphs.length || !merLive.video || !merLive.video.videoWidth) return;
     // only a price some cargo here costs counts: anything else (your money, the cart's total, a sale price) is ignored
-    const cargos = merCargos(), words = merFind(merLive.video).flatMap(h => h.words);
-    const r = words.find(w => cargos.some(c => c.price === w.num)) || null; merOcrRun.read = r;
-    if (r && r.num !== merOcrRun.price) {
-      merOcrRun.price = r.num; merUI.cprice = r.num;
-      if (merUI.ctype && !cargos.some(c => c.price === r.num && c.name === merUI.ctype)) merUI.ctype = null;
+    const cargos = merCargos(); let r = null, hit = null;
+    for (const h of merFind(merLive.video)) { const w = h.words.find(w => cargos.some(c => c.price === w.num)); if (w) { r = w; hit = h; break; } }
+    merOcrRun.read = r;
+    if (!r) return;
+    // a price several cargo types share: the name on the card tells which
+    const names = [...new Set(cargos.filter(c => c.price === r.num).map(c => c.name))];
+    const type = names.length > 1 ? merNameOf(merLive.video, hit.at, names) : null;
+    if (r.num !== merOcrRun.price || type !== merOcrRun.type) {
+      merOcrRun.price = r.num; merOcrRun.type = type; merUI.cprice = r.num;
+      if (type) merUI.ctype = type;
+      else if (merUI.ctype && !cargos.some(c => c.price === r.num && c.name === merUI.ctype)) merUI.ctype = null;
       saveMerUI(); merDraw();
     }
   }, 400);
@@ -10620,7 +10662,10 @@ function openMerOcr() {
     if (!hit) { out.textContent = merOcr.glyphs.length ? "Can't read it yet." : ""; return; }
     if (hit.at && merOcr.anchor) { const A = merOcr.anchor, r = still.width / A.fw; place(foundEl, { x: hit.at[0] / still.width, y: hit.at[1] / still.height, w: A.bw * r / still.width, h: A.bh * r / still.height }); }
     const p = hit.words.find(price), txt = [...hit.words].sort((a, b) => a.x - b.x).map(w => w.txt).join("  ");
-    out.textContent = `Reads ${txt}` + (p ? ` (${Math.round(p.score * 100)}% sure). The cargo price is ${p.txt}.` : ", not a cargo price.");
+    // a price shared by several cargo types: the name it reads on the card as well
+    const names = p ? [...new Set(merCargos().filter(c => c.price === p.num).map(c => c.name))] : [];
+    const nm = names.length > 1 ? merNameOf(still, hit.at, names) : null;
+    out.textContent = `Reads ${txt}` + (p ? ` (${Math.round(p.score * 100)}% sure). The cargo price is ${p.txt}` + (nm ? `, and the card says ${nm}.` : names.length > 1 ? `; ${names.join(" or ")}: the name isn't clear.` : ".") : ", not a cargo price.");
   }
   body.append(
     gmSection("1. Where the price shows", el("p", "gm-note", "In game, hold the mouse over a cargo so its card shows the price. Take a new picture, then drag a box round the card. The card follows the mouse, so the reader looks for its coin anywhere on screen."), wrap,

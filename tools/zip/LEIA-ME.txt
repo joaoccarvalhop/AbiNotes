@@ -54,7 +54,8 @@ MERCADOR (MERCHANT)
 - "Teach a sound": se um som for mal reconhecido, apanha o item no jogo, carrega em
   Teach e clica no cartão certo. Fica a contar para a próxima.
 - Preço da caixa: com "Listen to game" ligado, passa o rato numa caixa no jogo e o preço é
-  posto sozinho (já sabe os números do jogo, não precisa de ser ensinado).
+  posto sozinho (já sabe os números do jogo, não precisa de ser ensinado). Se esse preço for
+  de mais de um tipo de carga, lê também o nome no cartão e põe o tipo certo.
 - "Price reader": só se ler mal. Põe o rato numa caixa, "Take a new picture", desenha uma
   caixa à volta do cartão e escreve o preço (com ou sem vírgulas; em saldo, os dois).
   Usa o jogo no tamanho em que jogas (um vídeo numa janela pequena não serve).
