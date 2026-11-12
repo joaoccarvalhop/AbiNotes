@@ -34,6 +34,9 @@
   /* one compact bar: logo, category tabs, tools */
   .toolbar { flex: none; position: relative; z-index: 10; background: rgb(22, 23, 24); border-bottom: 1px solid var(--line-2); box-shadow: 0 10px 14px -12px #000; }
   /* two rows: sections on top, the active section's own menu and tools below */
+  /* while the data files load, the page is still the bare HTML (Builds' bar, Share without its icon): keep the bars and the
+     section tabs out of sight until the script has drawn the section you left open (it takes the class off) */
+  body.booting .bar.sub, body.booting .savebox, body.booting .gsearch, body.booting .areas button { visibility: hidden; }
   /* the page below keeps room for its scrollbar (--sbw, measured in JS): the bars keep the same, so their right edge meets the content's */
   .bar { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px 18px; padding-inline: max(16px, 2.5vw) calc(max(16px, 2.5vw) + var(--sbw, 0px)); }
   .bar.main { gap: 6px 26px; border-bottom: 1px solid var(--line); background: rgb(17, 18, 19); }
@@ -1447,6 +1450,38 @@
   .mc-spics { display: flex; flex-wrap: wrap; gap: 6px; min-height: 52px; }
   .mc-spics .mc-pic { width: 52px; height: 52px; } .mc-spics .mc-pic img { width: 46px; height: 46px; }
   .mc-spics .mc-more { width: 52px; height: 52px; }
+  /* practice: the same cards, marked once you answer (green: what it was, accent: your wrong pick, the rest step back) */
+  .mc-scard.ok { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+  .mc-scard.bad { border-color: #d0473a; box-shadow: inset 0 0 0 1px #d0473a; }
+  .mc-scard.past, .pr-opt.past { opacity: .45; }
+  .pr-stage, .mc-main > .pr-stage { align-content: start; grid-template-rows: none; }
+  .pr-was { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--key-bg); border: 1px solid var(--line); }
+  .pr-was .mc-cname { flex: 1; } .pr-was .mc-play { flex: none; width: 36px; padding: 0; }
+  .pr-stage.idle { display: flex; align-items: center; justify-content: center; }
+  .pr-head { display: flex; align-items: center; gap: 16px; }
+  .pr-head .pr-replay { flex: none; height: 40px; padding: 0 18px; font-size: 13.5px; }
+  .pr-info { display: flex; align-items: center; gap: 16px; margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pr-info b { font-size: 15px; color: var(--fg-strong); }
+  .pr-verdict { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 14px; font-size: 13.5px; color: var(--muted); border: 1px solid var(--line); background: rgba(255,255,255,.015); }
+  .pr-verdict b { color: var(--fg-strong); } .pr-verdict.ok { border-color: color-mix(in srgb, var(--ok) 55%, transparent); } .pr-verdict.ok b { color: var(--ok); }
+  .pr-verdict.bad { border-color: rgba(208,71,58,.6); } .pr-verdict.bad b { color: #e0705f; }
+  .pr-verdict > button { margin-left: auto; }
+  .pr-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-content: start; }
+  .pr-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; text-align: left; font-weight: 400; background: var(--key-bg); border: 1px solid var(--line); }
+  .pr-opt:hover { border-color: var(--line-2); }
+  .pr-opt .mc-pic { width: 52px; height: 52px; } .pr-opt .mc-pic img { width: 46px; height: 46px; }
+  .pr-opt .mc-cname { display: grid; gap: 2px; } .pr-opt .mc-cname b { color: var(--fg-strong); font-weight: 600; } .pr-opt .mc-cname small { color: var(--dim); font-size: 12px; }
+  .pr-opt .mc-pic { flex: none; }
+  .pr-opt kbd { display: grid; place-items: center; width: 22px; height: 22px; font: 600 11.5px inherit; color: var(--dim); border: 1px solid var(--line-2); }
+  .pr-opt.ok { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); opacity: 1; }
+  .pr-opt.bad { border-color: #d0473a; box-shadow: inset 0 0 0 1px #d0473a; }
+  .pr-acc { margin: 0; font-size: 12.5px; color: var(--fg); }
+  .pr-weak { display: grid; gap: 2px; }
+  .pr-wrow { display: flex; justify-content: space-between; padding: 5px 8px; font-size: 12.5px; font-weight: 400; background: var(--key-bg); border: 1px solid transparent; }
+  .pr-wrow:hover { border-color: var(--line-2); } .pr-wrow.playing { border-color: var(--accent); }
+  .pr-wrow span { color: #d98a6a; font-variant-numeric: tabular-nums; }
+  .pr-best { display: grid; gap: 4px; font-size: 12.5px; } .pr-best div { display: flex; justify-content: space-between; } .pr-best span { color: var(--muted); } .pr-best b { color: var(--fg-strong); font-variant-numeric: tabular-nums; }
+  .mc-side > .mc-rot { justify-self: start; }
   .mc-stitle { font-size: 12.5px; font-weight: 600; color: var(--fg-strong); font-variant-numeric: tabular-nums; }
   .mc-pic { width: 40px; height: 40px; display: grid; place-items: center; flex: none; background: color-mix(in srgb, var(--rc, #333) 28%, #101112); border: 1px solid color-mix(in srgb, var(--rc, #333) 45%, transparent); }
   .mc-pic { overflow: hidden; }
@@ -1709,7 +1744,7 @@
   @media (max-width: 760px) { .sm-station { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sm-to { display: none; } .sm-stats { grid-template-columns: minmax(0, 1fr); } .sm-stat + .sm-stat { border-left: 0; border-top: 1px solid var(--line); } .sm-stat { padding-left: 0; } }
 </style>
 </head>
-<body>
+<body class="booting">
   <div class="toolbar">
    <div class="bar main">
     <button type="button" class="logo" id="logo" title="Home"><b>ABI</b><span>/</span>Hub</button>
@@ -1746,6 +1781,7 @@
    <div class="bar sub" id="sub-market" hidden></div>
    <div class="bar sub" id="sub-gear" hidden></div>
    <div class="bar sub" id="sub-maps" hidden></div>
+   <div class="bar sub" id="sub-merchant" hidden></div>
    <div class="bar sub" id="sub-keybinds" hidden></div>
    <div class="bar sub" id="sub-tiers" hidden></div>
   </div>
@@ -2034,6 +2070,8 @@
   document.write('<script src="merchant-sounds.js"><\/script>'); // the merchant's sounds, so they work offline (may be missing: then they come from ABI Builder)
 </script>
 <script>
+// if anything breaks while starting, show the bars anyway (body.booting hides them until the end of this script)
+addEventListener("error", () => document.body.classList.remove("booting"));
 // the part under the bar that scrolls (the window itself doesn't)
 const pageEl = document.querySelector(".page");
 // the width of its scrollbar (0 where scrollbars float over the page): the bars above add it on the right, to line up (.bar)
@@ -2055,7 +2093,7 @@ const K = {
   priceDraft: "abi-prices-draft-v1", marketCat: "abi-builds-market-cat-v1",
   kbPreset: "abi-builds-kb-preset-v1", kbPress: "abi-builds-kp-press-v1",
   maps: "abi-builds-maps-v1",
-  merchant: "abi-merchant-ui-v1", merRefs: "abi-merchant-refs-v1", merMine: "abi-merchant-mine-v1", merOcr: "abi-merchant-ocr-v1",
+  merchant: "abi-merchant-ui-v1", merPractice: "abi-merchant-practice-v1", merRefs: "abi-merchant-refs-v1", merMine: "abi-merchant-mine-v1", merOcr: "abi-merchant-ocr-v1",
   smelt: "abi-smelter-v1", tiers: "abi-tiers-v1", trade: "abi-trading-v1",
   mine: "abi-mine-v1", // what you added or changed on top of builds.js and prices.js (the drafts above are only read once, to move them here)
   raidClock: "abi-raid-clock", raidMarks: "abi-raid-marks", // sessionStorage: this tab only
@@ -9708,6 +9746,8 @@ function merDraw() {
   sec.textContent = "";
   if (!MER) { sec.append(el("p", "nores", "The merchant's file (merchant.js) is missing from the folder.")); return; }
   merProfile();
+  merBar();
+  if (merUI.tab === "practice") { prDraw(sec); return; }
   let v = merView();
   // what the filters took away stops being picked: a cargo type with nothing left in it (or not at this price), a sound no item left makes
   if (merUI.ctype && (!v.picked.length || !v.items.length)) { merUI.ctype = null; saveMerUI(); v = merView(); }
@@ -9899,6 +9939,245 @@ function merDraw() {
   }
   if (merPopId != null) motion.pop(cards.find(c => c.dataset.sid === String(merPopId)));
   merPopId = null; merMoreFrom = null;
+}
+// the Merchant's own bar: Live (listen and pick a sound) or Practice (train your ear on the same cards)
+function merBar() {
+  const bar = $("sub-merchant"); if (!bar) return;
+  bar.textContent = "";
+  const nav = el("nav", "g-jump"); nav.setAttribute("role", "tablist"); nav.setAttribute("aria-label", "Merchant");
+  [["live", "Live", "Listen to the game and find the item"], ["practice", "Practice", "Train your ear on the 38 sounds"]].forEach(([k, label, tip]) => {
+    const b = el("button", null, label); b.type = "button"; b.setAttribute("role", "tab"); b.dataset.tip = tip;
+    b.setAttribute("aria-selected", String((merUI.tab || "live") === k));
+    b.addEventListener("click", () => { if ((merUI.tab || "live") === k) return; merUI.tab = k; saveMerUI(); prStop(); motion.changed("visit:merchant", -1); merDraw(); });
+    nav.append(b);
+  });
+  bar.append(nav);
+}
+
+/* ---------- Merchant practice: a sound plays, you answer with its card (or the item), the same cards as Live in the same
+   places, so the hand learns where each one is. Free or a timed round of 20; sounds evenly or as a real cargo holds them;
+   the ones you miss can come back more. Your hits per sound and best rounds are kept in this browser (K.merPractice). ---------- */
+const PR_ROUND = 20;
+const prs = Object.assign({ level: "card", mode: "free", src: "even", weak: true, stats: {}, best: {} }, ls.get(K.merPractice) || {});
+const savePr = () => ls.set(K.merPractice, prs);
+// the round being played (not kept): q = the question { id: item, sid, act, opts }, a = what you answered
+const pr = { q: null, a: null, n: 0, right: 0, streak: 0, top: 0, t0: 0, t1: 0, timer: 0, done: false, on: false };
+function prStop() { clearInterval(pr.timer); Object.assign(pr, { q: null, a: null, n: 0, right: 0, streak: 0, top: 0, t0: 0, t1: 0, done: false, on: false }); }
+// what can come up, with how likely: every sound alike, or the items of the cargo picked (all of this map/mode's cargos when none is)
+function prPool() {
+  const out = new Map(); // item id -> weight
+  if (prs.src === "cargo") {
+    const v = merView(), cs = v.picked.length ? v.picked : v.cargos;
+    cs.forEach(c => c.odds.forEach((p, id) => out.set(id, (out.get(id) || 0) + p / cs.length)));
+  } else {
+    // MER.items is keyed by id (as text); the cargos use the number, so the same here
+    const bySound = new Map(); Object.entries(MER.items).forEach(([k, it]) => { const s = it[6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(+k); });
+    bySound.forEach(ids => ids.forEach(id => out.set(id, 1 / ids.length))); // each sound as likely as the next, its items share it
+  }
+  return out;
+}
+// how often you miss a sound (a sound never heard counts as a little shaky)
+const prMiss = sid => { const [seen, ok] = prs.stats[sid] || [0, 0]; return (seen - ok + 1) / (seen + 2); };
+function prPick(weights) {
+  const list = [...weights], tot = list.reduce((s, [, w]) => s + w, 0); let r = Math.random() * tot;
+  for (const [k, w] of list) { r -= w; if (r <= 0) return k; }
+  return list.length ? list[list.length - 1][0] : null;
+}
+function prNext() {
+  const pool = prPool(); if (!pool.size) return;
+  const w = new Map();
+  pool.forEach((p, id) => { const sid = MER.items[id][6]; w.set(id, p * (prs.weak ? 1 + 4 * prMiss(sid) : 1)); });
+  let id = prPick(w);
+  if (pr.q && pool.size > 1) for (let i = 0; i < 4 && MER.items[id][6] === pr.q.sid; i++) id = prPick(w); // rarely the same sound twice in a row
+  const sid = MER.items[id][6], act = Math.random() < .5 ? "u" : "d";
+  // the item level: the item and three others from the pool, each with a different sound (items that sound the same can't be told apart)
+  let opts = null;
+  if (prs.level === "item") {
+    const others = [...pool.keys()].filter(x => MER.items[x][6] !== sid).sort(() => Math.random() - .5), used = new Set([sid]);
+    opts = [id];
+    for (const x of others) { if (opts.length === 4) break; if (!used.has(MER.items[x][6])) { used.add(MER.items[x][6]); opts.push(x); } }
+    opts.sort(() => Math.random() - .5);
+  }
+  pr.q = { id, sid, act, opts }; pr.a = null;
+  if (!pr.t0) pr.t0 = Date.now();
+  prDraw(); setTimeout(prHear, 150);
+}
+const prHear = () => { if (pr.q) merPlay(pr.q.sid, pr.q.act, document.querySelector("#merchant .pr-replay")); };
+function prAnswer(x) { // x: a sound id (card level) or an item id (item level)
+  if (!pr.q || pr.a != null) return;
+  pr.a = x;
+  const ok = prs.level === "item" ? MER.items[x][6] === pr.q.sid : x === pr.q.sid;
+  const s = prs.stats[pr.q.sid] || (prs.stats[pr.q.sid] = [0, 0]); s[0]++; if (ok) s[1]++;
+  pr.n++; if (ok) { pr.right++; pr.streak++; pr.top = Math.max(pr.top, pr.streak); } else pr.streak = 0;
+  if (prs.mode === "timed" && pr.n >= PR_ROUND) {
+    pr.done = true; pr.t1 = Date.now(); clearInterval(pr.timer);
+    const key = prs.level, b = prs.best[key], t = pr.t1 - pr.t0;
+    if (!b || pr.right > b.right || (pr.right === b.right && t < b.ms)) { prs.best[key] = { right: pr.right, ms: t, at: today() }; pr.newBest = true; } else pr.newBest = false;
+  }
+  savePr(); prDraw();
+  if (prs.mode === "timed" && !pr.done) setTimeout(() => { if (pr.a === x && pr.on) prNext(); }, ok ? 650 : 1400); // a wrong one stays up a little longer
+}
+function prStart() {
+  prStop(); pr.on = true;
+  if (prs.mode === "timed") pr.timer = setInterval(() => { const t = document.querySelector("#merchant .pr-clock"); if (t && pr.t0 && !pr.done) t.textContent = prTime(Date.now() - pr.t0); }, 250);
+  prNext();
+}
+const prTime = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+// keys: Space hears it again, Enter goes on (free practice), 1–4 answer the item level
+document.addEventListener("keydown", e => {
+  if (area !== "merchant" || merUI.tab !== "practice" || !pr.on || e.target.closest("input, textarea, select, dialog") || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === " ") { e.preventDefault(); prHear(); }
+  else if (e.key === "Enter" && pr.a != null && prs.mode === "free") { e.preventDefault(); prNext(); }
+  else if (prs.level === "item" && pr.q && pr.q.opts && /^[1-4]$/.test(e.key)) { const x = pr.q.opts[+e.key - 1]; if (x != null) prAnswer(x); }
+});
+
+function prDraw(sec = $("merchant")) {
+  if (!sec || area !== "merchant" || merUI.tab !== "practice") return;
+  const keepCards = sec.querySelector(".pr-cards")?.scrollTop || 0;
+  sec.textContent = "";
+  const first = motion.opened("merchant");
+  const grid = el("div", "mc-grid");
+
+  /* the settings, on the left like Live's filters */
+  const side = el("aside", "mc-panel mc-side");
+  const group = (label, tip, ...nodes) => { const g = el("div", "mc-f"), s = el("small", null, label); if (tip) s.dataset.tip = tip; g.append(s, ...nodes); side.append(g); return g; };
+  const seg = (key, opts) => {
+    const g = el("div", "g-seg");
+    opts.forEach(([v, t, tip]) => { const b = el("button", null, t); b.type = "button"; b.setAttribute("aria-pressed", String(prs[key] === v)); if (tip) b.dataset.tip = tip;
+      b.addEventListener("click", () => { if (prs[key] === v) return; prs[key] = v; savePr(); prStop(); prDraw(); }); g.append(b); });
+    return g;
+  };
+  side.append(el("h3", "mc-h", "Practice"));
+  group("Answer with", null, seg("level", [["card", "Sound card", "Click the card that makes it: the same click as in Live"], ["item", "Item", "Pick the item out of four, each with another sound"]]));
+  group("Round", null, seg("mode", [["free", "Free", "One sound after another, at your pace"], ["timed", `${PR_ROUND} sounds`, "Against the clock: your best round is kept"]]));
+  group("Sounds", null, seg("src", [["even", "All alike", "Every sound comes up as often"], ["cargo", "A real cargo", "As often as in the cargo picked below"]]));
+  if (prs.src === "cargo") {
+    const places = merPlaces(), modesOf = m => (places.get(m) || []).map(([mode]) => mode);
+    group("Map", null, ddSelect("Map", [...places.keys()].map(m => [m, m]), () => merUI.map, m => { const mode = modesOf(m).includes(merUI.mode) ? merUI.mode : modesOf(m)[0]; Object.assign(merUI, { map: m, mode, ctype: null, cprice: null }); saveMerUI(); prStop(); prDraw(); }));
+    group("Mode", null, ddSelect("Mode", modesOf(merUI.map).map(mode => [mode, merModeName(mode)]), () => merUI.mode, mode => { Object.assign(merUI, { mode, ctype: null, cprice: null }); saveMerUI(); prStop(); prDraw(); }));
+    const cs = merCargos();
+    group("Cargo", "The odds of this cargo decide what comes up. With none, all of this map's cargos", ddSelect("Cargo", [["", "Any cargo here"], ...cs.map(c => [c.key, `${c.name} · ${fmtKoen(c.price)}`])],
+      () => (cs.find(c => c.name === merUI.ctype && c.price === merUI.cprice) || {}).key || "",
+      k => { const c = cs.find(x => x.key === k); Object.assign(merUI, { ctype: c ? c.name : null, cprice: c ? c.price : null }); saveMerUI(); prStop(); prDraw(); }));
+  }
+  const weak = button("Weak sounds first", { cls: "mc-rot", icon: "chart", tip: "The sounds you miss come back more often", onClick: () => { prs.weak = !prs.weak; savePr(); prDraw(); } });
+  weak.setAttribute("aria-pressed", String(!!prs.weak));
+  side.append(weak);
+  // your record: the shakiest sounds (right click one to hear it), and the best rounds
+  const rec = el("div", "mc-f mc-lis"), all = Object.entries(prs.stats), seen = all.filter(([, [n]]) => n >= 2);
+  const tot = all.reduce((a, [, [n, ok]]) => [a[0] + n, a[1] + ok], [0, 0]);
+  rec.append(el("small", null, "Your ear"));
+  if (tot[0] < 5) rec.append(el("p", "gm-note", "Answer a few sounds to see which ones trip you up."));
+  else {
+    rec.append(el("p", "pr-acc", `${Math.round(tot[1] / tot[0] * 100)}% right over ${plural(tot[0], "sound")}`));
+    const worst = seen.map(([sid, [n, ok]]) => [+sid, ok / n, n]).filter(x => x[1] < 1).sort((a, b) => a[1] - b[1] || b[2] - a[2]).slice(0, 5);
+    if (worst.length) {
+      const ul = el("div", "pr-weak");
+      worst.forEach(([sid, r]) => { const row = el("button", "pr-wrow"); row.type = "button"; row.dataset.tip = merSoundName(sid) + "\nClick to hear it"; row.append(el("b", null, "ID " + sid), el("span", null, Math.round(r * 100) + "%"));
+        row.addEventListener("click", () => merPlay(sid, "u", row)); ul.append(row); });
+      rec.append(ul);
+    }
+  }
+  const bests = ["card", "item"].filter(k => prs.best[k]);
+  if (bests.length) {
+    const bl = el("div", "pr-best");
+    bests.forEach(k => { const b = prs.best[k], r = el("div"); r.append(el("span", null, k === "card" ? "Best, cards" : "Best, items"), el("b", null, `${b.right}/${PR_ROUND} · ${prTime(b.ms)}`)); bl.append(r); });
+    rec.append(bl);
+  }
+  if (Object.keys(prs.stats).length || bests.length) rec.append(button("Start over", { cls: "linkbtn", tip: "Forget your hits and best rounds", onClick: async () => {
+    if (!(await confirmBox({ title: "Forget your practice?", body: [el("p", null, "Your hits per sound and your best rounds go.")], ok: "Forget", danger: true }))) return;
+    prs.stats = {}; prs.best = {}; savePr(); prDraw();
+  } }));
+  side.append(rec);
+
+  /* the stage: what's playing, the round, then the answers */
+  const stage = el("section", "mc-panel pr-stage");
+  const head = el("div", "pr-head");
+  const pool = prPool();
+  let cardsPanel = null;
+  if (!pr.on) {
+    // before a round: one box, the same as every other "waiting" box
+    const zone = el("div", "sh-drop mc-wait"), ic = el("span", "sh-drop-ic"); ic.append(icon("pickup"));
+    const btns = el("div", "sh-drop-btns"); btns.append(button(prs.mode === "timed" ? `Start ${PR_ROUND} sounds` : "Start", { cls: "primary", onClick: prStart }));
+    zone.dataset.tip = "Space hears it again · Enter goes on · 1–4 pick an item";
+    zone.append(ic, el("b", null, prs.level === "card" ? "Hear a sound, click its card" : "Hear a sound, pick the item"),
+      el("small", null, prs.src === "cargo" ? "Sounds come up as often as in the cargo you picked." : "Every sound comes up as often."), btns);
+    if (!pool.size) { zone.querySelector("button").disabled = true; zone.querySelector("small").textContent = "Nothing in this cargo to play."; }
+    stage.append(zone); stage.classList.add("idle");
+  } else if (pr.done) {
+    const zone = el("div", "sh-drop mc-wait pr-end"), ic = el("span", "sh-drop-ic"); ic.append(icon(pr.newBest ? "star" : "check"));
+    const btns = el("div", "sh-drop-btns"); btns.append(button("Again", { cls: "primary", onClick: prStart }), button("Free practice", { onClick: () => { prs.mode = "free"; savePr(); prStart(); } }));
+    zone.append(ic, el("b", null, `${pr.right} of ${PR_ROUND} right · ${prTime(pr.t1 - pr.t0)}`),
+      el("small", null, pr.newBest ? "Your best round yet." : `Best: ${prs.best[prs.level].right}/${PR_ROUND} in ${prTime(prs.best[prs.level].ms)}. Longest streak this round: ${pr.top}.`), btns);
+    stage.append(zone); stage.classList.add("idle");
+  } else {
+    const q = pr.q, ok = pr.a != null && (prs.level === "item" ? MER.items[pr.a][6] === q.sid : pr.a === q.sid);
+    const replay = button(q.act === "u" ? "Picked up" : "Dropped", { cls: "mc-play pr-replay", icon: q.act === "u" ? "pickup" : "drop", tip: "Hear it again (Space)", onClick: prHear });
+    const info = el("div", "pr-info");
+    if (prs.mode === "timed") info.append(el("span", null, `${Math.min(pr.n + (pr.a == null ? 1 : 0), PR_ROUND)} / ${PR_ROUND}`), el("b", "pr-clock", prTime(Date.now() - pr.t0)));
+    else info.append(el("span", null, `${pr.right} / ${pr.n} right`), el("span", null, pr.streak > 1 ? `${pr.streak} in a row` : ""));
+    info.append(button("Stop", { cls: "linkbtn", tip: "End this round", onClick: () => { prStop(); prDraw(); } }));
+    head.append(replay, info);
+    stage.append(head);
+    // the verdict, once answered: what it was, and the way on
+    const verdict = el("div", "pr-verdict" + (pr.a == null ? "" : ok ? " ok" : " bad"));
+    if (pr.a == null) verdict.append(el("span", null, prs.level === "card" ? "Which card makes this sound?" : "Which item made this sound?"));
+    else {
+      const it = MER.items[q.id];
+      verdict.append(el("b", null, ok ? "Right" : "Not that one"), el("span", null, `ID ${q.sid} · ${it[0]}`));
+      if (prs.mode === "free") verdict.append(button("Next", { cls: "primary", tip: "Enter", onClick: prNext }));
+    }
+    stage.append(verdict);
+    // once answered: the item it was, so the sound gets a face
+    if (pr.a != null) {
+      const it = MER.items[q.id], row = el("div", "pr-was");
+      const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, `${it[7]} · ID ${q.sid}`));
+      const again = button(null, { cls: "mc-play", icon: q.act === "u" ? "pickup" : "drop", tip: "Hear it again", onClick: e => merPlay(q.sid, q.act, e.currentTarget) });
+      row.append(merPic(it), nm, again);
+      stage.append(row);
+    }
+    if (prs.level === "card") {
+      // every card that can come up, in Live's order and look, in Live's place (the left half): right click to hear one
+      const sids = new Set([...pool.keys()].map(id => MER.items[id][6]));
+      const bySound = new Map(); pool.forEach((p, id) => { const s = MER.items[id][6]; if (!bySound.has(s)) bySound.set(s, []); bySound.get(s).push(MER.items[id]); });
+      const sg = el("div", "mc-sgrid pr-cards");
+      MER.sounds.forEach(([sid]) => {
+        if (!sids.has(sid)) return;
+        const list = bySound.get(sid).sort((a, b) => b[1] - a[1] || b[2] - a[2]);
+        const card = el("div", "mc-scard" + (pr.a == null ? "" : sid === q.sid ? " ok" : sid === pr.a ? " bad" : " past")); card.tabIndex = 0; card.setAttribute("role", "button");
+        card.dataset.tip = "Right click to hear it";
+        card.addEventListener("contextmenu", e => { e.preventDefault(); const act = card.dataset.next || "u"; card.dataset.next = act === "u" ? "d" : "u"; merPlay(sid, act, card); });
+        card.append(el("b", "mc-stitle", "ID " + sid));
+        const pics = el("div", "mc-spics");
+        list.slice(0, 5).forEach(it => { const p = merPic(it); p.dataset.tip = it[0]; pics.append(p); });
+        if (list.length > 5) pics.append(el("span", "mc-more", "+" + (list.length - 5)));
+        card.append(pics);
+        const go = () => prAnswer(sid);
+        card.addEventListener("click", go); card.addEventListener("keydown", e => { if (e.key === "Enter" && pr.a == null) { e.preventDefault(); go(); } });
+        sg.append(card);
+      });
+      cardsPanel = el("section", "mc-panel");
+      cardsPanel.append(el("h3", "mc-h", "Sounds"), sg);
+      requestAnimationFrame(() => { sg.scrollTop = keepCards; });
+    } else {
+      const opts = el("div", "pr-opts");
+      q.opts.forEach((id, i) => {
+        const it = MER.items[id], o = el("button", "pr-opt" + (pr.a == null ? "" : id === q.id || it[6] === q.sid ? " ok" : id === pr.a ? " bad" : " past")); o.type = "button";
+        const nm = el("div", "mc-cname"); nm.append(el("b", null, it[0]), el("small", null, it[7]));
+        o.append(el("kbd", null, String(i + 1)), merPic(it), nm);
+        if (pr.a != null) o.dataset.tip = "ID " + it[6] + " · click to hear it";
+        o.addEventListener("click", () => { if (pr.a == null) prAnswer(id); else merPlay(it[6], q.act, o); });
+        opts.append(o);
+      });
+      stage.append(opts);
+    }
+  }
+  if (cardsPanel) { const main = el("div", "mc-main"); main.append(cardsPanel, stage); grid.append(side, main); } // the cards where Live has them
+  else grid.append(side, stage);
+  sec.append(grid);
+  merFit();
+  if (first) motion.stagger([side, cardsPanel, stage].filter(Boolean));
+  else if (pr.a != null) motion.pop(stage.querySelector(".pr-verdict"));
 }
 let merPopId = null, merMoreFrom = null; // the sound card just clicked; where the cards Show more added start
 // the level line moves while listening, without drawing everything again
@@ -10603,6 +10882,7 @@ if (area === "trading") safely("Trading", trDraw);
 if (area === "home") safely("Home", renderHome);
 $("logo").addEventListener("click", () => setArea("home"));
 requestAnimationFrame(() => pageEl.scrollTo({ top: scrolls[viewKey()] || 0, behavior: "instant" }));
+document.body.classList.remove("booting"); // drawn: the bars show now, already the right ones
 </script>
 </body>
 </html>

@@ -258,6 +258,20 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
   - `tools/merchant_sound_test.js`: os 76 sons com ruído por baixo.
   - `tools/merchant_ocr_test.js`: preços desenhados.
   - `tools/merchant_ocr_card_test.js`: o cartão real em `tools/merchant_ocr_sample.webp`, no sítio onde estava, movido e numa janela mais pequena.
+- **Separadores** (`sub-merchant`, `merBar`): "Live" (a página de sempre) e "Practice". A escolha fica em `merUI.tab`. O `merDraw` passa para o `prDraw` quando o separador aberto é o Practice.
+- **Practice** (`prDraw`, `prs` em `K.merPractice`, a ronda em `pr`): toca um som e tu respondes.
+  - **Answer with:**
+    - "Sound card": os cartões do Live, na mesma ordem e no mesmo sítio (metade esquerda, `mc-main`), para treinar a mão. A ronda fica à direita, onde estão os Candidates.
+    - "Item": 4 itens, cada um com um som diferente (itens com o mesmo som não se distinguem). Teclas 1–4.
+  - **Round:** "Free", ao teu ritmo (Enter para o seguinte), ou "20 sounds" contra o relógio. A melhor ronda de cada nível fica em `prs.best`.
+  - **Sounds:**
+    - "All alike": cada som com a mesma probabilidade.
+    - "A real cargo": as odds da carga escolhida, ou de todas as do mapa/modo (`prPool`). Usa o mapa, o modo e a carga do `merUI`, os mesmos do Live.
+  - **Weak sounds first:** o peso de cada som é multiplicado por 1 + 4 × a taxa de erro (`prMiss`, que começa em 50% para sons nunca ouvidos).
+  - Pick-up ou drop é sorteado e aparece no botão. Espaço volta a tocar o som.
+  - Depois de responder: verde no que era, vermelho no que escolheste, e o item que era, com o som.
+  - "Your ear": acerto total, os 5 sons mais falhados (clica para ouvir), as melhores rondas e "Start over".
+  - Antes de começar e no fim de uma ronda aparece a caixa `.sh-drop` ao centro.
 
 ### 4.7 Smelter
 

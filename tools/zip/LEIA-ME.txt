@@ -53,6 +53,11 @@ MERCADOR (MERCHANT)
   caixa, o preço é posto sozinho, esteja o cartão onde estiver.
   Ensina-o com o jogo no tamanho em que jogas: se mudares a resolução, ensina outra vez.
 
+- "Practice" (separador por baixo do topo do Merchant): treina o ouvido. Toca um som e clicas no
+  cartão certo (os mesmos cartões, no mesmo sítio que no Live) ou, no nível "Item", escolhes o item
+  entre 4. "Free" ao teu ritmo ou "20 sounds" contra o relógio. "A real cargo" faz sair os sons
+  com as odds de uma carga, e "Weak sounds first" repete os que falhas. Espaço volta a tocar.
+
 SMELTER
 - Separador "Smelter" no topo. O jogo não diz as odds: à esquerda estão as regras que os
   jogadores descobriram (valor total e cor dos itens).
