@@ -1781,6 +1781,10 @@
     .savebox button { padding: 6px 10px; }
     nav.areas, nav.cats, .g-jump { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     nav.areas::-webkit-scrollbar, nav.cats::-webkit-scrollbar, .g-jump::-webkit-scrollbar { display: none; }
+    /* a row that slides fades out on the side where there's more (JS sets more-l / more-r as it scrolls) */
+    .more-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent); }
+    .more-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent); }
+    .more-l.more-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 44px, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to right, transparent, #000 44px, #000 calc(100% - 44px), transparent); }
     nav.areas { order: 4; flex-basis: 100%; margin: 0 -12px; padding: 0 6px; }
     nav.areas button { padding: 10px 10px 9px; flex: none; }
     .bar.sub { min-height: 0; flex-wrap: wrap; }
@@ -2246,6 +2250,31 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // a phone-sized screen (the same width as the CSS block for phones at the end of the styles)
 const isPhone = () => matchMedia("(max-width: 760px)").matches;
 let phoneMapSeen = false; // Maps on a phone opens with its side columns shut, once per visit
+// rows of tabs that slide sideways on a phone: a fade on the side where more is hidden (CSS .more-l / .more-r), and the tab
+// picked brought into view whenever it changes (a section opened from Home or a link may sit off the row's edge)
+const SLIDE_ROWS = "nav.areas, nav.cats, .g-jump";
+function slideEdges(n) {
+  const l = n.scrollLeft > 2, r = n.scrollLeft + n.clientWidth < n.scrollWidth - 2;
+  n.classList.toggle("more-l", l); n.classList.toggle("more-r", r);
+}
+function slideRows() {
+  if (!isPhone()) { document.querySelectorAll(".more-l, .more-r").forEach(n => n.classList.remove("more-l", "more-r")); return; }
+  document.querySelectorAll(SLIDE_ROWS).forEach(n => {
+    if (!n.offsetParent) return;
+    // the tab picked changed (or the row is new): if it's out of sight, slide it to the middle
+    const on = n.querySelector('[aria-selected="true"]');
+    if (on && on !== n.slideOn) {
+      n.slideOn = on;
+      const nr = n.getBoundingClientRect(), r = on.getBoundingClientRect();
+      if (r.left < nr.left + 8 || r.right > nr.right - 8) n.scrollLeft += r.left - nr.left - (nr.width - r.width) / 2;
+    }
+    slideEdges(n);
+  });
+}
+document.addEventListener("scroll", e => { const n = e.target; if (n.matches && n.matches(SLIDE_ROWS)) slideEdges(n); }, { passive: true, capture: true });
+// rows are drawn as sections open and tabs change: look again after any click, and when the window changes size
+document.addEventListener("click", () => requestAnimationFrame(slideRows), true);
+addEventListener("resize", () => requestAnimationFrame(slideRows));
 
 /* ---------- shared motion: every section uses these, so things come in, change and get picked the same way everywhere.
    Sections are drawn again whole on each click, so motion.changed() tells what really changed and only that moves ---------- */
@@ -11186,6 +11215,7 @@ if (area === "home") safely("Home", renderHome);
 $("logo").addEventListener("click", () => setArea("home"));
 requestAnimationFrame(() => pageEl.scrollTo({ top: scrolls[viewKey()] || 0, behavior: "instant" }));
 document.body.classList.remove("booting"); // drawn: the bars show now, already the right ones
+requestAnimationFrame(slideRows); // phones: the tab rows' fades, and the section you left open in view
 </script>
 </body>
 </html>
