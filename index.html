@@ -4904,6 +4904,10 @@ function condLine(l) {
   return CONDS.filter(([k]) => k !== "new" && l.all[k] != null).map(([k, label]) => `${label} ${fmtKoen(l.all[k])}`).join(" · ");
 }
 function latest(id) { const h = priceHistory(id); return h.length ? h[h.length - 1] : null; }
+// one condition's price out of a reading (a plain number is the New price: items sold in one condition only)
+const condPrice = (all, k) => all == null ? null : typeof all === "object" ? all[k] ?? null : k === "new" ? all : null;
+// an item's history in one condition (the Market's Condition filter): same shape as priceHistory
+const condHistory = (h, k) => h.map(x => ({ ...x, price: condPrice(x.all, k) })).filter(x => x.price != null);
 function itemByName(n) { return market.items.find(i => i.name.toLowerCase() === String(n).toLowerCase()); }
 // latest market price in k, used by loadouts and gear (null when the item was never priced)
 function marketPriceK(name) { const it = itemByName(name) || marketItemFor(name); const l = it && latest(it.id); return l ? l.price / 1000 : null; }
@@ -4984,7 +4988,7 @@ function change(h) {
 const STALE_DAYS = 30;
 const ageDays = d => Math.round((Date.now() - new Date(d + "T12:00:00")) / 864e5);
 
-let mCat = ls.get(K_MCAT) || "all", mSub = "all", mSort = { key: "name", dir: 1 };
+let mCat = ls.get(K_MCAT) || "all", mSub = "all", mSort = { key: "name", dir: 1 }, mCond = "all";
 // the market's own menu order
 const M_GROUPS = ["Equipment", "Weapon Accessories", "Weapon Bolts", "Ammo", "Medical Supplies", "Tactical Items", "Keys", "Miscellaneous", "Provisions"];
 const groupOf = i => i.group || i.cat || "Other";
@@ -5022,15 +5026,29 @@ function renderMarket() {
       chips.append(b);
     });
     fbox.group("Kind", chips);
-    if (mSub !== "all") fbox.clear(() => { mSub = "all"; renderMarket(); }); // × Clear, like every filter box, while a kind is picked
   }
+  // condition: only where the list has gear sold New / Like New / Worn (helmets, masks, armor, armored rigs)
+  const inView = i => (mCat === "all" || groupOf(i) === mCat) && (mSub === "all" || i.cat === mSub);
+  const hasConds = market.items.some(i => inView(i) && CONDITION_CATS.includes(i.cat));
+  if (!hasConds) mCond = "all";
+  else {
+    const seg = el("div", "g-seg");
+    [["all", "All"], ...CONDS].forEach(([k, label]) => {
+      const b = el("button", null, label); b.type = "button"; b.setAttribute("aria-pressed", String(k === mCond));
+      b.addEventListener("click", () => { mCond = k; renderMarket(); });
+      seg.append(b);
+    });
+    fbox.group("Condition", seg, "The price in that condition, as the market's New / Like New / Worn tabs. Items not sold in it are left out");
+  }
+  if (mSub !== "all" || mCond !== "all") fbox.clear(() => { mSub = "all"; mCond = "all"; renderMarket(); }); // × Clear, like every filter box, while something is picked
   const M_SORTS = [["name:1", "Name"], ["price:-1", "Most expensive"], ["price:1", "Cheapest"], ["chg:-1", "Biggest rise"], ["chg:1", "Biggest drop"], ["date:-1", "Latest update"], ["cat:1", "Category"]];
   // built once (each dropdown listens on the page), then moved into the new box and synced
   renderMarket.sort = renderMarket.sort || ddSelect("Sort by", M_SORTS, () => `${mSort.key}:${mSort.dir}`, v => { const [key, dir] = v.split(":"); mSort = { key, dir: +dir }; renderMarket(); });
   renderMarket.sort.sync(); fbox.sort(renderMarket.sort);
   sec.append(fbox);
-  const rows = market.items.filter(i => (mCat === "all" || groupOf(i) === mCat) && (mSub === "all" || i.cat === mSub) && (!q || norm(i.name + " " + i.cat).includes(q)))
-    .map(i => { const h = priceHistory(i.id), l = h[h.length - 1]; return { it: i, h, price: l ? l.price : null, chg: change(h), date: l ? l.date : "" }; });
+  const rows = market.items.filter(i => inView(i) && (!q || norm(i.name + " " + i.cat).includes(q)))
+    .map(i => { const h0 = priceHistory(i.id), h = mCond === "all" ? h0 : condHistory(h0, mCond), l = h[h.length - 1]; return { it: i, h, price: l ? l.price : null, chg: change(h), date: l ? l.date : "" }; })
+    .filter(r => mCond === "all" || mCond === "new" || r.price != null); // Like New / Worn: only what is sold that way
   const key = { name: r => r.it.name.toLowerCase(), cat: r => r.it.cat, price: r => r.price ?? -1, chg: r => r.chg ?? -1e9, date: r => r.date };
   rows.sort((a, b) => { const x = key[mSort.key](a), y = key[mSort.key](b); return (x < y ? -1 : x > y ? 1 : 0) * mSort.dir; });
   const t = el("table", "g-table m-table");
@@ -5060,8 +5078,11 @@ function renderMarket() {
     const dt = el("td", "num m-date", r.date ? fmtDate(r.date) : "—");
     if (r.date && ageDays(r.date) > STALE_DAYS) { dt.classList.add("stale"); dt.title = `Over ${STALE_DAYS} days old`; }
     const pc = el("td", "num m-price", fmtKoen(r.price)); pc.dataset.tip = priceTip(null, r.it);
-    const cl = condLine(r.h[r.h.length - 1]);
-    if (cl) { pc.prepend(el("small", "m-new", "New ")); pc.append(el("small", "m-conds", cl)); }
+    const lastR = r.h[r.h.length - 1];
+    if (mCond === "all") {
+      const cl = condLine(lastR);
+      if (cl) { pc.prepend(el("small", "m-new", "New ")); pc.append(el("small", "m-conds", cl)); }
+    } else if (lastR && typeof lastR.all === "object" && lastR.all[mCond + "Dur"]) pc.append(el("small", "m-conds", `Durability ${lastR.all[mCond + "Dur"]}`)); // one condition: its durability under the price
     tr.append(nm, el("td", "m-cat", catLabel(r.it.cat)), pc, chg, tr2, dt);
     tr.addEventListener("click", () => openPrice(r.it.id));
     tr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPrice(r.it.id); } });

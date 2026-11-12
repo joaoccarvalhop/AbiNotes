@@ -81,7 +81,7 @@ O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os p
    - `present(dlg, label, reopen)` — navega entre overlays com "← Back".
 8. Loadouts, editor de loadout e o picker com pesquisa (`makePicker`).
 9. **Widgets de filtros** (secção 4.4).
-10. Market, preços e histórico.
+10. Market, preços e histórico. Na caixa de filtros, "Condition" (All / New / Like New / Worn, em `mCond`) só aparece quando a lista tem equipamento com estados (`CONDITION_CATS`). Com um estado escolhido, o preço, a variação, o gráfico pequeno e a ordenação usam esse estado (`condHistory`, `condPrice`), a durabilidade aparece por baixo do preço e os itens que não se vendem nesse estado (Like New / Worn) ficam de fora.
 11. Keybinds.
 12. Builds: lista, cartões e caixa de filtros.
 13. Share e Import.
