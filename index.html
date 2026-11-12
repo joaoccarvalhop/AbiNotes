@@ -5608,7 +5608,6 @@ function renderKeys() {
   kbInfo = edit
     ? `${changed} keys differ from the game's default (marked with ●)\nHover an action to see what it does\nClick a key to pick the new one`
     : "A game preset, it can't be changed\nHover an action to see what it does\nDuplicate it to make your own";
-  sec.append(el("div", "g-tools")); // same top spacing as the other sections
   const grid = el("div", "kb-grid");
   KB_LAYOUT.forEach(col => {
     const c = el("div");
