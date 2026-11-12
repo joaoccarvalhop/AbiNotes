@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ABI Keybinds</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1680px;
+    background: radial-gradient(ellipse at 20% 0%, #2a2c2e 0%, #161718 55%, #0f1010 100%);
+    color: #d6d6d6;
+    font-family: "Segoe UI", "Rajdhani", Arial, sans-serif;
+    padding: 28px 32px 30px;
+  }
+  header { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid #3a3b3c; padding-bottom: 12px; margin-bottom: 18px; }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: 1px; color: #f1f1f1; }
+  h1 span { color: #e0662f; }
+  .legend { font-size: 13px; color: #8d8d8d; }
+  .legend b { color: #cfcfcf; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 26px; align-items: start; }
+  section + section { margin-top: 22px; }
+  h2 { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: .5px; padding: 0 0 7px 2px; border-bottom: 1px solid #e0662f; margin-bottom: 4px; }
+  .row { display: grid; grid-template-columns: 1fr 140px 92px; align-items: center; gap: 8px; padding: 5px 2px; border-bottom: 1px solid #2a2b2c; font-size: 14px; }
+  .row .name { color: #bdbdbd; }
+  .key { background: #0d0d0e; border: 1px solid #3b3c3d; text-align: center; padding: 3px 4px; font-size: 13px; color: #f0f0f0; font-weight: 600; white-space: nowrap; }
+  .mode { text-align: center; font-size: 12px; color: #8a8a8a; }
+  .mode.hold { color: #7fb3d5; }
+  .mode.dbl { color: #e0a23f; }
+  .mode.rel { color: #9fc58a; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Arena Breakout: Infinite <span>/</span> Keybinds</h1>
+  <div class="legend"><b>Press</b> tap · <b style="color:#7fb3d5">Hold</b> hold down · <b style="color:#e0a23f">Double</b> double tap · <b style="color:#9fc58a">Release</b> let go</div>
+</header>
+<div class="grid">
+  <div>
+    <section>
+      <h2>Character Controls</h2>
+      <div class="row"><span class="name">Move Forward</span><span class="key">W</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Retreat</span><span class="key">S</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Move Left</span><span class="key">A</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Move Right</span><span class="key">D</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Crouch</span><span class="key">C</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Prone</span><span class="key">Z</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Creep</span><span class="key">Caps Lock</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Lean Left</span><span class="key">Alt+A</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Lean Right</span><span class="key">Alt+D</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Sprint</span><span class="key">Left Shift</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Jump</span><span class="key">Space</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Interact</span><span class="key">F</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Mode Exclusive Ability</span><span class="key">~</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Free Camera</span><span class="key">Mouse 5</span><span class="mode hold">Hold</span></div>
+    </section>
+    <section>
+      <h2>Moderate</h2>
+      <div class="row"><span class="name">Mark</span><span class="key">Middle Mouse</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Team Voice Press to Talk</span><span class="key">Mouse 4</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Proximity Voice Press to Talk</span><span class="key">I</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Switch Speak Channel</span><span class="key">Alt+P</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Communication Menu</span><span class="key">H</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Open Chat Window</span><span class="key">Enter</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Scroll Up in Chat</span><span class="key">Page Up</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Scroll Down in Chat</span><span class="key">Page Down</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Open/Close Backpack</span><span class="key">Tab</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Open/Close Map</span><span class="key">M</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Open/Close Mission Panel</span><span class="key">J</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Tournament Details Panel</span><span class="key">~</span><span class="mode">Press</span></div>
+    </section>
+  </div>
+  <div>
+    <section>
+      <h2>Weapons &amp; Equipment</h2>
+      <div class="row"><span class="name">Fire</span><span class="key">Left Mouse</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Aim</span><span class="key">Right Mouse</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Hold Breath</span><span class="key">Left Alt</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Change Magazine</span><span class="key">R</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Check Magazine</span><span class="key">Alt+R</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Switch Firing Mode</span><span class="key">G</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Check Firing Mode</span><span class="key">Alt+G</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Inspect Weapon</span><span class="key">B</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Tactical Items</span><span class="key">Q</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Tactical Item Wheel</span><span class="key">Q</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">High Throwable</span><span class="key">Left Mouse</span><span class="mode rel">Release</span></div>
+      <div class="row"><span class="name">Low Throwable</span><span class="key">Right Mouse</span><span class="mode rel">Release</span></div>
+      <div class="row"><span class="name">Switch Sight Style</span><span class="key">Alt+Q</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Switch Sight/Magnification</span><span class="key">Alt+E</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Cook Grenade</span><span class="key">R</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Increase Sight Zero</span><span class="key">Wheel Up</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Reduce Sight Zero</span><span class="key">Wheel Down</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Tactical Equipment On/Off</span><span class="key">E</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Put Down/Lift Head Gear</span><span class="key">Alt+1</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Quick Reload</span><span class="key">Alt+V</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Reload Wheel</span><span class="key">Alt+V</span><span class="mode hold">Hold</span></div>
+    </section>
+  </div>
+  <div>
+    <section>
+      <h2>Quick Bars &amp; Item Controls</h2>
+      <div class="row"><span class="name">Primary Weapon</span><span class="key">1</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Secondary Weapon</span><span class="key">1</span><span class="mode dbl">Double</span></div>
+      <div class="row"><span class="name">Pistol</span><span class="key">2</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Melee Weapon</span><span class="key">2</span><span class="mode dbl">Double</span></div>
+      <div class="row"><span class="name">Quick Key 5</span><span class="key">3</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Quick Key 6</span><span class="key">4</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Quick Key 7</span><span class="key">5</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Quick Key 8</span><span class="key">6</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Quick Treatment</span><span class="key">V</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Medicine Wheel</span><span class="key">V</span><span class="mode hold">Hold</span></div>
+      <div class="row"><span class="name">Discard Backpack Items</span><span class="key">X</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Quick Drop</span><span class="key">X</span><span class="mode dbl">Double</span></div>
+      <div class="row"><span class="name">Quick Loot/Equip</span><span class="key">F</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Check Mags in Backpack</span><span class="key">Middle Mouse</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Rotate Item</span><span class="key">R</span><span class="mode">Press</span></div>
+      <div class="row"><span class="name">Roll Up Backpack/Chest Rig</span><span class="key">F</span><span class="mode">Press</span></div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

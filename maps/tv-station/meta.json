@@ -1,0 +1,526 @@
+{
+ "slug": "tv-station",
+ "options": {
+  "defaultIcon": "/icons/default.svg",
+  "disableCacheAboveZoom": 4.5,
+  "enablePerLevelIndex": true,
+  "iconSizeCurve": {
+   "1": 24,
+   "2": 24,
+   "3": 32,
+   "4": 32,
+   "5": 24
+  },
+  "radiusMultiplier": 5,
+  "spatialIndexMaxDepth": 9,
+  "spatialIndexMaxMarkersPerNode": 24,
+  "categories": "$e:1:props:categories",
+  "bounds": [
+   [
+    0,
+    0
+   ],
+   [
+    15268,
+    8588
+   ]
+  ],
+  "minZoom": 4,
+  "maxZoom": 7,
+  "maxZoomUser": 6,
+  "zoomToMarkerLevel": 5,
+  "tileSize": 256,
+  "levels": [
+   "2F",
+   "1F"
+  ],
+  "currentLevel": "1F",
+  "difficultiesPossible": [
+   "Normal",
+   "Lockdown",
+   "Forbidden"
+  ],
+  "overlays": [
+   {
+    "floor": [
+     "1F"
+    ],
+    "bounds": [
+     [
+      0,
+      0
+     ],
+     [
+      15268,
+      8588
+     ]
+    ],
+    "url": "/abi/tvstation/1F/{level}/{x}/{y}.webp",
+    "tileSize": 256,
+    "minZoom": 4,
+    "maxZoom": 6,
+    "maxZoomUser": 6
+   },
+   {
+    "floor": [
+     "2F"
+    ],
+    "bounds": [
+     [
+      0,
+      0
+     ],
+     [
+      15268,
+      8588
+     ]
+    ],
+    "url": "/abi/tvstation/2F/{level}/{x}/{y}.webp",
+    "tileSize": 256,
+    "minZoom": 4,
+    "maxZoom": 6,
+    "maxZoomUser": 6
+   }
+  ],
+  "searchableCategories": [
+   "Key"
+  ],
+  "requiresTitle": [
+   "Key",
+   "Covert Ops Extract",
+   "Extract",
+   "Mission Extract",
+   "Info",
+   "Label",
+   "No Backpack Extract",
+   "Retro Safe",
+   "Safe",
+   "Safe (Behind Key)",
+   "Secret Safe"
+  ],
+  "requiresSingle": [
+   "Key",
+   "Covert Ops Extract",
+   "Extract",
+   "Mission Extract",
+   "Info",
+   "Label",
+   "No Backpack Extract",
+   "Retro Safe",
+   "Safe",
+   "Safe (Behind Key)",
+   "Secret Safe"
+  ]
+ },
+ "categories": {
+  "Label": {
+   "alwaysRender": true,
+   "category": "Locations",
+   "convertCatToType": {
+    "Label": {
+     "category": "Label",
+     "type": "label",
+     "zooms": [
+      0,
+      99
+     ]
+    }
+   },
+   "fontSize": 16,
+   "fontWeight": "bold",
+   "icon": "/icons/label.webp",
+   "info": "",
+   "outlineColor": "#000000",
+   "outlineThickness": 3,
+   "textColor": "#ffffff"
+  },
+  "Key": {
+   "category": "Locations",
+   "icon": "/icons/key.svg",
+   "showOnAllFloors": true,
+   "showOnSidebar": true,
+   "sidebarHeader": "Keys",
+   "sidebarShowFloors": true,
+   "sidebarShowItemIcons": true,
+   "sidebarStartClosed": false,
+   "size": 1
+  },
+  "Retrieval Box": {
+   "category": "Locations",
+   "icon": "/icons/retrieval_box.svg",
+   "info": "After an operator is elminated you can use a retrieval box to send items back to your Mail for safe transit. Whether you successfully extract or not, your items will be back on them menu once sent. You can send a 2x3 area worth of items back."
+  },
+  "Safe": {
+   "category": "Safes",
+   "icon": "/icons/safe.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Safes",
+   "sidebarPruneText": "\\s*Safe\\s*",
+   "sidebarStartClosed": false
+  },
+  "Safe (Behind Key)": {
+   "category": "Safes",
+   "icon": "/icons/key_safe.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Safes",
+   "sidebarPruneText": "\\s*Safe\\s*",
+   "sidebarStartClosed": false
+  },
+  "Secret Safe": {
+   "category": "Safes",
+   "icon": "/icons/secret_safe.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Safes",
+   "sidebarPruneText": "\\s*Safe\\s*",
+   "sidebarStartClosed": false
+  },
+  "Retro Safe": {
+   "category": "Safes",
+   "icon": "/icons/retro_safe.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Safes",
+   "sidebarStartClosed": false
+  },
+  "Electronic Safe": {
+   "category": "Safes",
+   "icon": "/icons/e_safe.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Safes",
+   "sidebarStartClosed": false
+  },
+  "Small Safe": {
+   "category": "Safes",
+   "icon": "/icons/small_safe.svg"
+  },
+  "Extract": {
+   "category": "Extracts",
+   "icon": "/icons/extract.svg",
+   "iconAspect": 1.64,
+   "iconDown": "/icons/extract_down.svg",
+   "iconUp": "/icons/extract_up.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Extracts",
+   "sidebarStartClosed": false
+  },
+  "Covert Ops Extract": {
+   "category": "Extracts",
+   "icon": "/icons/extract-green.svg",
+   "iconAspect": 1.64,
+   "iconDown": "/icons/extract-green.svg",
+   "iconUp": "/icons/extract-green.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Extracts",
+   "sidebarStartClosed": false
+  },
+  "No Backpack Extract": {
+   "category": "Extracts",
+   "icon": "/icons/no_backpack_extract.svg",
+   "iconAspect": 1.64,
+   "iconDown": "/icons/extract_down.svg",
+   "iconUp": "/icons/extract_up.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Extracts",
+   "sidebarStartClosed": false
+  },
+  "Mission Extract": {
+   "category": "Extracts",
+   "icon": "/icons/mission_extract.svg",
+   "iconAspect": 1.64,
+   "iconDown": "/icons/mission_extract_down.svg",
+   "iconUp": "/icons/mission_extract_up.svg",
+   "showOnSidebar": true,
+   "sidebarGroupByCategory": true,
+   "sidebarHeader": "Extracts",
+   "sidebarStartClosed": false
+  },
+  "Spawn": {
+   "alwaysRender": true,
+   "category": "Locations",
+   "convertCatToType": {
+    "Spawn": {
+     "category": "Spawn",
+     "color": "rgba(0, 255, 0, 0.33)",
+     "outline": "rgba(0, 255, 0, 0.75)",
+     "radius": 16,
+     "type": "circle"
+    }
+   },
+   "icon": "/icons/spawn_point.svg"
+  },
+  "Lever": {
+   "category": "Interactions",
+   "icon": "/icons/lever.svg"
+  },
+  "Sniper Scav Spawn": {
+   "category": "Locations",
+   "convertCatToType": {
+    "Spawn": {
+     "category": "Spawn",
+     "color": "rgba(255, 0, 0, 0.33)",
+     "outline": "rgba(255, 0, 0, 0.75)",
+     "radius": 16,
+     "type": "circle"
+    }
+   },
+   "icon": "/icons/sniper_scav.svg",
+   "info": "Sniper Scav Spawns are usually found in high locations and are a great way to tell if players have already been through there -- as they'll be dead. Players choose not to shoot them to keep up a facade. Be careful."
+  },
+  "Computers": {
+   "category": "Loot",
+   "icon": "/icons/home-computer.svg",
+   "info": "This category has Military and normal computers as one. Loot usually consists of cheaper wires and related items, but can be very profitable if you manage to find a GPU or similar item."
+  },
+  "Military Computers": {
+   "category": "Loot",
+   "icon": "/icons/computer.svg",
+   "info": "This category has Military and normal computers as one. Loot usually consists of cheaper wires and related items, but can be very profitable if you manage to find a GPU or similar item."
+  },
+  "Premium Suitcases": {
+   "category": "Loot",
+   "icon": "/icons/suitcase.svg",
+   "info": "Premium Suitcases hold cheaper items, but may contain more expensive larger items."
+  },
+  "Suitcases": {
+   "category": "Loot",
+   "icon": "/icons/suitcase.svg",
+   "info": "Suitcases hold anything from Soap to Golden Lions. They're always worth searching, so much so white suitcases recieved a Golden Lion sticker on the front."
+  },
+  "Jackets": {
+   "category": "Loot",
+   "icon": "/icons/jacket.svg",
+   "info": "Jackets contain mostly junk, if anything at all, but can contain keys/keycards for any map that cost a lot, as well as other high value loot like stamps, cartridges and more. Very valuable items like expensive Documents, as well as other small valuable items."
+  },
+  "Winter Coat": {
+   "category": "Loot",
+   "icon": "/icons/winter-coat2.svg",
+   "info": "Winter Coats are required for missions, and contain mostly junk, if anything at all, but can contain keys/keycards for any map that cost a lot, as well as other high value loot like stamps, cartridges and more. Very valuable items like expensive Documents, as well as other small valuable items."
+  },
+  "Tunnels": {
+   "category": "Loot",
+   "icon": "/icons/tunnel.svg"
+  },
+  "Medkits": {
+   "category": "Loot",
+   "icon": "/icons/medkit.svg",
+   "info": "Medkits contain quest items and medical supplies. Lots of sponges and items, but also can contain painkillers, bandages, surgery kits, and first aid kits of various sizes."
+  },
+  "Office Drawers": {
+   "category": "Loot",
+   "icon": "/icons/filing_cabinet.svg",
+   "info": "Office Drawers contain common components like tape and related items, but can rarely contain more valuable items such as the Cane."
+  },
+  "Info": {
+   "category": "Other",
+   "icon": "/icons/binoculars.svg"
+  },
+  "Ammo Caches": {
+   "category": "Loot",
+   "icon": "/icons/ammo_cache.svg",
+   "info": "Often contain valuable ammo, on all tiers of raids (relative to that raid)."
+  },
+  "Grenade Boxes": {
+   "category": "Loot",
+   "icon": "/icons/grenade_box.svg"
+  },
+  "Premium Weapon Cases": {
+   "category": "Loot",
+   "icon": "/icons/weapon_case_premium.svg",
+   "info": "Premium Weapon Cases usually contain weapon attachments, scopes, armor, ammo and even full-size weapons (usually of a medium-tier) and other related items. Can contain much rarer loot as well."
+  },
+  "Large Weapon Cases": {
+   "category": "Loot",
+   "icon": "/icons/weapon_case_large.svg"
+  },
+  "Weapon Cases": {
+   "category": "Loot",
+   "icon": "/icons/weapon_case.svg"
+  },
+  "Cash Registers": {
+   "category": "Loot",
+   "icon": "/icons/cash_register.svg",
+   "info": "Cash Registers usually has at least some money."
+  },
+  "Document Boxes": {
+   "category": "Loot",
+   "icon": "/icons/document_box.svg",
+   "info": "Usually contains worthless documents, but can rarely have much more expensive items."
+  },
+  "Gym Bags": {
+   "category": "Loot",
+   "icon": "/icons/gym_bag.svg",
+   "info": "Sometimes contains medical items, but usually just contains scraps."
+  },
+  "Long Weapon Cases": {
+   "category": "Loot",
+   "icon": "/icons/weapon_case_long.svg",
+   "info": "A weapon case containing usually grips, and other attachments. Sometimes weapons."
+  },
+  "Wooden Weapon Cases": {
+   "category": "Loot",
+   "icon": "/icons/weapon_case_long.svg",
+   "info": "A weapon case containing usually grips, and other attachments. Sometimes weapons."
+  },
+  "Toolboxes": {
+   "category": "Loot",
+   "icon": "/icons/toolbox.svg",
+   "info": "Usually contains useless screws and nuts, but can rarely contain more valuable electronic tools."
+  },
+  "Storage Cases": {
+   "category": "Loot",
+   "icon": "/icons/storage_case.svg",
+   "info": "Storage Cases usually contain basic armor, weapon attachments or magaznies and other related items. Can contain much rarer loot as well."
+  },
+  "Military Supply Cases": {
+   "category": "Loot",
+   "icon": "/icons/military_supply_case.svg",
+   "info": "Military Supply Cases. usually contain weapon attachments or scopes and other related items. Can contain much rarer loot as well."
+  },
+  "Tactical Accessory Cases": {
+   "category": "Loot",
+   "icon": "/icons/tactical_case.svg",
+   "info": "Tactical Accessory Cases usually contain weapon attachments or scopes and other related items. Can contain much rarer loot as well."
+  },
+  "Large Material Crates": {
+   "category": "Loot",
+   "icon": "/icons/large_materials_crate.svg",
+   "info": "Large Material Crates usually contain weapon attachments or scopes and other related items. Can contain much rarer loot as well."
+  },
+  "Weapon Spawn": {
+   "category": "Loot",
+   "icon": "/icons/loose_weapon.svg",
+   "info": "Weapons have a chance to spawn here as loose loot would. Sometimes hanging on the wall or another location."
+  },
+  "Medium Weapon Cases": {
+   "category": "Loot",
+   "icon": "/icons/weapon_case_medium.svg",
+   "info": "Medium Weapon Cases usually contain attachments and smaller weapons (usually of a low-tier) and other related items. Can contain much rarer loot as well."
+  },
+  "Abandoned Crate": {
+   "category": "Loot",
+   "icon": "/icons/abandoned_crate.svg",
+   "info": "Abandoned Crates are usually found in hidden locations and contain valuable loot."
+  },
+  "Airdrops": {
+   "category": "Loot",
+   "icon": "/icons/airdrop.svg",
+   "info": "Airdrops are usually found in somewhat hidden locations and usually contain really valuable loot. You can easily tell if they've been looted from a distance."
+  },
+  "Loose Loot": {
+   "category": "Loot",
+   "icon": "/icons/loose_loot.svg",
+   "info": "Loose Loot spawns here. Can be anything from ammo to basic tools."
+  },
+  "Gold Item Spawn": {
+   "category": "Loot",
+   "icon": "/icons/gold_item.webp",
+   "info": "Gold Item Spawns are areas where players have found Gold-tier items spawning. These are usually very rare, and often only appear in higher difficulties."
+  },
+  "Crawl Spaces": {
+   "category": "Locations",
+   "icon": "/icons/crawl_space.webp"
+  },
+  "Red Item Spawn": {
+   "category": "Loot",
+   "icon": "/icons/red_item.webp",
+   "info": "Red Item Spawns are areas where players have found Red-tier items spawning. These are usually very rare, and often only appear in higher difficulties."
+  },
+  "Lookout/Rat Spot": {
+   "category": "Other",
+   "icon": "/icons/rat_spot.svg",
+   "info": "Common area for players to be hiding, or looking out from. Often by extracts, or over high value loot areas."
+  },
+  "Key Spawn": {
+   "category": "Locations",
+   "icon": "/icons/gzw/keys/generic_spawn.webp",
+   "info": "It is possible for keys and keycards to spawn as items in the world here."
+  },
+  "Hazmat Jacket": {
+   "category": "Loot",
+   "icon": "/icons/hazmat.svg",
+   "info": "A jacket, with a slightly better loot pool."
+  },
+  "Camera Terminal": {
+   "category": "Interactions",
+   "icon": "/icons/monitor.svg",
+   "info": "Access linked cameras from this terminal."
+  },
+  "Camera": {
+   "category": "Interactions",
+   "icon": "/icons/camera.svg",
+   "info": "Allows you to view the monitored area from the linked Camera Terminal.."
+  },
+  "Biscuit Tin": {
+   "category": "Loot",
+   "icon": "/icons/biscuit_tinv2.svg",
+   "info": "Small containers that often contain almost worthless items, but can rarely contain expensive items like watches and more!"
+  },
+  "Car": {
+   "category": "Loot",
+   "icon": "/icons/arc/car.webp",
+   "info": "Players can open the trunk of these cars for some loot, but they can often trigger a loud car alarm alerting even distant players. Feeling lucky?"
+  },
+  "Large Crate": {
+   "category": "Loot",
+   "icon": "/icons/arc/archive_box.webp",
+   "info": "Large wooden boxes with some loot. Rarely valuable."
+  },
+  "Trash Bins": {
+   "category": "Loot",
+   "icon": "/icons/df/garbage-bin.svg",
+   "info": "Large dumpsters that can very rarely contain valuable loot."
+  },
+  "Ladder": {
+   "category": "Other",
+   "icon": "/icons/arc/ladder.webp",
+   "info": "Use this to travel between levels."
+  },
+  "Access Terminal": {
+   "category": "Interactions",
+   "icon": "/icons/access-terminal.svg",
+   "info": "Enter 3 digits to open the linked doors. These can be found around the map in items that spawn randomly."
+  },
+  "Sliding Doors": {
+   "category": "Interactions",
+   "icon": "/icons/sliding-doors.svg",
+   "info": "Sliding Doors to the lobby."
+  },
+  "Boss Spawn": {
+   "category": "Interactions",
+   "icon": "/icons/skull.svg",
+   "info": "Map Boss has a chance to spawn in this location. Be careful!"
+  },
+  "Devotion Statue": {
+   "category": "Distortion",
+   "icon": "/icons/devotion-statuev2.svg",
+   "info": "10 seconds to use. Scales uneven when used. Can be used once per raid.\nDevotion Statues were added in Season 5 and are available in Distortion gamemodes."
+  },
+  "Phone Booth": {
+   "category": "Distortion",
+   "icon": "/icons/phone-booth.svg",
+   "info": "You can extract here."
+  },
+  "Orbs": {
+   "category": "Distortion",
+   "icon": "/icons/black-orb.svg",
+   "info": "Added in Season 5 and are available in Distortion gamemodes"
+  },
+  "Traffic Light": {
+   "category": "Distortion",
+   "icon": "/icons/traffic-lightv2.svg",
+   "info": "Added in Season 5 and are available in Distortion gamemodes"
+  },
+  "Field Merchant": {
+   "category": "Distortion",
+   "icon": "/icons/field_merchant.svg",
+   "info": "Purchase items in-raid."
+  }
+ }
+}

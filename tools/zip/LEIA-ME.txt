@@ -1,0 +1,118 @@
+ABI Hub - builds, loadouts, mercado, equipamento, tier list, mapas, smelter e keybinds do Arena Breakout: Infinite
+==========================================================================================
+
+COMO ABRIR
+1. Extrai o zip para uma pasta (não abras os ficheiros de dentro do zip).
+2. Abre "abi-hub.html" no Chrome, Edge ou Firefox (duplo clique).
+3. Mantém tudo junto na mesma pasta: abi-hub.html, builds.js, prices.js, merchant.js,
+   merchant-sounds.js, e as pastas "maps" e "images".
+
+O QUE PRECISA DE INTERNET
+- As imagens das armas e do equipamento vêm da internet.
+- Os mapas funcionam sem internet (estão na pasta "maps").
+
+ROTAS NOS MAPAS
+- Em Maps, escolhe o mapa e o modo (Normal, Lockdown...). Os spawns mudam com o modo.
+- Clica no spawn onde nasceste. Os spawns ao teu lado desaparecem e os outros ficam
+  esbatidos (possíveis inimigos).
+- Na coluna da direita aparecem as tuas rotas primeiro e depois as sugeridas (Rush, Loot run,
+  Quiet, PvP), cada uma com o extract e o risco. Clica numa para a ver no mapa.
+- A rota escolhida mostra os passos numerados e a saída. As paragens opcionais estão
+  fechadas no fim da lista; abre-as para as juntares.
+- Os losangos são sítios onde é provável encontrares alguém. Passa o rato por cima
+  para ver a hora e de que spawn vem a pessoa.
+- Em baixo no painel: Save guarda a rota como tua, Change edita-a, Share partilha-a e
+  New desenha uma do zero. Ao desenhar, clique direito num ponto apaga-o.
+- À esquerda do mapa, "Filters":
+  - "Keys": todas as portas de keys do mapa; clica numa e o mapa vai lá. Clica outra vez para a largar.
+  - Força das linhas, nomes, contactos, paredes, spawns inimigos e que marcadores aparecem.
+  - "Raid": jogadores e duração do raid. Muda se no jogo vires outros números.
+- À direita do mapa, "Routes": as tuas rotas e, depois de escolheres o spawn, o plano.
+  Sem spawn escolhido, "Suggested" mostra todos os spawns do mapa: abre um para ver as
+  rotas dele. "Yours" agrupa as tuas pelo spawn. Passa o rato numa rota tua para a partilhar.
+- Cada coluna fecha com a setinha no topo; uma tira fina volta a abri-la.
+
+MERCADOR (MERCHANT)
+- Abre esta parte no Edge ou no Chrome: o Firefox não consegue partilhar o som do jogo.
+- À esquerda: o mapa e o modo, o tamanho do item (o espaço que ocupa na caixa), e o
+  tipo e o preço da caixa. Com tipo e preço escolhidos aparece a probabilidade de cada item.
+- "Listen to game": no aviso do browser escolhe a janela do jogo e marca "Share audio"
+  (se a janela não tiver essa opção, partilha o ecrã inteiro com "Share system audio").
+  Ao apanhar ou largar o item no jogo, a página reconhece o som e mostra o que pode ser,
+  com a probabilidade de cada item e quanto vale em média.
+- Sem ouvir o jogo também funciona: clica no cartão do som que ouviste. Clique direito
+  num cartão só toca o som (apanhar, depois largar). Se não tiveres a certeza, clica em
+  vários sons: as chances contam com todos.
+- Clica num candidato para ver todas as caixas onde pode sair, com a chance e o ganho.
+- "Teach a sound": se um som for mal reconhecido, apanha o item no jogo, carrega em
+  Teach e clica no cartão certo. Fica a contar para a próxima.
+- "Price reader": no jogo, põe o rato em cima de uma caixa para aparecer o cartão com o
+  preço e carrega em "Take a new picture". Desenha uma caixa desde a moeda até ao fim do
+  preço e escreve o que vês (em saldo aparecem dois preços: escreve os dois). Faz isto
+  com 2 ou 3 caixas até saber todos os dígitos. Depois, sempre que passares o rato numa
+  caixa, o preço é posto sozinho, esteja o cartão onde estiver.
+  Ensina-o com o jogo no tamanho em que jogas: se mudares a resolução, ensina outra vez.
+
+SMELTER
+- Separador "Smelter" no topo. O jogo não diz as odds: à esquerda estão as regras que os
+  jogadores descobriram (valor total e cor dos itens).
+- "Smelt check": escolhe os 3 itens que vais fundir e vês o que podem dar. Se a cor de um
+  item não for conhecida, marca-a (Gold, Purple...).
+- Depois de fundir, escolhe o que saiu e carrega em "Log result". Com o tempo, "Your
+  results" mostra quanto devolve em média e quantas vezes saiu vermelho.
+- Partilha os resultados com os amigos pelo botão Share: juntam-se aos teus e os números
+  ficam certos mais depressa.
+- "Special recipe": a receita do momento e quanto custa. Quando sair uma nova, junta-a
+  em "Add one".
+
+TRADING
+- Separador "Trading" no topo: comprar logo a seguir a um reset do mercado e vender quando está seco.
+- As horas dos resets aparecem na hora do teu PC, ao vivo: o próximo, a barra do dia
+  (laranja = boa hora para vender, verde = resets) e o que fazer agora.
+- "Profit": os preços variam, por isso arrasta os sliders de compra e de venda do mais baixo ao mais
+  alto que esperas. Vês o pior caso, o provável, o melhor, a chance de lucro e o preço mínimo para não perder.
+- "Tricks": passa o rato em cada linha. "Hauling loadouts": códigos de rig e mochila para carregar munição.
+
+TIER LIST
+- Separador "Tier list" no topo: uma lista por tipo (Guns, Helmets, Armor, Chest rigs, Backpacks).
+  Nas armas podes fazer uma lista geral ("All guns") ou uma por categoria (Assault Rifles, SMGs...).
+- Arrasta os itens da direita (Unranked) para as linhas S, A, B, C, D, ou clica num item e depois na
+  linha. Clique direito num item devolve-o. Clica no nome de uma linha para o mudar; "Add tier" junta outra.
+- Duplo clique num item (ou o (i) no canto) abre a ficha dele, com as stats.
+- Em Builds, Loadouts e Gear, "Sort by" > "My tier list" ordena pela tua lista. Os loadouts usam a média
+  da arma e do equipamento que tens nas listas.
+- As listas também se partilham pelo botão Share.
+
+ARMAS
+- Cada arma tem um separador "Stats" com os números dela sem acessórios.
+- As builds que vieram do ABI Builder têm um pequeno gráfico na linha de baixo: passa o
+  rato por cima para ver os números com os acessórios (a verde o que melhora, a vermelho
+  o que piora).
+
+GUARDAR AS TUAS ALTERAÇÕES
+- Quando mudas alguma coisa aparece "Unsaved" no topo. Carrega em "Save".
+- No Chrome/Edge, da primeira vez o browser pergunta onde guardar: escolhe o builds.js
+  (e o prices.js, se mudaste preços) DESTA pasta. Depois disso guarda sozinho.
+- No Firefox o Save descarrega o ficheiro: substitui o builds.js desta pasta pelo descarregado.
+- Se fechares sem guardar, a página lembra-se e oferece recuperar na próxima vez.
+
+PARTILHAR COM AMIGOS
+- Botão "Share" no topo:
+  - Share: escolhe loadouts, rotas, keybinds, builds, resultados do smelter, tier lists e/ou preços.
+    "Copy code" para coisas pequenas (cola no Discord) ou "Download file" para coisas
+    grandes como os preços (envia o ficheiro .abihub).
+  - Import: cola o código ou abre o ficheiro que te enviaram, escolhe o que queres trazer.
+    Nos preços fica sempre o mais recente de cada item.
+- Cada rota e cada loadout têm também o seu botão Share, que abre a mesma janela.
+
+PESQUISA E KEYS
+- A barra "Search everything..." no topo mostra alguns resultados de cada tipo. No fim
+  da lista, "See all ... results" abre todos, com um separador por tipo (armas,
+  loadouts, equipamento, mercado e as portas das keys nos mapas).
+- Abre uma key do mercado e carrega em "Show on map": abre o mapa e o piso certos, com
+  zoom na porta e um anel à volta. Se a key abre várias portas, todas ficam marcadas.
+
+NOTA
+Os mapas e marcadores foram copiados de maps.tcno.co (TroubleChute), só para uso entre amigos.
+Todas as fontes (So1o, ABI Builder, o wiki do jogo, skrux, TroubleChute...) estão na página:
+Home > "About & sources", no fundo.
