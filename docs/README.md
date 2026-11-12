@@ -267,7 +267,7 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
   - **What's inside:**
     - "Cargo odds": o item sai pelas odds da carga da caixa.
     - "All alike": cada som com a mesma probabilidade, e a caixa é uma carga que pode ter esse item.
-  - **Abrir uma caixa** (`prOpen`): toca o pick-up e depois o drop (`prSound`) e mostra o tamanho. Espaço volta a tocar e Enter abre a caixa seguinte.
+  - **Abrir uma caixa** (`prOpen`): toca o pick-up e depois o drop (`prSound`) e mostra o tamanho. Os botões "Pick up" e "Drop" tocam cada som sozinho. Espaço toca os dois (`prHear`) e Enter abre a caixa seguinte.
   - **Answer with:**
     - "Sound card": os cartões que o Live mostra com essa carga e esse tamanho escolhidos (`prBoxItems` + `prFits`), na mesma ordem e no sítio do Live (metade esquerda). A banca fica onde estão os Candidates.
     - "Item": 4 itens com sons diferentes, do mesmo tamanho sempre que possível. Teclas 1–4.

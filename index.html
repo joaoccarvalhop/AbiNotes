@@ -1459,7 +1459,8 @@
   .pr-was .mc-cname { flex: 1; } .pr-was .mc-play { flex: none; width: 36px; padding: 0; }
   .pr-stage.idle { display: flex; align-items: center; justify-content: center; }
   .pr-head { display: flex; align-items: center; gap: 16px; }
-  .pr-head .pr-replay { flex: none; height: 40px; padding: 0 18px; font-size: 13.5px; }
+  .pr-head .pr-replay { flex: none; height: 40px; padding: 0 16px; font-size: 13.5px; }
+  .pr-head .pr-replay + .pr-replay { margin-left: -10px; } /* the two sounds sit together */
   .pr-size { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; font-size: 13.5px; color: var(--fg-strong); border: 1px solid var(--line-2); cursor: help; }
   .pr-size .mc-glyph b { background: var(--accent); }
   .pr-info { display: flex; align-items: center; gap: 16px; margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -10033,7 +10034,13 @@ function prSound(sid, btn) {
   merPlay(sid, "u", btn);
   prPlayT = setTimeout(() => merPlay(sid, "d", btn && btn.isConnected ? btn : null), 750);
 }
-const prHear = () => { if (pr.q) prSound(pr.q.sid, document.querySelector("#merchant .pr-replay")); };
+// both, each lighting its own button
+const prHear = () => {
+  if (!pr.q) return;
+  const [u, d] = document.querySelectorAll("#merchant .pr-replay"), sid = pr.q.sid;
+  clearTimeout(prPlayT); merPlay(sid, "u", u);
+  prPlayT = setTimeout(() => merPlay(sid, "d", d && d.isConnected ? d : null), 750);
+};
 // what a box's cargo can hold (as Live with that cargo type and price picked)
 const prBoxItems = b => { const c = merCargos().find(x => x.name === b.cargo && x.price === b.price); return c ? [...c.odds.keys()] : [...prPool().keys()]; };
 // open a box: its question (the item level: the item and three others with other sounds, the same size first, since the
@@ -10158,7 +10165,9 @@ function prDraw(sec = $("merchant")) {
   const head = el("div", "pr-head");
   const b = pr.boxes[pr.cur], q = b ? pr.q : null, done = b && b.ans;
   if (q) {
-    head.append(button("Hear it again", { cls: "mc-play pr-replay", icon: "pickup", tip: "The pick-up, then the drop (Space)", onClick: prHear }));
+    // each sound on its own, like an item's Pick up / Drop (Space plays both, one after the other)
+    head.append(button("Pick up", { cls: "mc-play pr-replay", icon: "pickup", tip: "Hear the pick-up (Space: both)", onClick: e => { clearTimeout(prPlayT); merPlay(q.sid, "u", e.currentTarget); } }),
+      button("Drop", { cls: "mc-play pr-replay", icon: "drop", tip: "Hear the drop (Space: both)", onClick: e => { clearTimeout(prPlayT); merPlay(q.sid, "d", e.currentTarget); } }));
     const size = el("span", "pr-size"); size.append(merSizeGlyph(`${q.size[0]}x${q.size[1]}`), `${q.size[0]}×${q.size[1]}`); size.dataset.tip = "The room it takes, as the box shows it";
     head.append(size);
   }
