@@ -139,9 +139,10 @@ for (cat, name), kinds in seen.items():
     prev = prices.get(item["id"], {})
     prev.update(out)
     prices[item["id"]] = prev
-# only a New price (no condition tabs): stored as a plain number, like last time
+# only a New price (no condition tabs): stored as a plain number, like last time; an item that had conditions keeps its
+# object even when only New was read (the page then still finds its Like New / Worn in the older reading)
 for k, v in list(prices.items()):
-    if set(v) == {"new"}:
+    if set(v) == {"new"} and not isinstance(last.get(k), dict):
         prices[k] = v["new"]
 
 old = {s["date"] for s in data["snapshots"]}

@@ -13376,20 +13376,6 @@ window.ABI_PRICES = {
       "date": "2026-11-12",
       "source": "Video 12 Nov",
       "prices": {
-        "body-armor-defender-m4-heavy-body-armor": {
-          "new": 295812,
-          "likeNew": 251180,
-          "likeNewDur": "68/80",
-          "worn": 209160,
-          "wornDur": "56/80"
-        },
-        "body-armor-defender-m4-heavy-armor-officer-skin": {
-          "new": 301186,
-          "likeNew": 252624,
-          "likeNewDur": "68/80",
-          "worn": 213786,
-          "wornDur": "56/80"
-        },
         "unarmored-chest-rigs-stormtrooper-type-2-chest-rig": 40986,
         "unarmored-chest-rigs-stormtrooper-type-3-tactical-chest-rig": 111096,
         "unarmored-chest-rigs-stormtrooper-type-4-tactical-chest-rig": 101250,
@@ -13431,452 +13417,19 @@ window.ABI_PRICES = {
         "rail-mosin-nagant-rifle-i-2": 9464,
         "rail-m14-upper-receiver-1": 2470,
         "rail-m14-upper-receiver-2": 6435,
-        "helmet-kelsey-fire-helmet": {
-          "new": 4320,
-          "likeNew": 3731,
-          "likeNewDur": "8/10"
-        },
-        "helmet-lightweight-safety-helmet": {
-          "new": 4732,
-          "likeNew": 4092,
-          "likeNewDur": "13/15"
-        },
-        "helmet-motorcycle-helmet": {
-          "new": 3510,
-          "likeNew": 1748,
-          "likeNewDur": "13/15"
-        },
-        "helmet-tanker-protective-cap": {
-          "new": 5510,
-          "likeNew": 4550,
-          "likeNewDur": "17/20"
-        },
-        "helmet-retro-military-helmet": {
-          "new": 10695,
-          "likeNew": 4059,
-          "likeNewDur": "17/20"
-        },
-        "helmet-retro-steel-helmet": {
-          "new": 5474,
-          "likeNew": 4040,
-          "likeNewDur": "21/25"
-        },
-        "helmet-security-helmet": {
-          "new": 11960,
-          "likeNew": 4218,
-          "likeNewDur": "17/20"
-        },
-        "helmet-aviator-helmet": {
-          "new": 12236,
-          "likeNew": 4600,
-          "likeNewDur": "17/20",
-          "worn": 8544,
-          "wornDur": "14/20"
-        },
-        "helmet-security-riot-helmet": {
-          "new": 12467,
-          "likeNew": 10413,
-          "likeNewDur": "19/22",
-          "worn": 8918,
-          "wornDur": "15/22"
-        },
-        "helmet-pas-standard-helmet": {
-          "new": 6912,
-          "likeNew": 6273,
-          "likeNewDur": "21/25",
-          "worn": 6180,
-          "wornDur": "18/25"
-        },
-        "helmet-pas2-helmet": {
-          "new": 24768,
-          "likeNew": 18130,
-          "likeNewDur": "24/28",
-          "worn": 16728,
-          "wornDur": "20/28"
-        },
-        "helmet-f70-tactical-helmet": {
-          "new": 43596,
-          "likeNew": 42630,
-          "likeNewDur": "21/25",
-          "worn": 34892,
-          "wornDur": "18/25"
-        },
-        "helmet-sh12-military-helmet": {
-          "new": 39550,
-          "likeNew": 35343,
-          "likeNewDur": "26/30",
-          "worn": 31122,
-          "wornDur": "21/30"
-        },
-        "helmet-6b4-helmet": {
-          "new": 37558,
-          "likeNew": 26134,
-          "likeNewDur": "26/30",
-          "worn": 25926,
-          "wornDur": "21/30"
-        },
-        "helmet-6b4-helmet-squad-s": {
-          "new": 36292,
-          "likeNew": 27208,
-          "likeNewDur": "26/30",
-          "worn": 24734,
-          "wornDur": "21/30"
-        },
-        "helmet-6b5-helmet": {
-          "new": 38016,
-          "likeNew": 25773,
-          "likeNewDur": "30/35",
-          "worn": 26230,
-          "wornDur": "24/35"
-        },
-        "helmet-sh40-military-helmet": {
-          "new": 40480,
-          "likeNew": 28036,
-          "likeNewDur": "42/50",
-          "worn": 30780,
-          "wornDur": "35/50"
-        },
-        "helmet-ind-tactical-helmet": {
-          "new": 48951,
-          "likeNew": 46989,
-          "likeNewDur": "30/35",
-          "worn": 38760,
-          "wornDur": "24/35"
-        },
-        "helmet-ind-tactical-helmet-snow": {
-          "new": 49984,
-          "likeNew": 43776,
-          "likeNewDur": "30/35",
-          "worn": 34953,
-          "wornDur": "24/35"
-        },
-        "helmet-ind200-helmet": {
-          "new": 56304,
-          "likeNew": 46995,
-          "likeNewDur": "34/40",
-          "worn": 38336,
-          "wornDur": "28/40"
-        },
-        "helmet-f80-tactical-helmet": {
-          "new": 40368,
-          "likeNew": 34639,
-          "likeNewDur": "30/35",
-          "worn": 30282,
-          "wornDur": "24/35"
-        },
-        "helmet-sh18-military-helmet": {
-          "new": 60300,
-          "likeNew": 52074,
-          "likeNewDur": "38/45",
-          "worn": 46931,
-          "wornDur": "32/45"
-        },
-        "helmet-kss-tactical-helmet": {
-          "new": 85085,
-          "likeNew": 58859,
-          "likeNewDur": "34/40",
-          "worn": 63204,
-          "wornDur": "28/40"
-        },
-        "helmet-kss2-tactical-helmet": {
-          "new": 91200,
-          "likeNew": 66640,
-          "likeNewDur": "38/45",
-          "worn": 61424,
-          "wornDur": "32/45"
-        },
-        "helmet-56k-helicopter-helmet": {
-          "new": 127575,
-          "likeNew": 71196,
-          "likeNewDur": "42/50",
-          "worn": 59007,
-          "wornDur": "35/50"
-        },
-        "helmet-sh-matzka-2-helmet": {
-          "new": 250866,
-          "likeNew": 210956,
-          "likeNewDur": "55/65",
-          "worn": 162324,
-          "wornDur": "46/65"
-        },
-        "helmet-sh60-military-helmet": {
-          "new": 172800,
-          "likeNew": 151206,
-          "likeNewDur": "42/50",
-          "worn": 141298,
-          "wornDur": "35/50"
-        },
-        "helmet-sh50-military-helmet": {
-          "new": 154560,
-          "likeNew": 110732,
-          "likeNewDur": "51/60",
-          "worn": 101880,
-          "wornDur": "42/60"
-        },
-        "helmet-fa-assault-tactical-helmet": {
-          "new": 212499,
-          "likeNew": 152650,
-          "likeNewDur": "42/50",
-          "worn": 168084,
-          "wornDur": "35/50"
-        },
-        "helmet-03-heavy-tactical-helmet": {
-          "new": 347886,
-          "likeNew": 263940,
-          "likeNewDur": "38/45",
-          "worn": 236215,
-          "wornDur": "32/45"
-        },
-        "helmet-rsp-heavy-tactical-helmet": {
-          "new": 252590,
-          "likeNew": 156952,
-          "likeNewDur": "47/55",
-          "worn": 161082,
-          "wornDur": "38/55"
-        },
-        "helmet-an95-heavy-blast-helmet": {
-          "new": 401760,
-          "likeNew": 273700,
-          "likeNewDur": "47/55",
-          "worn": 317874,
-          "wornDur": "38/55"
-        },
-        "helmet-6bnt-helmet": {
-          "new": 453915,
-          "likeNew": 422496,
-          "likeNewDur": "64/75",
-          "worn": 395520,
-          "wornDur": "52/75"
-        },
-        "helmet-rst-special-forces-helmet": {
-          "new": 587648,
-          "likeNew": 457050,
-          "likeNewDur": "64/75",
-          "worn": 444627,
-          "wornDur": "52/75"
-        },
-        "helmet-hg84-offensive-helmet": {
-          "new": 369588,
-          "likeNew": 320184,
-          "likeNewDur": "60/70",
-          "worn": 344844,
-          "wornDur": "49/70"
-        },
-        "helmet-ind50-heavy-tactical-helmet": {
-          "worn": 336948,
-          "wornDur": "42/60"
-        },
-        "helmet-dod9-blast-helmet": {
-          "worn": 477432,
-          "wornDur": "52/75"
-        },
-        "helmet-as200-heavy-tactical-helmet": {
-          "worn": 388875,
-          "wornDur": "46/65"
-        },
-        "mask-dk5-universal-bullet": {
-          "new": 10692,
-          "worn": 2964,
-          "wornDur": "28/40"
-        },
-        "mask-sh-universal-bulletp": {
-          "new": 17856,
-          "worn": 5168,
-          "wornDur": "21/30"
-        },
-        "mask-dk6-security-ballist": {
-          "new": 31500,
-          "worn": 13515,
-          "wornDur": "32/45"
-        },
-        "mask-sh60-mask": {
-          "new": 22052,
-          "worn": 13578,
-          "wornDur": "24/35"
-        },
-        "mask-dk8-military-bulletp": {
-          "new": 41752,
-          "worn": 17100,
-          "wornDur": "32/45"
-        },
-        "mask-dk7-premium-bulletp": {
-          "new": 18540,
-          "worn": 8626,
-          "wornDur": "35/50"
-        },
-        "mask-an95-military": {
-          "new": 30870,
-          "worn": 8816,
-          "wornDur": "35/50"
-        },
-        "mask-sh-matzka-mask": {
-          "new": 72488,
-          "worn": 20938,
-          "wornDur": "35/50"
-        },
-        "mask-sh65-military-mask-a": {
-          "new": 27360,
-          "worn": 22230,
-          "wornDur": "38/55"
-        },
-        "mask-6bnt-blast-mask": {
-          "new": 91800,
-          "worn": 31312,
-          "wornDur": "49/70"
-        },
-        "mask-sh65-military-mask-b": {
-          "new": 114000,
-          "worn": 43472,
-          "wornDur": "46/65"
-        },
-        "mask-rst-special-forces-mask": {
-          "new": 235056,
-          "worn": 57722,
-          "wornDur": "49/70"
-        },
-        "body-armor-retro-sapper-bulletproof-chest-armor": 7820,
-        "body-armor-old-security-body-armor": 8930,
-        "body-armor-retro-bulletproof-vest": 8832,
-        "body-armor-security-body-armor": 10011,
-        "body-armor-retro-infantry-bulletproof-vest": 19383,
-        "body-armor-220-body-armor": 11040,
-        "body-armor-h-lc-lightweight-body-armor": 48884,
-        "body-armor-h-tac-swat-body-armor": {
-          "new": 44226,
-          "likeNew": 35088,
-          "likeNewDur": "30/35",
-          "worn": 33957,
-          "wornDur": "24/35"
-        },
-        "body-armor-kn-regulation-body-armor": {
-          "new": 27885,
-          "likeNew": 28116,
-          "likeNewDur": "30/35",
-          "worn": 23270,
-          "wornDur": "24/35"
-        },
-        "body-armor-pca350-body-armor": {
-          "new": 30624,
-          "likeNew": 25088,
-          "likeNewDur": "42/50",
-          "worn": 20515,
-          "wornDur": "35/50"
-        },
-        "body-armor-kn-assault-body-armor": {
-          "new": 64770,
-          "likeNew": 30409,
-          "likeNewDur": "42/50",
-          "worn": 42502,
-          "wornDur": "35/50"
-        },
-        "body-armor-standard-swat-armor": {
-          "new": 42768,
-          "likeNew": 31255,
-          "likeNewDur": "38/45",
-          "worn": 29068,
-          "wornDur": "32/45"
-        },
-        "body-armor-sek-fortress-body-armor": {
-          "new": 80465,
-          "likeNew": 68688,
-          "likeNewDur": "42/50",
-          "worn": 55848,
-          "wornDur": "35/50"
-        },
-        "body-armor-6b23-body-armor": {
-          "new": 151074,
-          "likeNew": 95992,
-          "likeNewDur": "60/70",
-          "worn": 95200,
-          "wornDur": "49/70"
-        },
-        "body-armor-6b13-body-armor": {
-          "new": 82998,
-          "likeNew": 69972,
-          "likeNewDur": "55/65",
-          "worn": 43662,
-          "wornDur": "46/65"
-        },
-        "body-armor-ind401-body-armor": {
-          "new": 75900,
-          "likeNew": 63668,
-          "likeNewDur": "47/55",
-          "worn": 52116,
-          "wornDur": "38/55"
-        },
-        "body-armor-spartan-b-body-armor": {
-          "new": 122430,
-          "likeNew": 94162,
-          "likeNewDur": "42/50",
-          "worn": 86496,
-          "wornDur": "35/50"
-        },
-        "body-armor-926-composite-body-armor": {
-          "new": 266916,
-          "likeNew": 210596,
-          "likeNewDur": "60/70",
-          "worn": 216560,
-          "wornDur": "49/70"
-        },
-        "body-armor-h-lc-tactical-body-armor": {
-          "new": 287927,
-          "likeNew": 263760,
-          "likeNewDur": "60/70",
-          "worn": 227752,
-          "wornDur": "49/70"
-        },
-        "body-armor-imtv-samurai-assault-body-armor": {
-          "new": 337092,
-          "likeNew": 312352,
+        "body-armor-defender-m4-heavy-body-armor": {
+          "new": 295812,
+          "likeNew": 251180,
           "likeNewDur": "68/80",
-          "worn": 244475,
+          "worn": 209160,
           "wornDur": "56/80"
         },
-        "body-armor-imtv-samurai-standard-body-armor": {
-          "new": 335340,
-          "likeNew": 303507,
-          "likeNewDur": "60/70",
-          "worn": 239075,
-          "wornDur": "49/70"
-        },
-        "body-armor-imtv-samurai-full-protection-body-armor": {
-          "new": 344172,
-          "likeNew": 289980,
-          "likeNewDur": "76/90",
-          "worn": 253476,
-          "wornDur": "63/90"
-        },
-        "body-armor-bt6-heavy-body-armor": {
-          "new": 544320,
-          "likeNew": 416415,
-          "likeNewDur": "76/90",
-          "worn": 353694,
-          "wornDur": "63/90"
-        },
-        "body-armor-bt101-tactical-body-armor": {
-          "new": 1180718,
-          "likeNew": 961844,
-          "likeNewDur": "85/100",
-          "worn": 718770,
-          "wornDur": "70/100"
-        },
-        "body-armor-6b45-heavy-body-armor": {
-          "new": 974806,
-          "likeNew": 827736,
-          "likeNewDur": "102/120",
-          "worn": 712896,
-          "wornDur": "84/120"
-        },
-        "body-armor-marshal-heavy-body-armor": {
-          "new": 955500,
-          "likeNew": 836264,
-          "likeNewDur": "98/115",
-          "worn": 680595,
-          "wornDur": "80/115"
-        },
-        "body-armor-kn-composite-body-armor": {
-          "worn": 842886,
-          "wornDur": "77/110"
+        "body-armor-defender-m4-heavy-armor-officer-skin": {
+          "new": 301186,
+          "likeNew": 252624,
+          "likeNewDur": "68/80",
+          "worn": 213786,
+          "wornDur": "56/80"
         },
         "unarmored-chest-rigs-service-tactical-vest": 27720,
         "unarmored-chest-rigs-rap-simple-chest-rig": 48240,
@@ -13887,56 +13440,6 @@ window.ABI_PRICES = {
         "unarmored-chest-rigs-fa-commander-chest-rig": 121664,
         "unarmored-chest-rigs-b6-tactical-chest-rig": 82080,
         "unarmored-chest-rigs-926-premium-field-chest-rig": 191730,
-        "armored-rig-m1955-combat-vest": 24948,
-        "armored-rig-6b5-armored-rig": 89760,
-        "armored-rig-sentry-3-armored-chest-rig": 65940,
-        "armored-rig-926-security-armored-chest-rig": 74048,
-        "armored-rig-sentry-305-armored-chest-rig": 100232,
-        "armored-rig-tm1-armored-rig": 125706,
-        "armored-rig-tm2-armored-rig": 110912,
-        "armored-rig-h-tac-a8-armored-rig": {
-          "new": 300768,
-          "worn": 192150,
-          "wornDur": "42/60"
-        },
-        "armored-rig-warrior-heavy-armored-chest-rig": {
-          "new": 319707,
-          "worn": 199808,
-          "wornDur": "38/55"
-        },
-        "armored-rig-h-tac-a9-armored-rig": {
-          "new": 299943,
-          "worn": 213218,
-          "wornDur": "46/65"
-        },
-        "armored-rig-defender-m4-heavy-armored-rig": {
-          "new": 381024,
-          "worn": 290628,
-          "wornDur": "70/100"
-        },
-        "armored-rig-spartan-c-heavy-armored-rig": {
-          "new": 937827,
-          "worn": 700631,
-          "wornDur": "70/100"
-        },
-        "armored-rig-al-tactical-armored-rig": {
-          "new": 984256,
-          "worn": 593856,
-          "wornDur": "66/95"
-        },
-        "armored-rig-avs-heavy-armored-rig": {
-          "new": 1003275,
-          "worn": 680967,
-          "wornDur": "63/90"
-        },
-        "armored-rig-al-commander-armored-rig": {
-          "worn": 773920,
-          "wornDur": "70/100"
-        },
-        "armored-rig-al-assault-armored-rig": {
-          "worn": 669840,
-          "wornDur": "63/90"
-        },
         "backpack-sling-bag": 3267,
         "backpack-lightweight-camping-backpack": 3280,
         "backpack-medium-camping-backpack": 2256,
@@ -15535,6 +15038,657 @@ window.ABI_PRICES = {
         "miscellaneous-medical-item-h2o2": 5096,
         "miscellaneous-medical-item-medical-scissors": 3850,
         "miscellaneous-medical-item-disinfectant": 5253,
+        "helmet-kelsey-fire-helmet": {
+          "worn": 3026,
+          "wornDur": "7/10",
+          "new": 4320,
+          "likeNew": 3731,
+          "likeNewDur": "8/10"
+        },
+        "helmet-lightweight-safety-helmet": {
+          "worn": 3256,
+          "wornDur": "10/15",
+          "new": 4732,
+          "likeNew": 4092,
+          "likeNewDur": "13/15"
+        },
+        "helmet-motorcycle-helmet": {
+          "worn": 3432,
+          "wornDur": "10/15",
+          "new": 3510,
+          "likeNew": 1748,
+          "likeNewDur": "13/15"
+        },
+        "helmet-tanker-protective-cap": {
+          "worn": 3654,
+          "wornDur": "14/20",
+          "new": 5510,
+          "likeNew": 4550,
+          "likeNewDur": "17/20"
+        },
+        "helmet-retro-military-helmet": {
+          "worn": 7462,
+          "wornDur": "14/20",
+          "new": 10695,
+          "likeNew": 4059,
+          "likeNewDur": "17/20"
+        },
+        "helmet-retro-steel-helmet": {
+          "worn": 5100,
+          "wornDur": "18/25",
+          "new": 5474,
+          "likeNew": 4040,
+          "likeNewDur": "21/25"
+        },
+        "helmet-security-helmet": {
+          "worn": 8463,
+          "wornDur": "14/20",
+          "new": 11960,
+          "likeNew": 4218,
+          "likeNewDur": "17/20"
+        },
+        "body-armor-retro-sapper-bulletproof-chest-armor": {
+          "worn": 5429,
+          "wornDur": "18/25",
+          "new": 7820,
+          "likeNew": 6480,
+          "likeNewDur": "21/25"
+        },
+        "body-armor-old-security-body-armor": {
+          "worn": 6256,
+          "wornDur": "18/25",
+          "new": 8930,
+          "likeNew": 7209,
+          "likeNewDur": "21/25"
+        },
+        "body-armor-retro-bulletproof-vest": {
+          "worn": 6141,
+          "wornDur": "14/20",
+          "new": 8832,
+          "likeNew": 6889,
+          "likeNewDur": "17/20"
+        },
+        "body-armor-security-body-armor": {
+          "worn": 8512,
+          "wornDur": "18/25",
+          "new": 10011,
+          "likeNew": 7020,
+          "likeNewDur": "21/25"
+        },
+        "body-armor-retro-infantry-bulletproof-vest": {
+          "worn": 14382,
+          "wornDur": "21/30",
+          "new": 19383,
+          "likeNew": 7320,
+          "likeNewDur": "26/30"
+        },
+        "body-armor-220-body-armor": {
+          "worn": 8944,
+          "wornDur": "21/30",
+          "new": 11040,
+          "likeNew": 8034,
+          "likeNewDur": "26/30"
+        },
+        "body-armor-h-lc-lightweight-body-armor": {
+          "worn": 32736,
+          "wornDur": "38/55",
+          "new": 48884,
+          "likeNew": 29638,
+          "likeNewDur": "47/55"
+        },
+        "body-armor-h-tac-swat-body-armor": {
+          "worn": 33957,
+          "wornDur": "24/35",
+          "new": 44226,
+          "likeNew": 35088,
+          "likeNewDur": "30/35"
+        },
+        "body-armor-kn-regulation-body-armor": {
+          "worn": 23270,
+          "wornDur": "24/35",
+          "new": 27885,
+          "likeNew": 28116,
+          "likeNewDur": "30/35"
+        },
+        "body-armor-pca350-body-armor": {
+          "worn": 20515,
+          "wornDur": "35/50",
+          "new": 30624,
+          "likeNew": 25088,
+          "likeNewDur": "42/50"
+        },
+        "body-armor-kn-assault-body-armor": {
+          "worn": 42502,
+          "wornDur": "35/50",
+          "new": 64770,
+          "likeNew": 30409,
+          "likeNewDur": "42/50"
+        },
+        "body-armor-standard-swat-armor": {
+          "worn": 29068,
+          "wornDur": "32/45",
+          "new": 42768,
+          "likeNew": 31255,
+          "likeNewDur": "38/45"
+        },
+        "body-armor-sek-fortress-body-armor": {
+          "worn": 55848,
+          "wornDur": "35/50",
+          "new": 80465,
+          "likeNew": 68688,
+          "likeNewDur": "42/50"
+        },
+        "body-armor-6b23-body-armor": {
+          "worn": 95200,
+          "wornDur": "49/70",
+          "new": 151074,
+          "likeNew": 95992,
+          "likeNewDur": "60/70"
+        },
+        "body-armor-kn-composite-body-armor": {
+          "new": 1241877,
+          "likeNew": 1123200,
+          "likeNewDur": "94/110",
+          "worn": 842886,
+          "wornDur": "77/110"
+        },
+        "armored-rig-m1955-combat-vest": {
+          "likeNew": 21700,
+          "likeNewDur": "17/20",
+          "worn": 17557,
+          "wornDur": "14/20",
+          "new": 24948
+        },
+        "armored-rig-6b5-armored-rig": {
+          "likeNew": 61446,
+          "likeNewDur": "30/35",
+          "worn": 62304,
+          "wornDur": "24/35",
+          "new": 89760
+        },
+        "armored-rig-sentry-3-armored-chest-rig": {
+          "likeNew": 63270,
+          "likeNewDur": "26/30",
+          "worn": 64264,
+          "wornDur": "21/30",
+          "new": 65940
+        },
+        "armored-rig-926-security-armored-chest-rig": {
+          "likeNew": 54444,
+          "likeNewDur": "21/25",
+          "worn": 70440,
+          "wornDur": "18/25",
+          "new": 74048
+        },
+        "armored-rig-sentry-305-armored-chest-rig": {
+          "likeNew": 87450,
+          "likeNewDur": "42/50",
+          "worn": 94428,
+          "wornDur": "35/50",
+          "new": 100232
+        },
+        "armored-rig-tm1-armored-rig": {
+          "likeNew": 82404,
+          "likeNewDur": "34/40",
+          "worn": 101120,
+          "wornDur": "28/40",
+          "new": 125706
+        },
+        "armored-rig-tm2-armored-rig": {
+          "likeNew": 104811,
+          "likeNewDur": "38/45",
+          "worn": 128472,
+          "wornDur": "32/45",
+          "new": 110912
+        },
+        "helmet-aviator-helmet": {
+          "new": 12236,
+          "likeNew": 4600,
+          "likeNewDur": "17/20",
+          "worn": 8544,
+          "wornDur": "14/20"
+        },
+        "helmet-security-riot-helmet": {
+          "new": 12467,
+          "likeNew": 10413,
+          "likeNewDur": "19/22",
+          "worn": 8918,
+          "wornDur": "15/22"
+        },
+        "helmet-pas-standard-helmet": {
+          "new": 6912,
+          "likeNew": 6273,
+          "likeNewDur": "21/25",
+          "worn": 6180,
+          "wornDur": "18/25"
+        },
+        "helmet-pas2-helmet": {
+          "new": 24768,
+          "likeNew": 18130,
+          "likeNewDur": "24/28",
+          "worn": 16728,
+          "wornDur": "20/28"
+        },
+        "helmet-f70-tactical-helmet": {
+          "new": 43596,
+          "likeNew": 42630,
+          "likeNewDur": "21/25",
+          "worn": 34892,
+          "wornDur": "18/25"
+        },
+        "helmet-sh12-military-helmet": {
+          "new": 39550,
+          "likeNew": 35343,
+          "likeNewDur": "26/30",
+          "worn": 31122,
+          "wornDur": "21/30"
+        },
+        "helmet-6b4-helmet": {
+          "new": 37558,
+          "likeNew": 26134,
+          "likeNewDur": "26/30",
+          "worn": 25926,
+          "wornDur": "21/30"
+        },
+        "helmet-6b4-helmet-squad-s": {
+          "new": 36292,
+          "likeNew": 27208,
+          "likeNewDur": "26/30",
+          "worn": 24734,
+          "wornDur": "21/30"
+        },
+        "helmet-6b5-helmet": {
+          "new": 38016,
+          "likeNew": 25773,
+          "likeNewDur": "30/35",
+          "worn": 26230,
+          "wornDur": "24/35"
+        },
+        "helmet-sh40-military-helmet": {
+          "new": 40480,
+          "likeNew": 28036,
+          "likeNewDur": "42/50",
+          "worn": 30780,
+          "wornDur": "35/50"
+        },
+        "helmet-ind-tactical-helmet": {
+          "new": 48951,
+          "likeNew": 46989,
+          "likeNewDur": "30/35",
+          "worn": 38760,
+          "wornDur": "24/35"
+        },
+        "helmet-ind-tactical-helmet-snow": {
+          "new": 49984,
+          "likeNew": 43776,
+          "likeNewDur": "30/35",
+          "worn": 34953,
+          "wornDur": "24/35"
+        },
+        "helmet-ind200-helmet": {
+          "new": 56304,
+          "likeNew": 46995,
+          "likeNewDur": "34/40",
+          "worn": 38336,
+          "wornDur": "28/40"
+        },
+        "helmet-f80-tactical-helmet": {
+          "new": 40368,
+          "likeNew": 34639,
+          "likeNewDur": "30/35",
+          "worn": 30282,
+          "wornDur": "24/35"
+        },
+        "helmet-sh18-military-helmet": {
+          "new": 60300,
+          "likeNew": 52074,
+          "likeNewDur": "38/45",
+          "worn": 46931,
+          "wornDur": "32/45"
+        },
+        "helmet-kss-tactical-helmet": {
+          "new": 85085,
+          "likeNew": 58859,
+          "likeNewDur": "34/40",
+          "worn": 63204,
+          "wornDur": "28/40"
+        },
+        "helmet-kss2-tactical-helmet": {
+          "new": 91200,
+          "likeNew": 66640,
+          "likeNewDur": "38/45",
+          "worn": 61424,
+          "wornDur": "32/45"
+        },
+        "helmet-56k-helicopter-helmet": {
+          "new": 127575,
+          "likeNew": 71196,
+          "likeNewDur": "42/50",
+          "worn": 59007,
+          "wornDur": "35/50"
+        },
+        "helmet-sh-matzka-2-helmet": {
+          "new": 250866,
+          "likeNew": 210956,
+          "likeNewDur": "55/65",
+          "worn": 162324,
+          "wornDur": "46/65"
+        },
+        "helmet-sh60-military-helmet": {
+          "new": 172800,
+          "likeNew": 151206,
+          "likeNewDur": "42/50",
+          "worn": 141298,
+          "wornDur": "35/50"
+        },
+        "helmet-sh50-military-helmet": {
+          "new": 154560,
+          "likeNew": 110732,
+          "likeNewDur": "51/60",
+          "worn": 101880,
+          "wornDur": "42/60"
+        },
+        "helmet-fa-assault-tactical-helmet": {
+          "new": 212499,
+          "likeNew": 152650,
+          "likeNewDur": "42/50",
+          "worn": 168084,
+          "wornDur": "35/50"
+        },
+        "helmet-03-heavy-tactical-helmet": {
+          "new": 347886,
+          "likeNew": 263940,
+          "likeNewDur": "38/45",
+          "worn": 236215,
+          "wornDur": "32/45"
+        },
+        "helmet-rsp-heavy-tactical-helmet": {
+          "new": 252590,
+          "likeNew": 156952,
+          "likeNewDur": "47/55",
+          "worn": 161082,
+          "wornDur": "38/55"
+        },
+        "helmet-an95-heavy-blast-helmet": {
+          "new": 401760,
+          "likeNew": 273700,
+          "likeNewDur": "47/55",
+          "worn": 317874,
+          "wornDur": "38/55"
+        },
+        "helmet-6bnt-helmet": {
+          "new": 453915,
+          "likeNew": 422496,
+          "likeNewDur": "64/75",
+          "worn": 395520,
+          "wornDur": "52/75"
+        },
+        "helmet-rst-special-forces-helmet": {
+          "new": 587648,
+          "likeNew": 457050,
+          "likeNewDur": "64/75",
+          "worn": 444627,
+          "wornDur": "52/75"
+        },
+        "helmet-hg84-offensive-helmet": {
+          "new": 369588,
+          "likeNew": 320184,
+          "likeNewDur": "60/70",
+          "worn": 344844,
+          "wornDur": "49/70"
+        },
+        "helmet-ind50-heavy-tactical-helmet": {
+          "new": 477927,
+          "likeNew": 380619,
+          "likeNewDur": "51/60",
+          "worn": 336948,
+          "wornDur": "42/60"
+        },
+        "helmet-dod9-blast-helmet": {
+          "new": 615104,
+          "likeNew": 541730,
+          "likeNewDur": "64/75",
+          "worn": 477432,
+          "wornDur": "52/75"
+        },
+        "helmet-as200-heavy-tactical-helmet": {
+          "new": 546000,
+          "likeNew": 412680,
+          "likeNewDur": "55/65",
+          "worn": 388875,
+          "wornDur": "46/65"
+        },
+        "mask-dk5-universal-bullet": {
+          "new": 10692,
+          "likeNew": 9114,
+          "likeNewDur": "34/40",
+          "worn": 2964,
+          "wornDur": "28/40"
+        },
+        "mask-sh-universal-bulletp": {
+          "new": 17856,
+          "likeNew": 15811,
+          "likeNewDur": "26/30",
+          "worn": 5168,
+          "wornDur": "21/30"
+        },
+        "mask-dk6-security-ballist": {
+          "new": 31500,
+          "likeNew": 26082,
+          "likeNewDur": "38/45",
+          "worn": 13515,
+          "wornDur": "32/45"
+        },
+        "mask-sh60-mask": {
+          "new": 22052,
+          "likeNew": 9918,
+          "likeNewDur": "30/35",
+          "worn": 13578,
+          "wornDur": "24/35"
+        },
+        "mask-dk8-military-bulletp": {
+          "new": 41752,
+          "likeNew": 36584,
+          "likeNewDur": "38/45",
+          "worn": 17100,
+          "wornDur": "32/45"
+        },
+        "mask-dk7-premium-bulletp": {
+          "new": 18540,
+          "likeNew": 19454,
+          "likeNewDur": "42/50",
+          "worn": 8626,
+          "wornDur": "35/50"
+        },
+        "mask-an95-military": {
+          "new": 30870,
+          "likeNew": 26600,
+          "likeNewDur": "42/50",
+          "worn": 8816,
+          "wornDur": "35/50"
+        },
+        "mask-sh-matzka-mask": {
+          "new": 72488,
+          "likeNew": 29026,
+          "likeNewDur": "42/50",
+          "worn": 20938,
+          "wornDur": "35/50"
+        },
+        "mask-sh65-military-mask-a": {
+          "new": 27360,
+          "likeNew": 30644,
+          "likeNewDur": "47/55",
+          "worn": 22230,
+          "wornDur": "38/55"
+        },
+        "mask-6bnt-blast-mask": {
+          "new": 91800,
+          "likeNew": 37544,
+          "likeNewDur": "60/70",
+          "worn": 31312,
+          "wornDur": "49/70"
+        },
+        "mask-sh65-military-mask-b": {
+          "new": 114000,
+          "likeNew": 51604,
+          "likeNewDur": "55/65",
+          "worn": 43472,
+          "wornDur": "46/65"
+        },
+        "mask-rst-special-forces-mask": {
+          "new": 235056,
+          "likeNew": 173090,
+          "likeNewDur": "60/70",
+          "worn": 57722,
+          "wornDur": "49/70"
+        },
+        "body-armor-6b13-body-armor": {
+          "new": 82998,
+          "likeNew": 69972,
+          "likeNewDur": "55/65",
+          "worn": 43662,
+          "wornDur": "46/65"
+        },
+        "body-armor-ind401-body-armor": {
+          "new": 75900,
+          "likeNew": 63668,
+          "likeNewDur": "47/55",
+          "worn": 52116,
+          "wornDur": "38/55"
+        },
+        "body-armor-spartan-b-body-armor": {
+          "new": 122430,
+          "likeNew": 94162,
+          "likeNewDur": "42/50",
+          "worn": 86496,
+          "wornDur": "35/50"
+        },
+        "body-armor-926-composite-body-armor": {
+          "new": 266916,
+          "likeNew": 210596,
+          "likeNewDur": "60/70",
+          "worn": 216560,
+          "wornDur": "49/70"
+        },
+        "body-armor-h-lc-tactical-body-armor": {
+          "new": 287927,
+          "likeNew": 263760,
+          "likeNewDur": "60/70",
+          "worn": 227752,
+          "wornDur": "49/70"
+        },
+        "body-armor-imtv-samurai-assault-body-armor": {
+          "new": 337092,
+          "likeNew": 312352,
+          "likeNewDur": "68/80",
+          "worn": 244475,
+          "wornDur": "56/80"
+        },
+        "body-armor-imtv-samurai-standard-body-armor": {
+          "new": 335340,
+          "likeNew": 303507,
+          "likeNewDur": "60/70",
+          "worn": 239075,
+          "wornDur": "49/70"
+        },
+        "body-armor-imtv-samurai-full-protection-body-armor": {
+          "new": 344172,
+          "likeNew": 289980,
+          "likeNewDur": "76/90",
+          "worn": 253476,
+          "wornDur": "63/90"
+        },
+        "body-armor-bt6-heavy-body-armor": {
+          "new": 544320,
+          "likeNew": 416415,
+          "likeNewDur": "76/90",
+          "worn": 353694,
+          "wornDur": "63/90"
+        },
+        "body-armor-bt101-tactical-body-armor": {
+          "new": 1180718,
+          "likeNew": 961844,
+          "likeNewDur": "85/100",
+          "worn": 718770,
+          "wornDur": "70/100"
+        },
+        "body-armor-6b45-heavy-body-armor": {
+          "new": 974806,
+          "likeNew": 827736,
+          "likeNewDur": "102/120",
+          "worn": 712896,
+          "wornDur": "84/120"
+        },
+        "body-armor-marshal-heavy-body-armor": {
+          "new": 955500,
+          "likeNew": 836264,
+          "likeNewDur": "98/115",
+          "worn": 680595,
+          "wornDur": "80/115"
+        },
+        "armored-rig-h-tac-a8-armored-rig": {
+          "new": 300768,
+          "likeNew": 282609,
+          "likeNewDur": "51/60",
+          "worn": 192150,
+          "wornDur": "42/60"
+        },
+        "armored-rig-warrior-heavy-armored-chest-rig": {
+          "new": 319707,
+          "likeNew": 275044,
+          "likeNewDur": "47/55",
+          "worn": 199808,
+          "wornDur": "38/55"
+        },
+        "armored-rig-h-tac-a9-armored-rig": {
+          "new": 299943,
+          "likeNew": 299060,
+          "likeNewDur": "55/65",
+          "worn": 213218,
+          "wornDur": "46/65"
+        },
+        "armored-rig-defender-m4-heavy-armored-rig": {
+          "new": 381024,
+          "likeNew": 338690,
+          "likeNewDur": "85/100",
+          "worn": 290628,
+          "wornDur": "70/100"
+        },
+        "armored-rig-spartan-c-heavy-armored-rig": {
+          "new": 937827,
+          "likeNew": 831648,
+          "likeNewDur": "85/100",
+          "worn": 700631,
+          "wornDur": "70/100"
+        },
+        "armored-rig-al-tactical-armored-rig": {
+          "new": 984256,
+          "likeNew": 1037634,
+          "likeNewDur": "81/95",
+          "worn": 593856,
+          "wornDur": "66/95"
+        },
+        "armored-rig-avs-heavy-armored-rig": {
+          "new": 1003275,
+          "likeNew": 1179711,
+          "likeNewDur": "76/90",
+          "worn": 680967,
+          "wornDur": "63/90"
+        },
+        "armored-rig-al-commander-armored-rig": {
+          "new": 1203417,
+          "likeNew": 888353,
+          "likeNewDur": "85/100",
+          "worn": 773920,
+          "wornDur": "70/100"
+        },
+        "armored-rig-al-assault-armored-rig": {
+          "new": 1200644,
+          "likeNew": 1004250,
+          "likeNewDur": "76/90",
+          "worn": 669840,
+          "wornDur": "63/90"
+        },
         "7-62x39mm-ammo-7-62x39mm-lp": 82,
         "7-62x39mm-ammo-7-62x39mm-us": 147,
         "7-62x39mm-ammo-7-62x39mm-hp": 396,
