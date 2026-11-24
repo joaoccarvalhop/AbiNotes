@@ -1759,7 +1759,7 @@ button.mc-sum:hover { border-color: var(--line-2); background: rgba(255,255,255,
 .sm-entry .mc-pic { width: 30px; height: 30px; } .sm-entry .mc-pic img { width: 26px; height: 26px; }
 .sm-entry b { text-align: right; } .sm-eins { display: flex; gap: 3px; } .sm-arrow { color: var(--dim); text-align: center; }
 @media (max-width: 1100px) { .sm-lower { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 760px) { .sm-station { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sm-to { display: none; } .sm-stats { grid-template-columns: minmax(0, 1fr); } .sm-stat + .sm-stat { border-left: 0; border-top: 1px solid var(--line); } .sm-stat { padding-left: 0; } }
+@media (max-width: 760px) { .sm-to { display: none; } .sm-stats { grid-template-columns: minmax(0, 1fr); } .sm-stat + .sm-stat { border-left: 0; border-top: 1px solid var(--line); } .sm-stat { padding-left: 0; } }
 
 /* ---------- phones: one block, so the desktop rules above stay as they are ----------
    the top bar keeps to two short rows (logo, search, Share; then the sections, sliding sideways), every row of tabs

@@ -1,6 +1,6 @@
 /* The Maps page: loaded the first time it opens (loadPage in app.js). What the rest of the hub uses (MAP_LIST,
-   the key doors, reading route codes, and openRouteOnMap / openMarkerOnMap / refreshMaps, which load this file
-   first) is in app.js. */
+   the key doors, reading route codes, and openRouteOnMap / openMarkerOnMap / planRouteOnMap / refreshMaps, which
+   load this file first) is in js/page-data.js. */
 import { area, registerPage, setArea } from "../app.js";
 import { $, button, clearButton, clone, data, delButton, el, emptyNote, icon, isPhone, K, ls, norm, reduceMotion, setDirty, swapIn } from "../js/base.js";
 import { today } from "../js/market-data.js";

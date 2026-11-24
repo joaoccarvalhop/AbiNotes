@@ -1,7 +1,3 @@
-# Built zip (rebuilt with tools\make_zip.py)
-ABI-Hub.zip
-*.zip
-
 # Scraped/working data from the tools (large, not needed by the page)
 tools/out/
 __pycache__/

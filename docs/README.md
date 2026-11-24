@@ -19,16 +19,16 @@ O código são **módulos JavaScript** (`import`/`export`), por isso a página p
 | `js/ui.js` | Interface partilhada: janelas (abrir, fechar, ← Back de uma para outra), confirmação, seletor com imagens, dropdowns, caixas de filtros, toast. |
 | `js/overlays/*.js` | As janelas que se abrem de qualquer página: gear, arma (com o cartão de build), loadout (detalhe e editar), preço, add build. |
 | `js/share.js`, `js/search.js` | Share/Backup, e a pesquisa global da barra de cima. |
-| `pages/*.js` | Uma por página (Home, Builds, Loadouts, Market, Gear, Tier list, Maps, Keybinds, Merchant, Smelter, Trading): o que só essa página desenha. Carregam na primeira vez que a página abre, com os dados que só ela usa (os do Merchant, cerca de 540 KB, só no Merchant e na Smelter). Cada uma regista-se com `registerPage` e o resto da app chama-a por `PAGES.<página>`, ou por `withPage` quando ela ainda não carregou (por exemplo `openRouteOnMap`). **Nada em `app.js` ou `js/` importa uma página.** |
+| `pages/*.js` | Uma por página (Home, Builds, Loadouts, Market, Gear, Tier list, Maps, Keybinds, Merchant, Smelter, Trading): o que só essa página desenha. Carregam na primeira vez que a página abre, com os dados que só ela usa (`PAGE_DATA` no `app.js`): o Merchant traz `merchant.js`, `merchant-ocr.js` e `merchant-sounds.js` (cerca de 540 KB), e a Smelter só o `merchant.js`. `pages/merchant-items.js` não é uma página: são os itens do Merchant (`MER`, `merPic`), que o Merchant e a Smelter importam. Cada uma regista-se com `registerPage` e o resto da app chama-a por `PAGES.<página>`, ou por `withPage` quando ela ainda não carregou (por exemplo `openRouteOnMap`). **Nada em `app.js` ou `js/` importa uma página.** |
 | `builds.js` | O conteúdo partilhado, igual para toda a gente. Define `window.ABI_BUILDS` com as builds por arma e os `loadouts` sugeridos. Não leva nada pessoal (keybinds, rotas, os teus loadouts): isso fica no browser de cada um (secção 2). |
 | `merchant.js` | Dados do Field Merchant (`window.ABI_MERCHANT`), tirados do ABI Builder por `tools/merchant_extract.py`: itens, os 38 sons, e as caixas de cada mapa/modo com o peso de cada item. |
-| `merchant-sounds.js` | Os 76 sons do Merchant (`window.ABI_MERCHANT_SOUNDS`), em data URLs, gerados por `tools/merchant_sounds.py`. São um `.js` e não `.ogg` soltos porque uma página aberta com duplo clique não consegue usar `fetch` em ficheiros locais. Se o ficheiro faltar, os sons vêm do ABI Builder. |
+| `merchant-sounds.js` | Os 76 sons do Merchant (`window.ABI_MERCHANT_SOUNDS`), em data URLs, gerados por `tools/merchant_sounds.py`. São um `.js` e não `.ogg` soltos por herança do tempo em que a página abria por `file://`; assim os sons continuam a vir com o site e não do ABI Builder. Se o ficheiro faltar, os sons vêm do ABI Builder (`MER.soundUrl`). |
+| `merchant-ocr.js` | O que o leitor de preços do Merchant já sabe de origem (`window.ABI_MERCHANT_OCR`): os algarismos, a vírgula, a moeda do cartão e as letras dos nomes de carga (secção 4.6). |
 | `prices.js` | Os preços. Define `window.ABI_PRICES`, com `items` e `snapshots` (uma leitura do mercado por data). |
 | `maps/<slug>/` | Um mapa: <br>• `data.js` — marcadores, pisos e modos <br>• `nav.js` — paredes para as rotas <br>• `nav-fix.json` — correções de paredes feitas à mão <br>• `tiles/` — imagens do mapa <br>• `floors/` — plantas de cada piso |
-| `tools/` | Scripts em Python para gerar e rever as paredes dos mapas (secção 5). Os resultados vão para `tools/out/`. |
+| `abi-keybinds.html`, `abi-keybinds.png` | Uma folha de keybinds à parte, que não faz parte do site, e a imagem que se tira dela. |
+| `tools/` | Os scripts que geram ou revêem o que a página usa (secção 5): as páginas (`make_pages.py`), as paredes dos mapas, os dados e sons do Merchant, os preços a partir de vídeos, e os testes de consola do Merchant. Os resultados vão para `tools/out/`. |
 | `docs/` | Esta documentação e a auditoria (`AUDITORIA.md`). |
-
-O `make_zip.py` também leva o `merchant.js`.
 
 Os slugs dos mapas são `farm`, `valley`, `northridge`, `armory`, `tv-station` e `airport`.
 
@@ -49,7 +49,7 @@ Já não há botão Save nem "Unsaved". Há duas camadas:
     - itens e leituras de preços que os ficheiros não têm.
   - Quando os ficheiros são atualizados, o partilhado novo aparece e o teu continua por cima. Não há conflitos nem avisos.
   - **Loadouts:** os do `builds.js` são partilhados (`sharedLoIds`). Editar um cria uma cópia tua ao lado ("Save as yours", "based on …") e só os teus têm Delete. O separador "Yours" mostra só os teus.
-  - **Keybinds:** toda a gente começa no Default do jogo. O "My setup" (`KB_MINE`) só aparece, uma vez, na cópia local de quem fez a página (`localhost`/`127.0.0.1`, ou `file://` como antes).
+  - **Keybinds:** toda a gente começa no Default do jogo. O "My setup" (`KB_MINE`) só aparece, uma vez, na cópia local de quem fez a página (servida em `localhost`/`127.0.0.1`).
   - **Migração:** os rascunhos antigos (`K.draft`, `K.priceDraft`) são lidos uma vez, passam para `K.mine` (sem contar builds como tiradas) e são apagados.
 - O resto das preferências também fica só no browser: favoritos, "In game", filtros, tier lists, smelts, códigos do Trading, a última secção aberta.
 - **Backup** (Share > Backup): "Download backup" gera um `.json` com todas as chaves `abi-*` do localStorage. "Restore a backup" pede confirmação, substitui essas chaves e recarrega a página. Serve para guardar as coisas ou passá-las para outro PC ou browser.
@@ -68,14 +68,16 @@ Cada loadout e cada rota têm o seu próprio botão Share, que abre a mesma jane
 
 ### Secções do código
 
-O código continua dividido por cabeçalhos `/* ---------- nome ---------- */`, agora espalhados pelos módulos da secção 1 (cada cabeçalho foi para o módulo do seu tema). A descrição abaixo é por tema, na ordem do antigo script único; o ficheiro de cada um está na tabela da secção 1.
+O código continua dividido por cabeçalhos `/* ---------- nome ---------- */`, agora espalhados pelos módulos da secção 1 (cada cabeçalho foi para o módulo do seu tema). A descrição abaixo é por tema; cada ponto diz em que ficheiro está.
+
+`render()`, `renderLoadouts()`, `renderMarket()`, `renderGear()` e `tlDraw()` estão no `app.js` e são só portas: redesenham a página respetiva se ela já carregou (`PAGES.<página>.draw`), e não fazem nada se não. Chamam-se depois de qualquer mudança nos dados, de onde for.
 
 **Regra dos módulos:** um módulo só pode usar ao carregar (código de topo, fora de funções) o que as camadas abaixo dele definem (`base` → dados por tema → `ui` → janelas/Share/pesquisa → `app.js`). Chamadas para cima só dentro de funções que correm depois (um clique). Se esta regra for quebrada, o browser mostra ao abrir `Cannot access 'x' before initialization`. Uma página nunca é importada: o núcleo chama-a por `PAGES`.
 
-Os principais, por ordem:
+Os principais:
 
-1. Constantes (`TIERS`, `ORDER`), **todas as chaves do browser em `K`**, `$`, `el` e `ls`.
-2. **Helpers partilhados**:
+1. **`js/base.js`**: constantes (`TIERS`, `ORDER`), **todas as chaves do browser em `K`**, `$`, `el` e `ls`.
+2. **Helpers partilhados** (`js/base.js`):
 
    | Helper | Para que serve |
    |---|---|
@@ -84,27 +86,30 @@ Os principais, por ordem:
    | `insertBuild(gun, b)` | põe uma build no sítio certo, por ordem de tier |
    | `button(label, {cls, tip, icon, onClick})` | cria um botão completo |
 
-3. Estado partilhado lido desde o arranque (por exemplo, os filtros do Builds).
-4. A camada pessoal (`mineOf`, `applyMine`, `setDirty`) e os nomes das builds.
-5. Áreas (Home, Builds, Loadouts, Market, Gear, Maps, Merchant, Smelter, Keybinds, Tier list) e as suas barras. "Home" é também o primeiro separador do topo (o logótipo continua a levar lá).
-6. Catálogo de equipamento, a aba Gear e a **overlay de detalhe** (`openGear`, `openExtra`, `openWeapon`). As stats base das armas (sem acessórios) estão em `WEAPON_STATS`, lidas do wiki do ABI Builder; os nomes seguem os do `builds.js` (ex.: "Deagle", "Mosin", "ZC807"). As stats de cada build (com acessórios) estão em `BUILD_STATS`, pelo código sem o "Mod Gun-": só existem para as builds publicadas no ABI Builder. As do So1o não estão online; a folha dele só tem custo, TTK e notas.
-7. **Overlays**:
+3. Estado partilhado lido desde o arranque, por exemplo o estado dos filtros do Builds (`bF`), em `js/base.js`. A caixa de filtros em si é da página (`pages/builds.js`).
+4. A camada pessoal (`mineOf`, `applyMine`, `setDirty`) e os nomes das builds (`js/base.js`).
+5. **Páginas e router** (`app.js`): Home, Builds, Loadouts, Market, Gear, Maps, Merchant, Smelter, Trading, Keybinds e Tier list (`AREAS_LIST`), cada uma com a sua barra por baixo do topo. `setArea` troca de página e de endereço, e `go` faz o mesmo dentro de uma View Transition. "Home" é também o primeiro separador do topo, e o logótipo leva lá. Os links do topo estão no `index.html`.
+   - **Páginas em ficheiro próprio** (`app.js`): `PAGES`, `registerPage`, `loadPage` (carrega os dados da página, `PAGE_DATA`, e depois o módulo), `drawPage` e `withPage`. `loadScript` carrega um ficheiro de dados uma vez. Os ficheiros em `FRESH` (`merchant.js`) vêm sempre de novo, como o `builds.js` e o `prices.js`.
+6. Catálogo de equipamento e stats (`js/gear-data.js`), a página Gear (`pages/gear.js`) e as **overlays de detalhe** (`openGear`, `openExtra` e `openWeapon` em `js/overlays/weapon.js`; o resto da janela de gear em `js/overlays/gear.js`). As stats base das armas (sem acessórios) estão em `WEAPON_STATS`, lidas do wiki do ABI Builder; os nomes seguem os do `builds.js` (ex.: "Deagle", "Mosin", "ZC807"). As stats de cada build (com acessórios) estão em `BUILD_STATS`, pelo código sem o "Mod Gun-": só existem para as builds publicadas no ABI Builder. As do So1o não estão online; a folha dele só tem custo, TTK e notas.
+7. **Overlays** (`js/ui.js`):
    - `closeDialog(dlg)` — fecha com o fade;
    - `wireDialog(dlg, close, xId)` — liga o X, o Esc e o clique no fundo;
    - `present(dlg, label, reopen)` — navega entre overlays com "← Back".
-8. Loadouts, editor de loadout e o picker com pesquisa (`makePicker`).
-9. **Widgets de filtros** (secção 4.4).
-10. Market, preços e histórico. Na caixa de filtros, "Condition" (All / New / Like New / Worn, em `mCond`) só aparece quando a lista tem equipamento com estados (`CONDITION_CATS`). Com um estado escolhido, o preço, a variação, o gráfico pequeno e a ordenação usam esse estado (`condHistory`, `condPrice`), a durabilidade aparece por baixo do preço e os itens que não se vendem nesse estado (Like New / Worn) ficam de fora.
-11. Keybinds.
-12. Builds: lista, cartões e caixa de filtros.
-13. Share e Import.
-14. Home (`renderHome`):
+8. Loadouts: os dados (`js/loadouts-data.js`), a página (`pages/loadouts.js`), a janela de detalhe e o editor (`js/overlays/loadout.js`). O picker com pesquisa (`makePicker`) está em `js/ui.js`.
+9. **Widgets de filtros** (`js/ui.js`, secção 4.4).
+10. Market, preços e histórico: os preços em `js/market-data.js`, a página em `pages/market.js`, a janela de preço em `js/overlays/price.js`. Na caixa de filtros, "Condition" (All / New / Like New / Worn, em `mCond`) só aparece quando a lista tem equipamento com estados (`CONDITION_CATS`). Com um estado escolhido, o preço, a variação, o gráfico pequeno e a ordenação usam esse estado (`condHistory`, `condPrice`), a durabilidade aparece por baixo do preço e os itens que não se vendem nesse estado (Like New / Worn) ficam de fora.
+11. Keybinds: os presets em `js/keybinds-data.js` (a Home e o Share usam-nos), a página em `pages/keybinds.js`.
+12. Builds: a lista e a caixa de filtros em `pages/builds.js`; o cartão de build em `js/overlays/weapon.js` (a janela da arma também o usa); Add build em `js/overlays/add-build.js`.
+13. Share, Import e Backup (`js/share.js`).
+14. Home (`renderHome`, em `pages/home.js`):
     - Em cima, uma faixa de boas-vindas (`.home-hero`). Ao fundo tem uma tira do próprio mapa de Farm (os tiles `maps/farm/tiles/base/<coluna>_<linha>.webp`, linhas 4–6 e colunas 4–20), escurecida. Por cima: o nome, os números (builds, loadouts, rotas, itens na tier list) e três ações: Add build, Add loadout e Plan a route.
     - Depois, um cartão por secção, pela ordem do topo; ao passar o rato acende a borda laranja. A seguir vêm os favoritos e as tuas rotas.
     - No fundo, "About & sources".
     - About (`openAbout`, `#about`): todas as fontes da página, por secção (`ABOUT_SOURCES`), cada uma com o link e para que serve. Uma fonte nova entra nessa lista.
-15. Maps (secção 4.5).
-16. Pesquisa global e arranque.
+15. Maps (`pages/maps.js`, secção 4.5). O que o resto da app usa dos mapas está em `js/page-data.js`.
+16. Tier list: as posições (`tl`, `tlRank`, `tlOrder`, os chips) em `js/rankings.js`, porque Builds, Gear, Loadouts, Home e Share as usam; a página em `pages/tiers.js`.
+17. Merchant (`pages/merchant.js`, secção 4.6), Smelter (`pages/smelter.js`) e Trading (`pages/trading.js`). O registo das smelts e o relógio da Trading ficam em `js/page-data.js`, porque a Home e o Share os usam.
+18. Pesquisa global (`js/search.js`) e arranque (fim do `app.js`).
     - `gsResults(v)` dá todos os resultados por grupo: Weapons, Loadouts, Gear, Market e Maps (as portas das keys).
     - A caixa mostra só alguns por grupo e acaba em "See all N results".
     - Esse link abre a overlay `#searchall` (`openSearchAll`), com um separador por grupo. Abre-se com `present()`, por isso quem abre um resultado tem "← Back to Search".
@@ -147,7 +152,7 @@ Os principais, por ordem:
   - **Tier list:** filas mais baixas e os Unranked presos ao fundo do ecrã: toca no item e depois na fila.
   - **Toque (`@media (hover: none)`):** o que aparece com o rato por cima fica sempre visível (o Share das rotas, o lixo, o ⓘ dos itens). Tocar em algo que só informa mostra o tooltip uns segundos; tocar num botão só faz a ação.
   - **Para ver:** `tools/mobile_preview.html` mostra o site em duas molduras de telemóvel (360 e 412 px). `go("maps")` abre uma secção nas duas.
-- **Números**: preços com `fmtKoen` (também no Merchant). Os custos já não levam "≈". Os tooltips são todos `data-tip`.
+- **Números**: preços com `fmtKoen` (também no Merchant). Os custos já não levam "≈". Os tooltips escrevem-se com `data-tip` (o sistema de tooltips também lê `title`, mas a regra é `data-tip`).
 - **Animações**: usam sempre o conjunto global `motion` (JS) e as classes `.a-*` (CSS), para serem iguais em todas as secções. Uma animação nova entra aí, não fica presa a uma secção.
   - Os keyframes antigos (`enter`, `pop`, `ddin`, `m-in`/`m-out`, `toast-in`, `mpswap`) também passaram a ser só fades. Assim as secções, as overlays, as dropdowns, os avisos e os cartões dos loadouts entram sem saltar. Ficam com movimento só o anel a pulsar no mapa e o deslizar das colunas dos Maps.
   - Só luz, sem movimento: `motion.in`/`stagger` (fade, um a seguir ao outro), `pop` (brilho laranja curto em algo escolhido), `tick` (um número que mudou), `nudge` (a seta acende), `flash` (algo acabado de juntar), `swap` (o conteúdo de uma caixa trocou, ex. um separador).
@@ -160,32 +165,33 @@ Os principais, por ordem:
 
 | Função | O que faz |
 |---|---|
-| `filterBox()` | A caixa. Tem: <br>• `.group(label, node, tip)` <br>• `.sort(dd)` <br>• `.clear(fn)` |
-| `ddSelect(label, [[value, label, sub?]], get, set)` | O dropdown. Um único listener na página fecha o que estiver aberto. |
-| `rangeFilter(what, fmt, onChange)` | O slider de dinheiro com duas pegas. Usado no custo dos Loadouts e nos preços do Gear. `.set(lo, hi, top, step)` desenha-o. |
-| `gearTable(cols, rows, …)` | As tabelas do Gear. Têm: <br>• `.filter(fn, key)` — vários filtros juntam-se, por nome <br>• `.sortTo(i)` <br>• `.onSort` |
+| `filterBox()` | A caixa (`js/ui.js`). Tem: <br>• `.group(label, node, tip, cls)` <br>• `.sort(dd)` <br>• `.clear(fn)` |
+| `ddSelect(label, [[value, label, sub?]], get, set)` | O dropdown (`js/ui.js`). Um único listener de clique na página fecha o que estiver aberto; fazer scroll ou mudar o tamanho da janela também os fecha. |
+| `rangeFilter(what, fmt, onChange, { exact })` | O slider de dinheiro com duas pegas (`js/ui.js`). Usado no custo dos Loadouts, nos preços do Gear e na Trading (`exact`). `.set(lo, hi, top, step, newBottom)` desenha-o. |
+| `gearTable(cols, rows, …)` | As tabelas do Gear (só da página Gear, em `pages/gear.js`). Têm: <br>• `.filter(fn, key)` — vários filtros juntam-se, por nome (`key` por omissão é `"tier"`) <br>• `.sortTo(i)` <br>• `.onSort` |
 
 ### 4.5 Maps
+
+Tudo em `pages/maps.js`, menos o que o resto da app usa sem abrir os Maps, que está em `js/page-data.js`: `MAP_LIST`, as portas das keys (`keyDoor`, `allMaps`, `mapDoors`, `loadMapData`), a leitura dos códigos de rota (`readRouteCode`) e as portas de entrada `openRouteOnMap`, `openMarkerOnMap`, `planRouteOnMap` e `refreshMaps`. Estas carregam primeiro a página e depois chamam as funções dela (`mapsOpenRoute`, `mapsOpenMarker`, `mapsPlanRoute`, `mapsRefresh`) por `PAGES.maps`.
 
 - **Estado**:
   - `mapsUI` — preferências guardadas inteiras com `saveMapsUI()`;
   - `mapView` — o mapa que está à vista;
   - `spawnSel` / `hereSel` — o plano;
   - `routeEdit` / `navEdit` — os editores.
-- **Trocar de mapa, de modo ou de dados** passa sempre por `resetMapState()`. Isso fecha os editores e larga o spawn. `openRouteOnMap(r)` abre uma rota vinda de outro sítio (Home, import).
-- **Ecrã**: três colunas.
-  - Há cinco colunas: barra Filters, coluna Filters, mapa, coluna Routes e barra Routes.
+- **Trocar de mapa, de modo ou de dados** passa sempre por `resetMapState()`. Isso fecha os editores e larga o spawn. `openRouteOnMap(r)` abre uma rota vinda de outro sítio (Home, import), e `planRouteOnMap()` abre o mapa a pedir o spawn ("Plan a route" na Home), mesmo que o mapa ainda esteja a carregar.
+- **Ecrã**: cinco peças lado a lado: barra Filters, coluna Filters, mapa, coluna Routes e barra Routes.
     - Cada barra (`v.lrail` / `v.rail`) tem um cabeçalho fixo a laranja que diz de que lado é (`railHead`), e por baixo as abas.
     - Clicar numa aba abre a coluna nessa aba; clicar outra vez na aba aberta fecha a coluna (`v.foldLeft` / `v.foldRight`).
-  - Filters (`v.layers`, `renderLayers`, `lyTab`) mostra uma aba de cada vez:
-    - Keys: as portas das keys deste mapa; clicar numa vai lá com `focusMarkerAfter`, sem largar o plano. Clicar na que está escolhida larga-a (`closeCard`). Só há um conjunto de anéis a pulsar de cada vez: `focusMarkerAfter` tira sempre o anterior (`dropFocusRing`), também quando se escolhe a mesma key outra vez.
+  - Filters (`v.layers`, `renderLayers`, `lyTab`) mostra uma aba de cada vez (`LY_TABS`, Markers por omissão):
     - Markers: a pesquisa e os grupos.
-    - Display: o aspeto das rotas.
+    - Keys: as portas das keys deste mapa; clicar numa vai lá com `focusMarkerAfter`, sem largar o plano. Clicar na que está escolhida larga-a (`closeCard`). Só há um conjunto de anéis a pulsar de cada vez: `focusMarkerAfter` tira sempre o anterior (`dropFocusRing`), também quando se escolhe a mesma key outra vez.
+    - Display: o aspeto das rotas, e as paredes (Walls, com o Edit).
     - Raid: jogadores e minutos.
   - Animações:
     - As colunas abrem e fecham a deslizar (transição da largura; o conteúdo tem largura fixa, por isso não se reorganiza durante a animação).
     - Enquanto a coluna desliza, o `fold` corrige o `tx` a cada frame, por isso o mapa não se mexe nem muda de zoom (o observador de tamanho ignora estas mudanças com `v.keepLeft`).
-    - Conteúdo novo numa coluna entra com um fade (`swapIn`).
+    - Conteúdo novo numa coluna entra com um fade (`swapIn`, de `js/base.js`).
   - O mapa ao centro.
   - O editor de rotas (ramo `routeEdit` de `renderMapSide`, classes `re2-*`) tem, por ordem:
     1. o nome em grande (editável), com as cores em círculos e um (i) com os atalhos no tooltip;
@@ -196,8 +202,8 @@ Os principais, por ordem:
   - O andar de cada ponto usa o `ddSelect` da página. Dentro das colunas dos mapas (`.mp-col`), o menu flutua em posição fixa, como no Merchant.
   - No topo da coluna Routes há três passos (`routeSteps`): Spawn → Route → Go. Mostram em que passo estás, e cada um leva lá com um clique. A explicação de cada passo fica no tooltip.
   - Escolher um spawn (ou "I'm here") abre a coluna Routes na aba Suggested.
-  - As rotas não dependem do modo: o caminho é o mesmo em Normal, Lockdown ou Forbidden, só os spawns mudam. `savedFor` e a lista mostram as rotas de todos os modos, e abrir uma não muda o modo. O `r.mode` ainda se grava, mas já não se usa.
-  - Importar um código abre a rota no mapa e no spawn certos (`openRouteOnMap` → `openSaved`, que lê o spawn no primeiro ponto).
+  - As rotas não dependem do modo: o caminho é o mesmo em Normal, Lockdown ou Forbidden, só os spawns mudam. `savedFor` e a lista mostram as rotas de todos os modos, e abrir uma não muda o modo. O `r.mode` ainda se grava e vai nos códigos de partilha, mas a lista já não o usa.
+  - Importar um código abre a rota no mapa e no spawn certos (`openRouteOnMap` → `mapsOpenRoute` → `openSaved`, que lê o spawn no primeiro ponto).
   - Routes à direita (`v.side`, `renderMapSide`). As abas estão numa barra sempre visível na borda direita do ecrã (`v.rail`, `drawRail`, `rtTab`). Uma aba abre a coluna nessa aba; clicar na aba que está ativa fecha a coluna (`v.foldRight`). Enquanto se desenha uma rota, a barra fica desativada.
     - Suggested: de onde partes (o spawn, ou "aqui" a meio do raid, com "Change"; sem nada escolhido, o botão "Pick your spawn") e as rotas calculadas a partir daí (`planFin`). Sem spawn escolhido, lista todos os spawns do mapa (`spawnList`: os que estão lado a lado contam como um; nomes repetidos levam a direção, ex. "Cemetery · north"); abrir um calcula as suas rotas nessa altura (`spOpen`, `spFins`) e clicar numa escolhe o spawn e abre-a.
     - Yours: as tuas que começam nesse spawn; sem spawn escolhido, todas, agrupadas pelo spawn com os mesmos nomes do Suggested (abertas por defeito, `spOpen` com chave "m:").
@@ -217,35 +223,38 @@ Os principais, por ordem:
   - O mapa só desenha a rota aberta ou a que estás a desenhar (`routesHere`). Os tempos dos contactos e as mudanças de andar aparecem ao passar o rato.
   - Os andares estão no canto inferior esquerdo do mapa (`drawFloors`). O modo continua na barra de cima.
   - Cada coluna fecha numa tira estreita (`syncCols`; `mapsUI.leftHidden` / `mapsUI.sideHidden`). Fechar ou abrir uma coluna não muda o zoom nem a posição do mapa: o `tx` é corrigido logo e o observador de tamanho não volta a encaixar o mapa (`v.keepLeft`).
-  - Já não há botões Routes/Filters no canto nem painel a deslizar. `toggleLayers` e `toggleRoutesPop` só voltam a desenhar.
-- **Abrir um marcador vindo de outro sítio** (a porta de uma key): `openMarkerOnMap(slug, mk)`.
-  - Muda de mapa e de piso, faz zoom no marcador e abre o cartão dele.
+  - Já não há botões Routes/Filters no canto nem painel a deslizar. `toggleLayers` e `toggleRoutesPop` só voltam a desenhar. O código do painel antigo (`routesPop`, `renderRoutesPop`) ainda lá está, mas fica sempre escondido (`syncSide`).
+- **Abrir um marcador vindo de outro sítio** (a porta de uma key): `openMarkerOnMap(slug, mk)` → `mapsOpenMarker`.
+  - Muda de mapa e de piso, e `focusMarkerAfter` faz zoom no marcador e abre o cartão dele.
   - Põe anéis a pulsar (`.mp-focus`) em todos os sítios com o mesmo nome nesse piso. Os anéis desaparecem quando o cartão fecha.
   - O marcador escolhido aparece mesmo que a categoria dele esteja desligada nos Filters.
 - **Keys**:
-  - `keyDoor(nome)` encontra o marcador "Key" com o mesmo nome sem a palavra key. Todas as 17 keys do Market têm porta.
-  - `allMaps()` carrega os dados de todos os mapas uma vez, quando se pesquisa ou se abre uma key.
+  - `keyDoor(nome, done)` encontra o marcador "Key" com o mesmo nome sem a palavra key, e entrega-o a `done`. Todas as 17 keys do Market têm porta.
+  - `allMaps(done)` carrega os dados de todos os mapas uma vez, quando se pesquisa ou se abre uma key.
+  - Os dois estão em `js/page-data.js`: funcionam sem a página dos Maps ter carregado.
 - **Marcadores com vários sítios**: no `markers.json` alguns marcadores têm uma lista de sítios (por exemplo, keys com várias portas, Retrieval Boxes, o boss da Northridge). A primeira cópia dos mapas deixou-os de fora. `tools/maps_add_multi.py` junta-os ao `data.js`, um marcador por sítio (50 ao todo). Pode correr-se outra vez sem repetir nada.
-- **Sem botões de zoom**: faz-se zoom com a roda do rato. Também não há cartão "Pick your spawn".
+- **Sem botões de zoom**: faz-se zoom com a roda do rato (no telemóvel, com dois dedos).
 - **Fluxo**:
   1. Abres o mapa.
-  2. Clicas num spawn (`selectSpawn`).
-  3. O painel flutuante (`planPanel`) entra a deslizar, com as tuas rotas primeiro e depois as sugeridas.
-  4. A rota escolhida mostra as paragens, com os opcionais fechados.
-  5. Em baixo estão Save, Change, Share e New.
+  2. Clicas num spawn (`selectSpawn`), ou em "Pick your spawn" na aba Suggested.
+  3. A coluna Routes abre na aba Suggested (ou fica em Yours, se estavas lá), com as rotas a partir desse spawn.
+  4. Escolhes uma rota (`pickPlan`): a coluna mostra os passos dela (`planPanel`), com as paragens opcionais fechadas.
+  5. Em baixo: numa sugerida, Save, Change e Share; numa tua, Change e Share. O "New" está no título da lista.
 - **Rotas sugeridas**:
   - `suggestRoutes` gera as rotas Rush, Loot run, Quiet e PvP.
   - `finishRoute` calcula tempos, contactos prováveis (jogadores simulados a partir dos spawns), "taken?" e risco. Os minutos da rota (`f.minutes`) continuam a ser calculados (servem os contactos), mas não aparecem no ecrã: a estimativa não era fiável. Nas listas e nos separadores mostra-se o risco no lugar deles.
   - As rotas contornam as paredes com `legPts` / `gridPath`, que fazem A* sobre a grelha de `navGrid`.
 - **Paredes**:
   - Vêm do `nav.js`, mais as correções de `nav-fix.json` e as tuas edições (`data.nav`).
-  - Editam-se em Filters → Walls → Edit.
+  - Editam-se em Filters → Display → Walls → Edit.
 - **Tamanho da raid**: jogadores e minutos vêm de `MAP_RAID` (`raidInfo(slug)`). Mudam-se em Filters → Raid e ficam em `mapsUI.raid`, por mapa.
 - **Parados de propósito**: `RAID_ON` e `MARKS_ON` estão a `false`. Desligam o relógio da raid, "I'm here", os vistos de chegada e as marcas (Saw someone…). O código e o CSS ficam para mais tarde; basta pôr a flag a `true`.
 
 ### 4.6 Merchant
 
 Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser apanhado ou largado.
+
+O código está em `pages/merchant.js`; os itens (`MER`, `merPic`) em `pages/merchant-items.js`, que a Smelter também importa. Os dados (`merchant.js`, `merchant-ocr.js`, `merchant-sounds.js`) só carregam quando o Merchant abre; a Smelter carrega só o `merchant.js`. Se um deles faltar, a página abre na mesma e diz o que não tem.
 
 - **Ecrã** (inspirado no do ABI Builder): três colunas lado a lado.
   - Filtros: pesquisa, mapa/modo, tamanho do item com rotação, tipo e preço da caixa.
@@ -275,7 +284,7 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
     - O som ouvido pelo ar parece-se menos com as referências, por isso o microfone tem o seu próprio "Match needed" (`merUI.needMic`, 55% por omissão; `merNeed()` escolhe o que está em uso).
     - O Teach funciona igual e aprende como o teu microfone ouve cada som.
   - **Onde não dá para partilhar o som** (`merCan`): no lugar do botão aparece uma nota curta ("Listening to the game needs Chrome or Edge on a computer"; no telemóvel, "listens through the mic") com o porquê no tooltip. O "Listen with mic" passa a botão principal e o Price reader desaparece.
-  - O som é cortado em frames de 1024 amostras (passo 512, 48 kHz). Cada frame passa a energia em 24 bandas logarítmicas (`merFeature`, com FFT nossa).
+  - O som é cortado em frames de 1024 amostras (passo 512, 48 kHz). Cada frame passa a energia em 24 bandas logarítmicas (`merFeature`, com FFT nossa). As bandas dependem da taxa de amostragem (`merRate`); `merSetRate(r)` muda-a e recalcula-as (o teste dos sons usa-o).
   - Um som 5 dB acima do fundo dispara uma comparação (`merFrame`). Primeiro tira-se o ruído de fundo, depois correlaciona-se o "desenho" tempo × banda com cada referência (`merSimilar`). Ganha a mais parecida, se passar o "Match" (65% por omissão).
   - **Apanhar + largar**: um segundo som até 20 s depois do primeiro lê-se em par com ele. Um item só ganha o par se estiver entre os melhores dos dois sons. Se os sons discordarem, fica a resposta do primeiro, porque os sons de largar parecem-se mais entre itens e sozinhos enganam-se mais.
   - Referências: os 76 sons (38 × apanhar/largar) vêm do `merchant-sounds.js` da pasta (`merSoundUrl`; sem ele, do ABI Builder). São analisados da primeira vez que se ouve e o resultado fica guardado no browser (`K.merRefs`). As gravações do Teach (`K.merMine`) contam ao lado delas.
@@ -302,13 +311,13 @@ Diz o que uma caixa do Field Merchant pode ter, pelo som que o item faz ao ser a
     - depois a caixa encolhe para essa linha, da moeda até um pouco depois do fim.
     - O preço pode ser escrito sem vírgulas (`merCommas` põe-nas como o jogo).
   - O formato guardado mudou (`merOcr.v = 2`). O que foi ensinado antes apaga-se uma vez e ensina-se de novo.
-- **Testes**: correm na consola da página.
+- **Testes**: correm na consola do `merchant.html`, servido por http (secção 6). O código do Merchant está num módulo, por isso cada ferramenta pede primeiro a linha `Object.assign(window, await import("./pages/merchant.js"), await import("./pages/merchant-items.js"))`, que está no topo de cada ficheiro. O mesmo vale para `merchant_ocr_defaults.js` e `merchant_ocr_letters.js`.
   - `tools/merchant_sound_test.js`: os 76 sons com ruído por baixo.
   - `tools/merchant_ocr_test.js`: preços desenhados.
   - `tools/merchant_ocr_card_test.js`: o cartão real em `tools/merchant_ocr_sample.webp`, no sítio onde estava, movido e numa janela mais pequena.
 - **Separadores** (`sub-merchant`, `merBar`): "Live" (a página de sempre) e "Practice". A escolha fica em `merUI.tab`. O `merDraw` passa para o `prDraw` quando o separador aberto é o Practice.
 - **Practice** (`prDraw`, `prs` em `K.merPractice`, a banca em `pr`): uma banca como a do mercador no jogo.
-  - **A banca** (`prFill`): 24 caixas ("Free") ou 20 contra o relógio ("20, timed", a melhor fica em `prs.best`), numa grelha de 9 colunas.
+  - **A banca** (`prFill`): 24 caixas ("24 boxes") ou 20 contra o relógio ("20, timed", a melhor fica em `prs.best`), numa grelha de 9 colunas (6 no telemóvel, `prCols`).
     - Cada caixa é uma carga real do mapa/modo (tipo e preço).
     - O tamanho da caixa é o do item que tem dentro (às vezes rodado). As maiores são arrumadas primeiro.
     - O rótulo é o tipo de carga. Ao passar o rato aparece o tipo e o preço, como o cartão do jogo.
@@ -331,7 +340,7 @@ O jogo não publica odds. As regras vêm do guia do ABI Builder (abibuilder.com/
   - `SMELT_RECIPES`: as receitas especiais ("Trash to Treasure") com datas. As novas metem-se na página ("Add one"), em `smd.recipes`.
   - Cor dos itens (`smRar`): a que marcaste, senão a do `merchant.js` (136 dos 280 itens Miscellaneous). Roxo = 4, dourado = 5, vermelho = 6.
   - `smFind(nome)` liga o nome de uma receita ao item do Market. Os nomes longos do Market vêm cortados com "…".
-- **Estado**: `smd` em `K.smelt` (localStorage): `log`, `rar`, `recipes`, `slots`, `out`. Não vai para o builds.js.
+- **Estado**: `smd` em `K.smelt` (localStorage): `log`, `rar`, `recipes`, `slots`, `out`, `outV`. Não vai para o builds.js. O `smd` (com `saveSm`, `smItem` e `SMELT_KINDS`) está em `js/page-data.js` e não na página, porque o Share e a Home usam o registo; o resto é `pages/smelter.js`.
   - Cuidado: `sm` já é a janela do Share. Por isso o estado do Smelter chama-se `smd`.
 - **Ecrã**:
   - Em cima fica a bancada: 3 quadrados com os itens, uma seta e o quadrado "What came out" com o valor e o botão Log. Cada quadrado é um `makePicker` com aspeto de quadrado, e a borda de cima tem a cor do item.
@@ -404,7 +413,7 @@ Como o "Tier List Maker" do ABI Builder: arrumas as coisas em S/A/B/C/D, e as ou
 
 ### Chaves no browser
 
-Estão todas no objeto `K`, no início do script. **Nunca mudes o valor de uma chave existente**: quem já usa a página perderia o que tem guardado.
+Estão todas no objeto `K`, em `js/base.js`. **Nunca mudes o valor de uma chave existente**: quem já usa a página perderia o que tem guardado.
 
 Quando uma chave muda de formato, cria-se uma nova com outra versão (`…-v2`) e lê-se a antiga uma vez, como se faz com `gearTierOld`.
 
@@ -412,10 +421,12 @@ Quando uma chave muda de formato, cria-se uma nova com outra versão (`…-v2`) 
 
 ## 5. Ferramentas (`tools/`)
 
-Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
+Os `.py` correm com `python3 tools/<script>.py`, a partir da pasta do projeto. Os `.js` correm na consola do browser (ver cada um). Os resultados vão para `tools/out/`.
 
 | Script | Para quê |
 |---|---|
+| `make_pages.py [--check]` | Copia o `index.html` para as outras 10 páginas, mudando só o `data-area` e o `<title>`. Corre-se depois de mexer no `index.html`. Com `--check` só diz se estão em dia (e sai com erro se não). |
+| `mobile_preview.html` | O site em duas molduras de telemóvel (360 e 412 px). Abre-se servido: http://127.0.0.1:8765/tools/mobile_preview.html |
 | `nav_extract.py [slug…]` | Gera o `maps/<slug>/nav.js` a partir das plantas SVG e das imagens. Gera também as linhas vetoriais das paredes e a água. |
 | `nav_fix.py <slug> <floor> cut/wall/area/clear/undo/list/show …` | Correções de paredes à mão. Guarda em `nav-fix.json` e reconstrói o `nav.js`. |
 | `nav_check.py [slug]` | Confirma que tudo continua alcançável (a partir dos spawns e das escadas). |
@@ -433,7 +444,6 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 | `price_frames.py <frames> <out>` | Preços novos, passo 1. Primeiro, o ffmpeg tira 3 imagens por segundo do vídeo, já cortadas à volta da grelha do mercado (`crop=1460:880:370:110`, mais `mpdecimate`). Depois este script parte o vídeo em categorias pelo título (há categorias que só aparecem 1 segundo: chaves, cada munição). Em cada categoria guarda a primeira imagem já carregada, uma por cada terço de ecrã de scroll e a última. <br>Ao gravar, abre cada categoria no topo: se a primeira fila só aparecer já com a página descida, os nomes ficam cortados e é preciso ligá-los à mão, pela ordem e pela imagem (`read/batch_manual.json`). |
 | `price_merge.py <read> <data> "<fonte>" [--write]` | Preços novos, passo 2. Junta o que foi lido das imagens (`batch_*.json`: categoria, separador e, para cada item, nome, preço e durabilidade) num snapshot novo do `prices.js`. Os itens são encontrados pela categoria e pelo nome que o jogo mostra. Um nome cortado igual para vários itens ("… (1)", "… (2)") é dado ao item cujo preço anterior era mais parecido. Lista as leituras muito diferentes das da última vez, para confirmar à vista. Sem `--write` só mostra o resultado. |
 | `obs_setup.py [prices\|record\|stream]` | Configura o OBS (fecha-o antes; os teus perfis e cenas ficam como estão). A palavra escolhe com qual o OBS abre. <br>• Perfil **ABI Prices**: o mercado, ecrã inteiro a 30 fps, qualidade "Indistinguishable" em NVENC, hybrid MP4 em `videos/`, sem o rato. F9 grava, F10 pára. <br>• Perfil **Record**: gameplay, 1080p60, qualidade "Indistinguishable" em NVENC, em `Videos\OBS`. F9 / F10. <br>• Perfil **Stream**: 1080p60 a 6000 kbps em NVENC, áudio a 160 kbps. F11 começa, F12 pára. O serviço e a chave põe-se à mão. <br>• Cenas **Gameplay**: "Game" (Game Capture de qualquer coisa em ecrã inteiro) e "Screen" (Display Capture), para usar quando a captura de jogo fica preta. <br>• Cenas **ABI Prices**: o ecrã sem o rato. |
-| `make_zip.py` | Gera o `ABI-Hub.zip` para os amigos: a página, os dados, `images/`, `maps/` (sem `nav-fix.json`) e o `LEIA-ME.txt` de `tools/zip/`. Só quando pedido. |
 | `navlib.py` | Biblioteca partilhada: a mesma grelha que a página constrói, e imagens. |
 | `floors_probe.py`, `categories_probe.py`, `routes_probe.py` | Sondas: o que as plantas, as categorias e os dados de rotas contêm. |
 
@@ -446,8 +456,10 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 
 **GitHub Pages**: o repositório é público para o Pages funcionar. O site é https://joaoccarvalhop.github.io/AbiNotes/
 - O `.nojekyll` faz o GitHub servir os ficheiros tal como estão.
-- O `index.html` tem `noindex`, para não aparecer no Google.
-- O `.gitignore` deixa de fora o zip, o `tools/out/` (dados de trabalho grandes) e o `__pycache__`.
+- As 11 páginas têm `noindex`, para não aparecerem no Google.
+- O GitHub Pages serve `maps.html` também em `/maps`, por isso no site a barra mostra o endereço limpo; localmente fica o `.html`.
+- O `.gitignore` deixa de fora o `tools/out/` (dados de trabalho grandes) e o `__pycache__`.
+- Branches: trabalha-se no `dev`; o `main` é o que o site publica.
 - O conteúdo partilhado muda-se nesta pasta (`builds.js`, `prices.js`) e depois faz-se commit e push. O que cada pessoa faz no site fica no browser dela (secção 2).
 
 ---
@@ -457,10 +469,8 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 A página precisa de um servidor (são módulos). Dentro da pasta do projeto:
 
 ```bash
-python -m http.server 8765 --bind 127.0.0.1
+python3 -m http.server 8765 --bind 127.0.0.1
 ```
-
-Corre-o dentro da pasta do projeto.
 
 Abre http://127.0.0.1:8765/. Depois de mudar um ficheiro, faz **Ctrl+F5**. O browser guarda dados separados para cada endereço, por isso o que fazes aqui não se mistura com o do site nem com o de uma cópia antiga aberta por `file://`.
 
