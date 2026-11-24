@@ -1,6 +1,9 @@
 // Builds merchant-ocr.js: the price reader's built-in digits and coin, so nobody has to teach it (the game's font never
-// changes; the game draws each digit the same way every time). Run in the console of index.html served over http:
+// changes; the game draws each digit the same way every time). Run in the console of merchant.html (its code loads only there) served over http:
+//   Object.assign(window, await import("./pages/merchant.js"), await import("./pages/merchant-items.js"));
 //   await (await fetch("tools/merchant_ocr_defaults.js")).text().then(eval)
+// (the page's code is in modules: the first line puts what this file uses where the console can reach it.
+//  Paste that line first too if you paste the file instead)
 // 1. Digits and commas from a market screen whose prices are known (tools/merchant_ocr_market.jpg: the game at
 //    1920x1080, the market grid as cut by price_frames.py, 1460x880 from 370,110). Its 14 prices hold every digit.
 // 2. The digits and the coin of a cargo's price card (tools/merchant_ocr_sample.webp, "16,000 20,000").
@@ -28,7 +31,7 @@
     .filter(g => { const k = g.join("|"); if (seen.has(k)) return false; seen.add(k); return true; });
   const data = { v: 1, fw: A.fw, box: Object.fromEntries(Object.entries(box).map(([k, x]) => [k, +x.toFixed(5)])),
     anchor: { aw: A.aw, bw: A.bw, bh: A.bh, tw: A.tw, th: A.th, t: hex(A.t), fW: A.fW, fH: A.fH, f: hex(A.f) }, glyphs };
-  // read the card with only these, as index.html will (merBuiltin), where it was and moved over other things
+  // read the card with only these, as the Merchant page will (merBuiltin), where it was and moved over other things
   window.ABI_MERCHANT_OCR = data; merOcr.glyphs = []; merUseBuiltin();
   const moved = document.createElement("canvas"); moved.width = W; moved.height = H; const g = moved.getContext("2d");
   g.drawImage(card, 0, 0); g.drawImage(card, 1405, 625, 156, 90, 640, 420, 156, 90); g.fillStyle = "#141516"; g.fillRect(1405, 625, 156, 90);

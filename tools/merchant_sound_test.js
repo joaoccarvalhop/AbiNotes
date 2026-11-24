@@ -1,11 +1,14 @@
-// How well the Merchant recognises sounds: paste into the console of index.html (Edge/Chrome, online), or load it with
+// How well the Merchant recognises sounds: paste into the console of merchant.html (its code loads only there) (Edge/Chrome, online), or load it with
+//   Object.assign(window, await import("./pages/merchant.js"), await import("./pages/merchant-items.js"));
 //   await (await fetch("tools/merchant_sound_test.js")).text().then(eval)
+// (the page's code is in modules: the first line puts what this file uses where the console can reach it.
+//  Paste that line first too if you paste the file instead)
 // Each of the 76 reference sounds is played through the same path as the game's sound, with white noise under it
 // (12 dB and 6 dB quieter than the sound, and almost none), and the first match is checked against the sound played.
 // Then the pairs: each item picked up and dropped (read together), and picked up followed by a wrong drop (a sound
 // from another item), which should not change the answer.
 (async () => {
-  const ctx = new AudioContext({ sampleRate: 48000 }); merRate = ctx.sampleRate; merBandEdges = null;
+  const ctx = new AudioContext({ sampleRate: 48000 }); merSetRate(ctx.sampleRate);
   await merLoadRefs(ctx);
   const raw = {};
   await Promise.all(MER.sounds.flatMap(([id]) => ["u", "d"].map(async act => {

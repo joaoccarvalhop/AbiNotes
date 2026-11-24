@@ -1,5 +1,8 @@
-// How well the Merchant's price reader reads: paste into the console of index.html, or load it with
+// How well the Merchant's price reader reads: paste into the console of merchant.html (its code loads only there), or load it with
+//   Object.assign(window, await import("./pages/merchant.js"), await import("./pages/merchant-items.js"));
 //   await (await fetch("tools/merchant_ocr_test.js")).text().then(eval)
+// (the page's code is in modules: the first line puts what this file uses where the console can reach it.
+//  Paste that line first too if you paste the file instead)
 // Draws prices the way a game might (light text on a dark box, a stray line under it), teaches three of them,
 // then reads others, also bigger. What you taught in the page is put back afterwards.
 (() => {

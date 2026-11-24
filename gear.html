@@ -1,0 +1,339 @@
+<!doctype html>
+<!-- made from index.html by tools/make_pages.py: edit index.html, not this file -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Gear · ABI Hub</title>
+<!-- the tab icon: the logo's orange slash on the page's dark, in the file itself (works offline and on the site) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23161718'/%3E%3Cpath d='M11.5 25 L20.5 7' stroke='%23e0662f' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="booting" data-area="gear">
+  <div class="toolbar">
+   <div class="bar main">
+    <a class="logo" id="logo" href="index.html" data-area="home" title="Home"><b>ABI</b><span>/</span>Hub</a>
+    <nav class="areas" id="areas" aria-label="Pages">
+      <a href="index.html" data-area="home">Home</a>
+      <a href="builds.html" data-area="builds">Builds</a>
+      <a href="loadouts.html" data-area="loadouts">Loadouts</a>
+      <a href="market.html" data-area="market">Market</a>
+      <a href="gear.html" data-area="gear">Gear</a>
+      <a href="maps.html" data-area="maps">Maps</a>
+      <a href="merchant.html" data-area="merchant">Merchant</a>
+      <a href="smelter.html" data-area="smelter">Smelter</a>
+      <a href="trading.html" data-area="trading">Trading</a>
+      <a href="keybinds.html" data-area="keybinds">Keybinds</a>
+      <a href="tiers.html" data-area="tiers">Tier list</a>
+    </nav>
+    <div class="gsearch" id="gsearch">
+      <input type="search" placeholder="Search everything…" aria-label="Search weapons, loadouts, gear and market" autocomplete="off">
+      <div class="gs-pop" role="listbox" hidden></div>
+    </div>
+    <div class="savebox">
+      <button type="button" id="share-open" title="Share with friends, import what they sent, or back up your stuff">Share</button>
+    </div>
+   </div>
+   <div class="bar sub" id="sub-builds">
+    <nav class="cats" id="cats" role="tablist" aria-label="Weapon categories"></nav>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Search weapon…" aria-label="Search weapon" autocomplete="off">
+
+      <button type="button" id="add-open" aria-haspopup="dialog" aria-expanded="false" aria-controls="addmodal">Add build</button>
+    </div>
+   </div>
+   <div class="bar sub" id="sub-loadouts" hidden></div>
+   <div class="bar sub" id="sub-market" hidden></div>
+   <div class="bar sub" id="sub-gear" hidden></div>
+   <div class="bar sub" id="sub-maps" hidden></div>
+   <div class="bar sub" id="sub-merchant" hidden></div>
+   <div class="bar sub" id="sub-keybinds" hidden></div>
+   <div class="bar sub" id="sub-tiers" hidden></div>
+  </div>
+<div class="page">
+
+  <div class="notice" id="notice" hidden></div>
+
+
+  <main id="list"></main>
+  <section class="cat" id="loadouts" hidden></section>
+  <section class="cat" id="market" hidden></section>
+  <section class="cat" id="home" hidden></section>
+  <section class="cat" id="gear" role="tabpanel" aria-labelledby="tab-gear" hidden></section>
+  <section class="cat" id="maps" hidden></section>
+  <section class="cat" id="merchant" hidden></section>
+  <section class="cat" id="smelter" hidden></section>
+  <section class="cat" id="trading" hidden></section>
+  <section class="cat" id="tiers" hidden></section>
+  <section class="cat" id="keybinds" role="tabpanel" aria-labelledby="tab-keybinds" hidden></section>
+  <p class="nores" id="nores" hidden>No weapon matches your search.</p>
+</div>
+
+<dialog class="modal" id="addmodal" aria-labelledby="add-h">
+  <form id="form" novalidate>
+    <header class="m-head">
+      <div>
+        <h2 id="add-h">Add a build</h2>
+        <p id="add-sub">Paste a code from So1o, ABI Builder or a friend and choose where it goes.</p>
+      </div>
+      <button type="button" class="x" id="f-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+      </button>
+    </header>
+
+    <div class="m-body">
+      <section class="m-sec">
+        <h3><span>1</span>Weapon</h3>
+        <div class="pick">
+          <div class="thumb" id="f-thumb"><div class="ph">?</div></div>
+          <div class="wp" id="f-gun">
+            <button type="button" class="wp-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="f-gun-lbl f-gun-val">
+              <span class="wp-lbl" id="f-gun-lbl">Weapon</span>
+              <span class="wp-val" id="f-gun-val">Choose a weapon</span>
+              <span class="wp-sub" id="f-gun-hint"></span>
+            </button>
+            <div class="wp-pop" hidden>
+              <input class="wp-q" type="search" placeholder="Filter weapons…" aria-label="Filter weapons" autocomplete="off">
+              <div class="wp-list" role="listbox" aria-label="Weapons" tabindex="-1"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="m-sec">
+        <h3><span>2</span>Budget level</h3>
+        <div class="seg" id="f-tier" role="radiogroup" aria-label="Budget level"></div>
+      </section>
+
+      <section class="m-sec">
+        <h3><span>3</span>Build</h3>
+        <div class="row2">
+          <label class="fld grow">Build code
+            <span class="codebox"><input id="f-code" autocomplete="off" spellcheck="false" placeholder="Mod Gun-3fsZ0RAQ…"><i id="f-code-ok" aria-hidden="true"></i></span>
+          </label>
+          <label class="fld cost"><span>Cost <span class="opt">optional</span></span><input id="f-cost" autocomplete="off" placeholder="150k"></label>
+        </div>
+        <div class="fld">
+          <span class="namehead"><label for="f-name">Name in game</label><span class="pill" id="f-name-auto">Auto</span><button type="button" class="linkbtn" id="f-name-reset" hidden>Back to auto</button></span>
+          <span class="namebox"><input id="f-name" autocomplete="off" maxlength="32"></span>
+        </div>
+      </section>
+
+      <section class="m-sec">
+        <h3><span>4</span>Source <span class="opt">optional</span></h3>
+        <div class="row3">
+          <label class="fld">Author <input id="f-author" autocomplete="off" placeholder="So1o"></label>
+          <label class="fld">Title <input id="f-title" autocomplete="off" maxlength="60" placeholder="As the author named it"></label>
+          <label class="fld">Link <input id="f-url" type="url" autocomplete="off" placeholder="https://abibuilder.com/builds/…"></label>
+        </div>
+      </section>
+    </div>
+
+    <footer class="m-foot">
+      <span class="msg" id="f-msg" role="status"></span>
+      <div class="m-actions">
+        <button type="button" id="f-cancel">Cancel</button>
+        <button type="submit" class="primary" id="f-submit">Add build</button>
+      </div>
+    </footer>
+  </form>
+</dialog>
+
+<dialog class="modal confirm" id="confirm" aria-labelledby="c-title" aria-describedby="c-body">
+  <div class="c-wrap">
+    <div class="c-icon" aria-hidden="true"></div>
+    <div class="c-main">
+      <h2 id="c-title"></h2>
+      <div class="c-body" id="c-body"></div>
+    </div>
+  </div>
+  <footer class="m-foot">
+    <div class="m-actions">
+      <button type="button" id="c-cancel"></button>
+      <button type="button" class="primary" id="c-ok"></button>
+    </div>
+  </footer>
+</dialog>
+
+<dialog class="modal gear-modal" id="gearmodal" aria-labelledby="gm-title">
+  <header class="m-head">
+    <div class="gm-top" id="gm-top"></div>
+    <button type="button" class="x" id="gm-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="gm-body"></div>
+  <footer class="m-foot" id="gm-foot"></footer>
+</dialog>
+
+<dialog class="modal lo-modal" id="lomodal" aria-labelledby="lm-title">
+  <header class="m-head">
+    <div class="gm-top" id="lm-top"></div>
+    <button type="button" class="x" id="lm-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="lm-body"></div>
+  <footer class="m-foot" id="lm-foot"></footer>
+</dialog>
+
+<dialog class="modal kp-modal" id="kbpick" aria-labelledby="kp-title">
+  <header class="m-head">
+    <div class="gm-top" id="kp-top"></div>
+    <button type="button" class="x" id="kp-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="kp-body"></div>
+  <footer class="m-foot" id="kp-foot"></footer>
+</dialog>
+
+<dialog class="modal" id="merocr" aria-labelledby="merocr-h">
+  <header class="m-head">
+    <div>
+      <h2 id="merocr-h">Price reader</h2>
+      <p>Reads the cargo's price off the game, so the right cargo is picked by itself.</p>
+    </div>
+    <button type="button" class="x" id="merocr-x" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="merocr-body"></div>
+  <footer class="m-foot" id="merocr-foot"></footer>
+</dialog>
+
+<dialog class="modal" id="meritem" aria-labelledby="meritem-h">
+  <header class="m-head">
+    <div class="gm-top" id="meritem-top"></div>
+    <button type="button" class="x" id="meritem-x" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="meritem-body"></div>
+</dialog>
+
+<dialog class="modal" id="about" aria-labelledby="about-h">
+  <header class="m-head">
+    <div>
+      <h2 id="about-h">About</h2>
+      <p>Where everything in ABI Hub comes from.</p>
+    </div>
+    <button type="button" class="x" id="about-x" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="about-body"></div>
+</dialog>
+
+<dialog class="modal" id="searchall" aria-labelledby="searchall-h">
+  <header class="m-head">
+    <div>
+      <h2 id="searchall-h">Search</h2>
+      <p id="searchall-sub"></p>
+    </div>
+    <button type="button" class="x" id="searchall-x" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="sa-top" id="searchall-top"></div>
+  <div class="gm-body" id="searchall-body"></div>
+</dialog>
+
+<dialog class="modal lo-modal" id="sharemodal" aria-labelledby="sm-title">
+  <header class="m-head">
+    <div class="gm-top" id="sm-top"></div>
+    <button type="button" class="x" id="sm-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="sm-body"></div>
+  <footer class="m-foot" id="sm-foot"></footer>
+</dialog>
+
+<dialog class="modal lo-modal" id="pricemodal" aria-labelledby="pm-title">
+  <header class="m-head">
+    <div class="gm-top" id="pm-top"></div>
+    <button type="button" class="x" id="pm-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </header>
+  <div class="gm-body" id="pm-body"></div>
+  <footer class="m-foot" id="pm-foot"></footer>
+</dialog>
+
+<dialog class="modal le-modal" id="loedit" aria-labelledby="le-h">
+  <form id="le-form" novalidate>
+    <header class="m-head">
+      <div>
+        <h2 id="le-h">Add a loadout</h2>
+        <p>A weapon build from Builds plus the gear you wear with it.</p>
+      </div>
+      <button type="button" class="x" id="le-close" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+      </button>
+    </header>
+    <div class="le-body">
+      <div class="le-col">
+        <section class="m-sec">
+          <h3><span>1</span>Weapon</h3>
+          <div class="pk" id="le-build"></div>
+          <p class="le-note" id="le-build-hint" aria-live="polite"></p>
+          <div class="fld"><span>Ammo <span class="opt" id="le-ammo-hint"></span></span>
+            <div class="am-row"><small>Main</small><div class="am-chips" id="le-ammo-main" role="radiogroup" aria-label="Main ammo"></div></div>
+            <div class="am-row"><small>On top</small><div class="am-chips" id="le-ammo-top" role="radiogroup" aria-label="Ammo loaded on top"></div></div>
+            <input id="le-ammo" placeholder="Type the ammo" autocomplete="off" hidden>
+          </div>
+        </section>
+        <section class="m-sec">
+          <h3><span>2</span>Gear</h3>
+          <div class="le-gear">
+            <div class="pk" id="le-helmet"></div>
+            <div class="pk" id="le-armor"></div>
+            <div class="pk" id="le-rig"></div>
+            <p class="le-note" id="le-rig-note" hidden>The armored rig is also your chest rig.</p>
+            <div class="pk" id="le-pack"></div>
+            <div class="pk" id="le-headset"></div>
+          </div>
+        </section>
+      </div>
+      <div class="le-col">
+        <section class="m-sec">
+          <h3><span>3</span>About it</h3>
+          <label class="fld"><span>Name</span><input id="le-name" placeholder="e.g. T5 Speed" autocomplete="off" maxlength="40"></label>
+          <p class="le-level" id="le-level" aria-live="polite"></p>
+          <div class="le-tags" id="le-tags" aria-label="Tags"></div>
+        </section>
+        <section class="m-sec">
+          <h3><span>4</span>Raid</h3>
+          <label class="fld"><span class="namehead"><span>Utility</span><span class="le-presets" id="le-util-presets"></span></span>
+            <input id="le-utility" placeholder="e.g. 3 Stun · 2 Frag · 2 Smoke" autocomplete="off"></label>
+          <label class="fld"><span>Notes <span class="opt">optional</span></span><textarea id="le-notes" rows="3" placeholder="When and how to play it"></textarea></label>
+          <div class="row3 two">
+            <label class="fld"><span>Author</span><input id="le-author" placeholder="Me" autocomplete="off"></label>
+            <label class="fld"><span>Link <span class="opt">optional</span></span><input id="le-url" placeholder="https://…" autocomplete="off"></label>
+          </div>
+        </section>
+      </div>
+    </div>
+    <footer class="m-foot">
+      <span class="msg" id="le-msg"></span>
+      <div class="m-actions">
+        <button type="button" id="le-cancel">Cancel</button>
+        <button type="submit" class="primary" id="le-submit">Add loadout</button>
+      </div>
+    </footer>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" popover="manual"></div>
+
+<script>
+  // load builds.js fresh every time, so changes saved to it show up on the next reload. What only one page
+  // needs (the Merchant's data and sounds) isn't here: that page loads it when it opens (loadPage in app.js)
+  document.write('<script src="builds.js?t=' + Date.now() + '"><\/script>');
+  document.write('<script src="prices.js?t=' + Date.now() + '"><\/script>');
+</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

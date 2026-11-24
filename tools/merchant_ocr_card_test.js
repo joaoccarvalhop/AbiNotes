@@ -1,6 +1,9 @@
 // The price reader on a real Merchant screen (tools/merchant_ocr_sample.webp: the price card of a Flammables cargo on
-// sale, "16,000 20,000"). Paste into the console of index.html served over http, or load it with
+// sale, "16,000 20,000"). Paste into the console of merchant.html (its code loads only there) served over http, or load it with
+//   Object.assign(window, await import("./pages/merchant.js"), await import("./pages/merchant-items.js"));
 //   await (await fetch("tools/merchant_ocr_card_test.js")).text().then(eval)
+// (the page's code is in modules: the first line puts what this file uses where the console can reach it.
+//  Paste that line first too if you paste the file instead)
 // Teaches the box from the coin to the end of the price once, then looks for the card: where it was, moved elsewhere
 // over other things, and in a smaller window (a video). What you taught in the page is put back afterwards.
 (async () => {

@@ -1,8 +1,8 @@
 # ABI Hub — documentação
 
-Uma página só (`index.html`) para Arena Breakout: Infinite: builds de armas, loadouts, preços do mercado, equipamento, keybinds e mapas com rotas.
+Um site para Arena Breakout: Infinite: builds de armas, loadouts, preços do mercado, equipamento, keybinds e mapas com rotas.
 
-Funciona offline. Abre-se diretamente no browser (`file://`) e não precisa de servidor nem de instalar nada.
+O código são **módulos JavaScript** (`import`/`export`), por isso a página precisa de ser servida: no GitHub Pages, ou localmente com `python3 -m http.server` (secção 6). Aberta com duplo clique (`file://`) o Chrome não a carrega. Não há nada para instalar nem compilar.
 
 ---
 
@@ -10,7 +10,16 @@ Funciona offline. Abre-se diretamente no browser (`file://`) e não precisa de s
 
 | Ficheiro / pasta | O que é |
 |---|---|
-| `index.html` | A página inteira: CSS, HTML e todo o código. Tem de continuar a ser um ficheiro só, que abre por `file://`. Chama-se `index.html` para o site do GitHub Pages abrir sem nada no fim do endereço. |
+| `index.html` | A página Home, e o **modelo de todas as páginas**: a barra de cima, as janelas (dialogs) e uma `<section>` vazia por página. Chama-se `index.html` para o site do GitHub Pages abrir sem nada no fim do endereço. |
+| `builds.html`, `maps.html`, … (10) | As outras páginas. São cópias do `index.html` que só mudam o `<body data-area="…">` e o `<title>`, feitas por `tools/make_pages.py`. **Não se editam à mão:** muda-se o `index.html` e corre-se `python3 tools/make_pages.py` (`--check` diz se estão em dia). |
+| `app.js` | O módulo de entrada: o **router** (cada secção é uma página com endereço, `setArea`/`go`, Voltar/Avançar, View Transitions), o carregador das páginas (`PAGES`, `registerPage`, `loadPage`, `withPage`) e o arranque. No topo explica as camadas de `js/` e importa-as por ordem. |
+| `app.css` | Todo o CSS. |
+| `js/base.js` | A base: helpers (`$`, `el`, `icon`, `fmtKoen`…), as chaves do browser (`K`, `ls`), o movimento partilhado, os dados (`builds.js`, `prices.js`) com a camada "teu" por cima (`setDirty`, `mineOf`), tooltips. |
+| `js/gear-data.js`, `js/market-data.js`, `js/rankings.js`, `js/loadouts-data.js`, `js/keybinds-data.js`, `js/page-data.js` | Os dados por tema: gear e armas; preços; as tuas posições da Tier list; loadouts (custo, nível, favoritos); presets de keybinds; e o que Maps, Smelter e Trading partilham com o resto (lista dos mapas, portas das keys, códigos de rota, smelts, relógio da Trading). |
+| `js/ui.js` | Interface partilhada: janelas (abrir, fechar, ← Back de uma para outra), confirmação, seletor com imagens, dropdowns, caixas de filtros, toast. |
+| `js/overlays/*.js` | As janelas que se abrem de qualquer página: gear, arma (com o cartão de build), loadout (detalhe e editar), preço, add build. |
+| `js/share.js`, `js/search.js` | Share/Backup, e a pesquisa global da barra de cima. |
+| `pages/*.js` | Uma por página (Home, Builds, Loadouts, Market, Gear, Tier list, Maps, Keybinds, Merchant, Smelter, Trading): o que só essa página desenha. Carregam na primeira vez que a página abre, com os dados que só ela usa (os do Merchant, cerca de 540 KB, só no Merchant e na Smelter). Cada uma regista-se com `registerPage` e o resto da app chama-a por `PAGES.<página>`, ou por `withPage` quando ela ainda não carregou (por exemplo `openRouteOnMap`). **Nada em `app.js` ou `js/` importa uma página.** |
 | `builds.js` | O conteúdo partilhado, igual para toda a gente. Define `window.ABI_BUILDS` com as builds por arma e os `loadouts` sugeridos. Não leva nada pessoal (keybinds, rotas, os teus loadouts): isso fica no browser de cada um (secção 2). |
 | `merchant.js` | Dados do Field Merchant (`window.ABI_MERCHANT`), tirados do ABI Builder por `tools/merchant_extract.py`: itens, os 38 sons, e as caixas de cada mapa/modo com o peso de cada item. |
 | `merchant-sounds.js` | Os 76 sons do Merchant (`window.ABI_MERCHANT_SOUNDS`), em data URLs, gerados por `tools/merchant_sounds.py`. São um `.js` e não `.ogg` soltos porque uma página aberta com duplo clique não consegue usar `fetch` em ficheiros locais. Se o ficheiro faltar, os sons vêm do ABI Builder. |
@@ -40,7 +49,7 @@ Já não há botão Save nem "Unsaved". Há duas camadas:
     - itens e leituras de preços que os ficheiros não têm.
   - Quando os ficheiros são atualizados, o partilhado novo aparece e o teu continua por cima. Não há conflitos nem avisos.
   - **Loadouts:** os do `builds.js` são partilhados (`sharedLoIds`). Editar um cria uma cópia tua ao lado ("Save as yours", "based on …") e só os teus têm Delete. O separador "Yours" mostra só os teus.
-  - **Keybinds:** toda a gente começa no Default do jogo. O "My setup" (`KB_MINE`) só aparece, uma vez, na cópia local (`file://`) de quem fez a página.
+  - **Keybinds:** toda a gente começa no Default do jogo. O "My setup" (`KB_MINE`) só aparece, uma vez, na cópia local de quem fez a página (`localhost`/`127.0.0.1`, ou `file://` como antes).
   - **Migração:** os rascunhos antigos (`K.draft`, `K.priceDraft`) são lidos uma vez, passam para `K.mine` (sem contar builds como tiradas) e são apagados.
 - O resto das preferências também fica só no browser: favoritos, "In game", filtros, tier lists, smelts, códigos do Trading, a última secção aberta.
 - **Backup** (Share > Backup): "Download backup" gera um `.json` com todas as chaves `abi-*` do localStorage. "Restore a backup" pede confirmação, substitui essas chaves e recarrega a página. Serve para guardar as coisas ou passá-las para outro PC ou browser.
@@ -59,7 +68,11 @@ Cada loadout e cada rota têm o seu próprio botão Share, que abre a mesma jane
 
 ### Secções do código
 
-O script está dividido por cabeçalhos `/* ---------- nome ---------- */`. Os principais, por ordem:
+O código continua dividido por cabeçalhos `/* ---------- nome ---------- */`, agora espalhados pelos módulos da secção 1 (cada cabeçalho foi para o módulo do seu tema). A descrição abaixo é por tema, na ordem do antigo script único; o ficheiro de cada um está na tabela da secção 1.
+
+**Regra dos módulos:** um módulo só pode usar ao carregar (código de topo, fora de funções) o que as camadas abaixo dele definem (`base` → dados por tema → `ui` → janelas/Share/pesquisa → `app.js`). Chamadas para cima só dentro de funções que correm depois (um clique). Se esta regra for quebrada, o browser mostra ao abrir `Cannot access 'x' before initialization`. Uma página nunca é importada: o núcleo chama-a por `PAGES`.
+
+Os principais, por ordem:
 
 1. Constantes (`TIERS`, `ORDER`), **todas as chaves do browser em `K`**, `$`, `el` e `ls`.
 2. **Helpers partilhados**:
@@ -441,9 +454,7 @@ Correm com `python tools\<script>.py`. Os resultados vão para `tools/out/`.
 
 ## 6. Testar
 
-Para testar alterações, abre `index.html` no Firefox. Depois de mudar o ficheiro, faz **Ctrl+F5**.
-
-Para testes automáticos com servidor local:
+A página precisa de um servidor (são módulos). Dentro da pasta do projeto:
 
 ```bash
 python -m http.server 8765 --bind 127.0.0.1
@@ -451,4 +462,6 @@ python -m http.server 8765 --bind 127.0.0.1
 
 Corre-o dentro da pasta do projeto.
 
-Abre http://127.0.0.1:8765/. O browser guarda dados separados para cada endereço, por isso o que fazes aqui não se mistura com o do `file://` nem com o do site.
+Abre http://127.0.0.1:8765/. Depois de mudar um ficheiro, faz **Ctrl+F5**. O browser guarda dados separados para cada endereço, por isso o que fazes aqui não se mistura com o do site nem com o de uma cópia antiga aberta por `file://`.
+
+Depois de mexer no `index.html`, corre `python3 tools/make_pages.py` para as outras 10 páginas o acompanharem.

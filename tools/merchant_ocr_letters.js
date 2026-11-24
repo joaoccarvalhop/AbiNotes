@@ -1,8 +1,11 @@
 // Builds the letters in merchant-ocr.js (window.ABI_MERCHANT_OCR.letters): how the game draws each letter of the cargo
 // names, so the price reader can tell two cargo types with the same price apart by the name on the card.
-// Run in the console of index.html served over http, with a market video's frames and reads in tools/out
+// Run in the console of merchant.html (its code loads only there) served over http, with a market video's frames and reads in tools/out
 // (price_frames.py's keep/ and the read/batch_N.json files; set DIR below):
+//   Object.assign(window, await import("./pages/merchant.js"), await import("./pages/merchant-items.js"));
 //   await (await fetch("tools/merchant_ocr_letters.js")).text().then(eval)
+// (the page's code is in modules: the first line puts what this file uses where the console can reach it.
+//  Paste that line first too if you paste the file instead)
 // 1. The item names of the first two rows of each category's first frame (the grid at the top): names whose marks count
 //    the same as their letters give each letter's look (the two most typical of each).
 // 2. All the names again, lined up (merSpells' way) against those: letters that fall into two or three marks (m, k, M, W,
